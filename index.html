@@ -8,6 +8,8 @@
 <meta property="og:title" content="トゥクトゥク幕府 〜みんなでトゥクろう。〜">
 <meta property="og:description" content="$10とボロボロのトゥクトゥク1台から大企業へ。プノンペンが舞台の3D経営シム。">
 <meta property="og:type" content="website">
+<meta property="og:image" content="https://game-site.emojiclash.com/tuktuk-full.jpg">
+<meta name="twitter:card" content="summary_large_image">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22%3E%3Ctext y=%22.9em%22 font-size=%2290%22%3E%F0%9F%9B%BA%3C/text%3E%3C/svg%3E">
 <title>トゥクトゥク幕府 〜みんなでトゥクろう。〜</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -255,6 +257,8 @@ const clamp=(v,a,b)=>v<a?a:v>b?b:v;
 const lerp=(a,b,t)=>a+(b-a)*t;
 const pick=a=>a[Math.floor(rnd()*a.length)];
 const dist2=(ax,az,bx,bz)=>{const dx=ax-bx,dz=az-bz;return Math.sqrt(dx*dx+dz*dz);};
+function escH(t){return String(t).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
+function CN(){return (typeof S!=='undefined'&&S&&S.company)||DEFAULT_CO;}
 function fmt(n){const neg=n<0;n=Math.abs(n);let s;
   if(n>=1e12)s=(n/1e12).toFixed(2)+'T';else if(n>=1e9)s=(n/1e9).toFixed(2)+'B';else if(n>=1e6)s=(n/1e6).toFixed(2)+'M';else if(n>=1e5)s=(n/1e3).toFixed(1)+'K';
   else s=Math.floor(n).toLocaleString('en-US');return (neg?'-$':'$')+s;}
@@ -263,7 +267,7 @@ function mulberry(a){return function(){a|=0;a=a+0x6D2B79F5|0;let t=Math.imul(a^a
 function angDiff(a,b){let d=b-a;while(d>Math.PI)d-=Math.PI*2;while(d<-Math.PI)d+=Math.PI*2;return d;}
 
 /* ================= game data ================= */
-const KEY='tukbakufu_save_v1', DAY=120;
+const KEY='tukbakufu_save_v1', DAY=120;const DEFAULT_CO='トゥクトゥク幕府';
 const LEVELS=[null,
  {name:'個人ドライバー',icon:'🛺'},
  {name:'小規模事業者',icon:'🏪'},
@@ -375,7 +379,7 @@ const aCost=a=>Math.round(a.cost*CM());
 /* ================= state ================= */
 function DEF(){return {v:1,money:10,earned:0,level:1,upg:{engine:0,tank:0,seats:0,exterior:0,tires:0,cargo:0,ac:0},fuel:1,vehicles:1,grade:0,
  staff:[],nid:1,fac:{},apps:{},divs:{},day:1,dayT:0,today:{inc:{},exp:{}},hist:[],cand:[],candR:{},trips:0,fleetTrips:0,appTrips:0,
- lastSave:Date.now(),sound:true,bgm:true,meta:{pts:0,city:0,runs:0,total:0},ev:null,evT:150,gasLock:0,justMoved:false,gasP:1,gasPrev:1,ins:0,hiredToday:0,bankrupt:0,wanted:0,crimes:0,arrests:0,casinoNet:0,accidents:0,insSaved:0,accLoss:0,cond:1,rep:4,ratings:[],streak:0,bestStreak:0,hq:1,px:0,pz:-25,ph:0,intro:false};}
+ lastSave:Date.now(),sound:true,bgm:true,meta:{pts:0,city:0,runs:0,total:0},ev:null,evT:150,gasLock:0,justMoved:false,gasP:1,gasPrev:1,ins:0,hiredToday:0,bankrupt:0,company:'',wanted:0,crimes:0,arrests:0,casinoNet:0,accidents:0,insSaved:0,accLoss:0,cond:1,rep:4,ratings:[],streak:0,bestStreak:0,hq:1,px:0,pz:-25,ph:0,intro:false};}
 let S=DEF();
 function load(){try{const raw=localStorage.getItem(KEY);if(!raw)return false;const o=JSON.parse(raw);const d=DEF();
   for(const k in d){if(o[k]!==undefined){if(d[k]&&typeof d[k]==='object'&&!Array.isArray(d[k]))d[k]=Object.assign(d[k],o[k]);else d[k]=o[k];}}
@@ -753,10 +757,10 @@ function buildFacility(id,lvl,animate){if(id==='branch'){buildBranches(animate);
   else if(id==='gas'){bx(g,'#a9adb3',W-0.6,0.1,Dp-0.6,0,0.05,0);bx(g,'#ff9f1c',W-1.5,0.55,Dp-4,0,5.2,0);bx(g,'#fff',W-1.3,0.2,Dp-3.8,0,4.85,0);
       [[-4,-3.5],[4,-3.5],[-4,3.5],[4,3.5]].forEach(q=>mesh(G.cyl,'#eee',0.25,5,0.25,q[0],2.5,q[1],g));
       for(let i=0;i<lvl+1;i++){const x=-3+i*(6/Math.max(1,lvl));bx(g,'#ff9f1c',0.8,1.8,0.6,x,0.9,0);bx(g,'#fff',0.9,0.4,0.7,x,2,0);}
-      const s=label('幕府 GAS',{bg:'#ff9f1c',scale:1.5});s.position.set(0,6.4,0);g.add(s);}
+      const s=label(CN()+' GAS',{bg:'#ff9f1c',scale:1.5});s.position.set(0,6.4,0);g.add(s);}
   else if(id==='office'){const h=5+lvl*2.6;bx(g,'#a9adb3',W-0.6,0.1,Dp-0.6,0,0.05,0);mesh(G.box0,'#f4e3c1',8.5,h,8,0,0.1,-1.5,g);bx(g,'#2a6f97',9.2,0.5,8.7,0,h+0.35,-1.5);
       for(let y=1.6;y<h-0.5;y+=2.6)for(let x=-2.8;x<=2.8;x+=2.8)bx(g,'#3d5a73',1.4,1.4,0.12,x,y,2.55);bx(g,'#6b4a2b',1.4,2.2,0.15,0,1.1,2.58);
-      const s=label('トゥクトゥク幕府',{bg:'#e63946',scale:1.3});s.position.set(0,h+1.6,2.4);g.add(s);colliders.push(facColl[id]={x0:p.x-4.3,z0:p.z-5.5,x1:p.x+4.3,z1:p.z+2.5});}
+      const s=label(CN(),{bg:'#e63946',scale:1.3});s.position.set(0,h+1.6,2.4);g.add(s);colliders.push(facColl[id]={x0:p.x-4.3,z0:p.z-5.5,x1:p.x+4.3,z1:p.z+2.5});}
   else if(id==='reception'){bx(g,'#e9d8b8',W-1,0.2,Dp-1,0,0.1,0);[[-4,-4],[4,-4],[-4,4],[4,4]].forEach(q=>mesh(G.cyl,'#8b5e34',0.2,3.4,0.2,q[0],1.8,q[1],g));
       const r=mesh(G.cone4,'#c1121f',7,2.6,7,0,4.6,0,g);r.rotation.y=Math.PI/4;bx(g,'#ff9f1c',5,1.2,1.2,0,0.8,0);bx(g,'#fff',5.2,0.15,1.4,0,1.45,0);
       const s=label('受付',{bg:'#ff9f1c',scale:1.3});s.position.set(0,6.6,0);g.add(s);for(let i=0;i<lvl;i++)mesh(G.cyl,'#3a86ff',0.6,0.9,0.6,-3+i*1.6,0.5,3,g);}
@@ -774,14 +778,14 @@ function buildFacility(id,lvl,animate){if(id==='branch'){buildBranches(animate);
       colliders.push(facColl[id]={x0:p.x-7,z0:p.z-7,x1:p.x+7,z1:p.z+5});}
   else if(id==='hq'){const h=12+lvl*5;bx(g,'#e9d8b8',15,2,15,0,1,0);mesh(G.box0,'#7fb7be',10,h,10,0,2,0,g);for(let y=4;y<h;y+=3.2)bx(g,'#d4af37',10.3,0.3,10.3,0,2+y,0);
       [[11,4,'#c1121f'],[8,3.4,'#d4af37'],[5,3,'#c1121f']].forEach((t,i)=>{const r=mesh(G.cone4,t[2],t[0]/1.41,t[1],t[0]/1.41,0,2+h+1.4+i*2.6,0,g);r.rotation.y=Math.PI/4;});
-      mesh(G.cone8,'#f4c430',0.4,4,0.4,0,2+h+9.5,0,g);const s=label('トゥクトゥク幕府 本社',{bg:'#c1121f',scale:2});s.position.set(0,2+h+13,0);g.add(s);
+      mesh(G.cone8,'#f4c430',0.4,4,0.4,0,2+h+9.5,0,g);const s=label(CN()+' 本社',{bg:'#c1121f',scale:2});s.position.set(0,2+h+13,0);g.add(s);
       colliders.push(facColl[id]={x0:p.x-7.5,z0:p.z-7.5,x1:p.x+7.5,z1:p.z+7.5});}
   const bg=bake(g);scene.add(bg);facG[id]=bg;ghost('f'+id,bg,p.x,p.z,Math.max(W,Dp)*0.5,id==='hq'?20+lvl*5:id==='office'?6+lvl*2.6:8);if(animate)constructFx(bg,p.x,p.z,W,Dp);}
 const branchG=[];
 function buildBranches(animate){for(let i=0;i<(S.fac.branch||0);i++){if(branchG[i])continue;const [bx_,bz_]=BRANCH_LOTS[i].split(',').map(Number);const r=bRect(bx_,bz_);
     const g=new THREE.Group();g.position.set(r.cx,0.36,r.cz);bx(g,'#5f6268',30,0.1,14,0,0.05,8);mesh(G.box0,'#f4e3c1',18,9,10,0,0.1,-8,g);bx(g,'#c1121f',19,0.6,11,0,9.4,-8);
     for(let x=-6;x<=6;x+=4)bx(g,'#3d5a73',2,2,0.12,x,5,-2.9);bx(g,'#3d5a73',4,3,0.12,0,1.6,-2.9);
-    const s=label(`幕府 第${i+1}営業所`,{bg:'#c1121f',scale:2});s.position.set(0,12,-6);g.add(s);
+    const s=label(`${CN()} 第${i+1}営業所`,{bg:'#c1121f',scale:2});s.position.set(0,12,-6);g.add(s);
     for(let k=0;k<4;k++){const t=buildFleetTuk(fleetColor());t.position.set(-9+k*6,0.1,9);t.rotation.y=Math.PI;g.add(t);}
     const bg=bake(g);scene.add(bg);branchG[i]=bg;ghost('br'+i,bg,r.cx,r.cz-6,12,12);if(animate)constructFx(bg,r.cx,r.cz,BLK,BLK);}}
 function fleetColor(){const l=S.grade;return l<3?'#2a9d8f':l<7?'#3a86ff':l<12?'#e63946':'#d4a017';}
@@ -923,8 +927,8 @@ function refreshFacVisual(id){if(id==='branch'){while(branchG.length>(S.fac.bran
   if(facColl[id]){colliders.splice(colliders.indexOf(facColl[id]),1);delete facColl[id];}if(facColl[id+'2']){colliders.splice(colliders.indexOf(facColl[id+'2']),1);delete facColl[id+'2'];}
   if((S.fac[id]||0)>0)buildFacility(id,S.fac[id],false);else{if(facG[id]){scene.remove(facG[id]);delete facG[id];}delete CUT.ghosts['f'+id];if(plotSigns[id])plotSigns[id].visible=true;delete S.fac[id];}}
 const BANKRUPT_MAX=2;
-function gameOver(debt){SFX.err();modal(`<div class="big">💀</div><h2>倒産…</h2><p>借金 ${fmt(debt)} を返せず、自己破産の上限（${BANKRUPT_MAX}回）を超えてしまった。<br><b>トゥクトゥク幕府は解散です。</b></p><p style="font-size:12px">ボロボロのトゥクトゥク1台と$10からやり直し。<br>威光（転生ボーナス）だけは引き継がれます。</p><div class="btns"><button class="btn r" data-act="gameover">一からやり直す</button></div>`);}
-function doGameOver(){const meta=Object.assign({},S.meta);const keep={sound:S.sound,bgm:S.bgm,hq:S.hq};const N_=DEF();Object.assign(N_,keep);N_.meta=meta;N_.money=Math.round(10*cityDef(meta.city).m);N_.intro=true;
+function gameOver(debt){SFX.err();modal(`<div class="big">💀</div><h2>倒産…</h2><p>借金 ${fmt(debt)} を返せず、自己破産の上限（${BANKRUPT_MAX}回）を超えてしまった。<br><b>${escH(CN())}は解散です。</b></p><p style="font-size:12px">ボロボロのトゥクトゥク1台と$10からやり直し。<br>威光（転生ボーナス）だけは引き継がれます。</p><div class="btns"><button class="btn r" data-act="gameover">一からやり直す</button></div>`);}
+function doGameOver(){const meta=Object.assign({},S.meta);const keep={sound:S.sound,bgm:S.bgm,hq:S.hq};const N_=DEF();Object.assign(N_,keep);N_.company=S.company||'';N_.meta=meta;N_.money=Math.round(10*cityDef(meta.city).m);N_.intro=true;
   resetting=true;try{localStorage.setItem(KEY,JSON.stringify(N_));}catch(e){}location.reload();}
 function foreclose(){if(S.money>=0)return;const seized=[];const debt0=-S.money;const sellVeh=()=>{const p=Math.round(vehPrice(Math.max(0,S.vehicles-2))*0.4);S.vehicles--;S.money+=p;return p;};
   let nv=0,sv=0;while(S.money<0&&freeVeh()>0){sv+=sellVeh();nv++;}if(nv)seized.push(`🛺 待機中のトゥクトゥク ${nv}台（+${fmt(sv)}）`);
@@ -1070,6 +1074,19 @@ function doRepair(){if(S.cond>=0.999){toast('車両は絶好調です ✨');retu
   if(S.money<=0){toast('お金が足りません 💸');SFX.err();return;}if(S.money<cost){amt=S.money/unit;cost=S.money;}
   addExp('repair',cost);S.cond=Math.min(1,S.cond+amt);SFX.repair();sparkle(player.x,2,player.z,'#8ecae6');floatText(`🔧 修理完了 ${Math.round(S.cond*100)}%`,player.x,5,player.z,'small');rebuildPlayer();if(sheetOpen)renderPanel();save();}
 
+/* ================= company name ================= */
+let nameNext=null;const CO_IDEAS=['トゥクトゥク幕府','メコン交通','プノンペン急便','黄金トゥク商会','アンコール運輸','ナーガ・モータース'];
+function nameModal(first,next){nameNext=next||null;
+  modal(`<div class="big">🏢</div><h2>${first?'会社の名前を決めよう！':'会社名を変更'}</h2><p>看板・本社ビル・支店・決算などに表示されます（14文字まで）</p>
+  <input id="coName" maxlength="14" value="${escH(S.company||DEFAULT_CO)}" style="width:100%;font-size:20px;font-weight:800;padding:10px;border-radius:12px;border:3px solid #ff9f1c;text-align:center;user-select:text;-webkit-user-select:text;font-family:inherit;color:#3a2a1a;background:#fff">
+  <div style="display:flex;gap:6px;flex-wrap:wrap;justify-content:center;margin-top:10px">${CO_IDEAS.map(n=>`<button class="btn sm" data-act="coname" data-arg="${escH(n)}">${escH(n)}</button>`).join('')}</div>
+  <div class="btns"><button class="btn g" data-act="setname">${first?'この名前で創業！':'変更する'}</button>${first?'':'<button class="btn" data-act="closemodal">やめる</button>'}</div>`);
+  setTimeout(()=>{const i=$('#coName');if(i&&!('ontouchstart' in window)){i.focus();i.select();}},120);}
+function setCompanyName(){const i=$('#coName');let n=(i?i.value:'').replace(/\s+/g,' ').trim().slice(0,14);if(!n)n=DEFAULT_CO;const ch=n!==CN();S.company=n;closeModal();
+  if(ch&&started)refreshCompanyVisuals();SFX.big();toast(`🏢 「${n}」${nameNext?'を創業しました！':'に社名を変更しました'}`);save();if(sheetOpen)renderPanel();
+  if(nameNext){const f=nameNext;nameNext=null;f();}}
+function refreshCompanyVisuals(){for(const id in S.fac){if(S.fac[id]>0&&id!=='branch')refreshFacVisual(id);}branchG.forEach(g=>scene.remove(g));branchG.length=0;buildBranches(false);}
+
 /* ================= levels & goals ================= */
 function levelReqs(L){const v=S.vehicles,f=S.fac;switch(L){
   case 2:return[['トゥクトゥク 2台',v>=2,v,2],['ドライバーを1人雇う',D.drivers.length>=1,D.drivers.length,1]];
@@ -1079,7 +1096,7 @@ function levelReqs(L){const v=S.vehicles,f=S.fac;switch(L){
   case 6:return[['トゥクトゥク 300台',v>=300,v,300],['営業所 2拠点',(f.branch||0)>=2,f.branch||0,2]];}return[];}
 function checkLevel(){let up=false;while(S.level<6&&levelReqs(S.level+1).every(r=>r[1])){S.level++;up=true;}
   if(up){recalc();SFX.lvl();const L=S.level;sparkle(player.x,4,player.z,'#ff9f1c');
-    modal(`<div class="burst"><span>${LEVELS[L].icon}</span></div><h2>LEVEL UP! Lv${L}</h2><p style="font-size:16px;font-weight:800">${LEVELS[L].name}</p><ul>${(LEVEL_UNLOCKS[L]||[]).map(x=>'<li>'+x+'</li>').join('')}</ul><p>運賃レートが ×${LMULT[L]} にアップ！</p><div class="btns"><button class="btn g" data-act="closemodal">天下統一へ進む！</button></div>`);
+    modal(`<div class="burst"><span>${LEVELS[L].icon}</span></div><h2>LEVEL UP! Lv${L}</h2><p style="font-size:16px;font-weight:800">${escH(CN())}は<br>「${LEVELS[L].name}」になった！</p><ul>${(LEVEL_UNLOCKS[L]||[]).map(x=>'<li>'+x+'</li>').join('')}</ul><p>運賃レートが ×${LMULT[L]} にアップ！</p><div class="btns"><button class="btn g" data-act="closemodal">天下統一へ進む！</button></div>`);
     updateHUD(true);save();}}
 function getGoal(){const u=S.upg;
   if(S.trips<1)return{t:'◆マークの人に近づいて乗せよう',p:player.onboard.length?0.5:0};
@@ -1161,7 +1178,7 @@ function renderPanel(){if(!sheetOpen)return;const b=$('#sheetBody');const st=b.s
       h+=`<div class="card ${lock?'lock':''}"><div class="ic">${f.icon}</div><div class="mid"><div class="nm">${f.name} ${l?`<small>Lv${l}/${f.max}</small>`:''}</div><div class="ds">${f.desc}<br>維持費 ${fmtD(f.maint)}／日・Lv</div>${l?pips(l,f.max):''}</div>
         ${lock?`<span class="btn dis">🔒Lv${f.lv}</span>`:mx?'<span class="btn g dis">MAX</span>':B('fac',f.id,facCost(f,l),l?'拡張':'建設',l?'b':'g')}</div>`;});}
   else if(sheetOpen==='biz'){const L=S.level;const inc=S.today.inc,exp=S.today.exp;const ti=Object.values(inc).reduce((a,b)=>a+b,0),te=Object.values(exp).reduce((a,b)=>a+b,0);
-    h+=`<div class="lvlcard"><h3>${LEVELS[L].icon} Lv${L} ${LEVELS[L].name}</h3>`;
+    h+=`<div class="lvlcard"><div style="font-size:13px;font-weight:800;opacity:.9">🏢 ${escH(CN())}</div><h3>${LEVELS[L].icon} Lv${L} ${LEVELS[L].name}</h3>`;
     if(L<6){h+=`<div style="font-size:12px;margin-bottom:4px">次: Lv${L+1}「${LEVELS[L+1].name}」の条件</div>`;levelReqs(L+1).forEach(r=>h+=`<div class="req ${r[1]?'ok':''}">${r[1]?'✅':'⬜'} ${r[0]} （${Math.min(r[2],r[3])}/${r[3]}）</div>`);}else h+='<div class="req ok">👑 最高ランク到達！</div>';
     h+=`</div><div class="row" style="margin-bottom:8px"><div class="stat"><b class="plus">${fmt(fleetNetPerSec()*60)}</b><small>社用車の純利益／分(予測)</small></div><div class="stat"><b>${fmt(S.earned)}</b><small>累計売上</small></div><div class="stat"><b>${S.trips+S.fleetTrips}</b><small>総送迎回数</small></div></div><div class="row" style="margin-bottom:8px"><div class="stat"><b style="color:#b8860b">★${S.rep.toFixed(2)}</b><small>評判（社用車の運賃 ×${D.mods.repF.toFixed(2)}）</small></div><div class="stat"><b>${Math.round(S.cond*100)}%</b><small>愛車の状態</small></div><div class="stat"><b style="font-size:14px">${gasPriceTxt()}</b><small>今日のガソリン価格</small></div></div>`;
     h+=`<div class="sec">📅 ${S.day}日目の収支（決算まで ${Math.ceil(DAY-S.dayT)}秒）</div><table class="tb">`;
@@ -1182,7 +1199,7 @@ function renderPanel(){if(!sheetOpen)return;const b=$('#sheetBody');const st=b.s
     h+=`<div class="sec">🏛️ 事業部門</div>`;
     DIVS.forEach(d=>{const own=S.divs[d.id],lock=L<d.lv;h+=`<div class="card ${lock?'lock':''}"><div class="ic">${d.icon}</div><div class="mid"><div class="nm">${d.name}</div><div class="ds">${d.desc}</div></div>${own?'<span class="btn g dis">運営中</span>':lock?`<span class="btn dis">🔒Lv${d.lv}</span>`:B('div',d.id,aCost(d),'設立')}</div>`;});
     h+=`<div class="sec">⚙️ 設定</div><div class="row"><button class="btn b" data-act="bgm">${S.bgm?'🎵 BGM ON':'🔇 BGM OFF'}</button><button class="btn b" data-act="sound">${S.sound?'🔊 効果音ON':'🔇 効果音OFF'}</button><button class="btn b" data-act="quality">${S.hq?'✨ 画質: 高':'⚡ 画質: 軽量'}</button></div>
-      <div class="row" style="margin-top:8px"><button class="btn g" data-act="savenow">💾 今すぐ保存</button><button class="btn r" data-act="reset">🗑️ データ消去</button></div>`;}
+      <div class="row" style="margin-top:8px"><button class="btn" data-act="rename">🏢 会社名を変更</button><button class="btn g" data-act="savenow">💾 今すぐ保存</button><button class="btn r" data-act="reset">🗑️ データ消去</button></div>`;}
   b.innerHTML=h;b.scrollTop=st;if(sheetOpen==='biz')drawChart();}
 function refreshAfford(){document.querySelectorAll('#sheetBody [data-cost]').forEach(el=>el.classList.toggle('dis',S.money<+el.dataset.cost));}
 function drawChart(){const c=$('#chart');if(!c)return;const x=c.getContext('2d');const H=S.hist.slice(-7);const cur={day:S.day,inc:Object.values(S.today.inc).reduce((a,b)=>a+b,0),exp:Object.values(S.today.exp).reduce((a,b)=>a+b,0)};const all=H.concat([cur]);
@@ -1210,7 +1227,7 @@ function renderPhone(){const apps=APPS.filter(a=>S.apps[a.id]);$('#pTitle').text
 
 /* ================= input ================= */
 const keys={};let joy={x:0,y:0,active:false,id:null,ox:0,oy:0};let brake=false;
-addEventListener('keydown',e=>{keys[e.code]=true;if(e.code==='KeyH')horn();{const m_=e.code.match(/^Digit([1-6])$/);if(m_)setGear(+m_[1]-1);}if(e.code==='KeyT')setAT(!player.at);if(e.code==='KeyG')punch();if(e.code==='KeyN'){mapOpen?closeMap():openMap();}if(e.code==='Escape'&&mapOpen)closeMap();if(e.code==='KeyC'&&nearCasino())openCasino();if(e.code==='KeyF')toggleFoot();if(e.code==='KeyQ')setGear(player.gear-1);if(e.code==='KeyE')setGear(player.gear+1);if(e.code==='KeyM')toggleBGM();if(['ArrowUp','ArrowDown','ArrowLeft','ArrowRight','Space'].includes(e.code))e.preventDefault();});
+addEventListener('keydown',e=>{if(e.target&&e.target.tagName==='INPUT'){if(e.key==='Enter')setCompanyName();return;}keys[e.code]=true;if(e.code==='KeyH')horn();{const m_=e.code.match(/^Digit([1-6])$/);if(m_)setGear(+m_[1]-1);}if(e.code==='KeyT')setAT(!player.at);if(e.code==='KeyG')punch();if(e.code==='KeyN'){mapOpen?closeMap():openMap();}if(e.code==='Escape'&&mapOpen)closeMap();if(e.code==='KeyC'&&nearCasino())openCasino();if(e.code==='KeyF')toggleFoot();if(e.code==='KeyQ')setGear(player.gear-1);if(e.code==='KeyE')setGear(player.gear+1);if(e.code==='KeyM')toggleBGM();if(['ArrowUp','ArrowDown','ArrowLeft','ArrowRight','Space'].includes(e.code))e.preventDefault();});
 addEventListener('keyup',e=>{keys[e.code]=false;});
 const jz=$('#joyZone'),jb=$('#joyBase'),jk=$('#joyKnob');
 jz.addEventListener('pointerdown',e=>{initAudio();joy.active=true;joy.id=e.pointerId;jz.setPointerCapture(e.pointerId);const r=jz.getBoundingClientRect();joy.ox=e.clientX;joy.oy=e.clientY;
@@ -1253,7 +1270,7 @@ document.querySelectorAll('#ptabs button').forEach(b=>b.addEventListener('click'
 document.querySelectorAll('#nav button').forEach(b=>b.addEventListener('click',()=>{initAudio();openSheet(b.dataset.tab);}));
 $('#sheetClose').addEventListener('click',closeSheet);
 document.addEventListener('click',e=>{const t=e.target.closest('[data-act]');if(!t)return;const a=t.dataset.act,g=t.dataset.arg;initAudio();
-  switch(a){case'upg':buyUpg(g);break;case'cspin':cSpin();break;case'mapclose':closeMap();break;case'gameover':doGameOver();break;case'cexit':closeCasino();break;case'evc':chooseEv(+g);break;case'prestige':{const gn=prestigeGain(),nc=cityDef(S.meta.city+1);modal(`<div class="big">🗺️</div><h2>${nc.name}へ進出しますか？</h2><p>会社を売却して、新しい都市でゼロから再スタート。</p><table class="tb"><tr><td>獲得する威光</td><td class="plus">+${gn}pt</td></tr><tr><td>威光ボーナス（全運賃）</td><td>+${S.meta.pts*5}% → +${(S.meta.pts+gn)*5}%</td></tr><tr><td>新都市の物価・運賃</td><td>×${nc.m.toFixed(1)}</td></tr><tr><td>スタート資金</td><td>${fmt(Math.round(10*nc.m*(1+(S.meta.pts+gn)*0.5)))}</td></tr></table><p style="font-size:11px">※お金・車両・スタッフ・設備・強化・レベルはリセット。威光と設定は引き継ぎ。</p><div class="btns"><button class="btn" data-act="closemodal">まだ残る</button><button class="btn p" data-act="doprestige">進出する！</button></div>`);}break;case'doprestige':doPrestige();break;case'ins':setIns(+g);break;case'gotoins':closeModal();openSheet('biz');setTimeout(()=>{const e=[...document.querySelectorAll('#sheetBody .sec')].find(x=>x.textContent.includes('保険'));if(e)e.scrollIntoView({block:'start'});},50);break;case'repair':doRepair();break;case'bgm':toggleBGM();renderPanel();break;case'buyveh':buyVehicles(+g);break;case'grade':buyGrade();break;case'fac':buildFac(g);break;case'hire':hireDriver(+g);break;case'bulkhire':hireBulk();break;
+  switch(a){case'upg':buyUpg(g);break;case'coname':{const i=$('#coName');if(i)i.value=g;SFX.click();}break;case'setname':setCompanyName();break;case'rename':nameModal(false);break;case'cspin':cSpin();break;case'mapclose':closeMap();break;case'gameover':doGameOver();break;case'cexit':closeCasino();break;case'evc':chooseEv(+g);break;case'prestige':{const gn=prestigeGain(),nc=cityDef(S.meta.city+1);modal(`<div class="big">🗺️</div><h2>${nc.name}へ進出しますか？</h2><p>会社を売却して、新しい都市でゼロから再スタート。</p><table class="tb"><tr><td>獲得する威光</td><td class="plus">+${gn}pt</td></tr><tr><td>威光ボーナス（全運賃）</td><td>+${S.meta.pts*5}% → +${(S.meta.pts+gn)*5}%</td></tr><tr><td>新都市の物価・運賃</td><td>×${nc.m.toFixed(1)}</td></tr><tr><td>スタート資金</td><td>${fmt(Math.round(10*nc.m*(1+(S.meta.pts+gn)*0.5)))}</td></tr></table><p style="font-size:11px">※お金・車両・スタッフ・設備・強化・レベルはリセット。威光と設定は引き継ぎ。</p><div class="btns"><button class="btn" data-act="closemodal">まだ残る</button><button class="btn p" data-act="doprestige">進出する！</button></div>`);}break;case'doprestige':doPrestige();break;case'ins':setIns(+g);break;case'gotoins':closeModal();openSheet('biz');setTimeout(()=>{const e=[...document.querySelectorAll('#sheetBody .sec')].find(x=>x.textContent.includes('保険'));if(e)e.scrollIntoView({block:'start'});},50);break;case'repair':doRepair();break;case'bgm':toggleBGM();renderPanel();break;case'buyveh':buyVehicles(+g);break;case'grade':buyGrade();break;case'fac':buildFac(g);break;case'hire':hireDriver(+g);break;case'bulkhire':hireBulk();break;
    case'reroll':if(spend('hire',Math.round(5*LM()))){S.cand=[genDriver(),genDriver(),genDriver()];renderPanel();}break;case'hirerole':hireRole(g);break;case'fire':fire(+g);break;
    case'app':regApp(g);break;case'div':buyDiv(g);break;case'openphone':openPhone();break;case'accept':acceptReq(+g);break;case'tab':openSheet(g);break;
    case'closemodal':closeModal();break;case'confirmyes':closeModal();if(confirmCb){const c=confirmCb;confirmCb=null;c();}break;
@@ -1391,7 +1408,7 @@ function chooseEv(i){const e=pendingEv;if(!e)return;const c=e.ch[i];if(c.cost){c
   pendingEv=null;closeModal();startEv(e.id,i);if(c.run)c.run();if(!S.ev)S.evT=150+rnd()*180;save();}
 function prestigeGain(){return Math.floor(Math.sqrt(S.earned/(20000*CM())));}
 function doPrestige(){const g=prestigeGain();if(S.level<5||g<1)return;const meta=Object.assign({},S.meta);meta.pts+=g;meta.city++;meta.runs++;meta.total+=S.earned;
-  const keep={sound:S.sound,bgm:S.bgm,hq:S.hq};const N_=DEF();Object.assign(N_,keep);N_.meta=meta;N_.justMoved=true;const nc=cityDef(meta.city);N_.money=Math.round(10*nc.m*(1+meta.pts*0.5));
+  const keep={sound:S.sound,bgm:S.bgm,hq:S.hq};const N_=DEF();Object.assign(N_,keep);N_.company=S.company||'';N_.meta=meta;N_.justMoved=true;const nc=cityDef(meta.city);N_.money=Math.round(10*nc.m*(1+meta.pts*0.5));
   resetting=true;try{localStorage.setItem(KEY,JSON.stringify(N_));}catch(e){}location.reload();}
 let lastFineToast=-99;
 function fleetTrip(d,rt){const m=D.mods;let fare=baseFleetFare(d)*EV('fleetFare');
@@ -1489,12 +1506,13 @@ function start(fresh){$('#title').classList.add('hidden');initAudio();
   started=true;lastWall=performance.now();requestAnimationFrame(loop);updateHUD(true);$('#bgmBtn').textContent=S.bgm?'🎵':'🔇';startBGM();
   if(had&&S.justMoved){S.justMoved=false;S.lastSave=Date.now();SFX.lvl();modal(`<div class="burst"><span>🗺️</span></div><h2>📍 ${CITY.name}に進出！</h2><p>新天地でまた1台のトゥクトゥクから。<br>威光 <b>${S.meta.pts}pt</b> で全運賃 <b>+${S.meta.pts*5}%</b>！</p><p>物価・運賃 ×${CITY.m.toFixed(1)}</p><div class="btns"><button class="btn g" data-act="closemodal">天下統一、再び！</button></div>`);}
   else if(had){const secs=(Date.now()-S.lastSave)/1000;if(secs>60&&D.drivers.length)applyOffline(secs,true);else toast('おかえりなさい！続きから再開します 🛺');}
-  else{modal(`<div class="big">🛺</div><h2>ようこそプノンペンへ！</h2><p>あなたは所持金$10、ボロボロのトゥクトゥク1台の個人ドライバー。</p>
+  else{nameModal(true,()=>modal(`<div class="big">🛺</div><h2>${escH(CN())}、プノンペンで創業！</h2><p>あなたは所持金$10、ボロボロのトゥクトゥク1台の個人ドライバー。</p>
     <ul><li><b>左下をドラッグ</b>（PCはWASD/矢印）で運転</li><li>頭上に<b>◆</b>がある人に近づくと乗車</li><li><b>光の柱</b>まで⏱制限時間内に運ぶと評判UP＆定刻ボーナス！</li><li>ぶつけると車がボロくなり、評判が落ちると<b>乗車拒否</b>されます</li><li>稼いだお金で強化・車両購入・雇用・建設</li></ul>
-    <div class="btns"><button class="btn g" data-act="closemodal">出発する！</button></div>`);}
+    <div class="btns"><button class="btn g" data-act="closemodal">出発する！</button></div>`));}
+  if(had&&!S.company)setTimeout(()=>toast('🏢 経営タブ → 設定で「会社名」を付けられるようになりました'),3500);
   save();}
 function title(){const b=$('#titleBtns');const hs=hasSave();
-  if(hs){try{const o=JSON.parse(localStorage.getItem(KEY));if(o&&o.meta){$('#title .desc').innerHTML=`📍 ${cityDef(o.meta.city).name}編 ・ 威光 ${o.meta.pts}pt<br>交通の天下を取れ！`;}}catch(e){}}
+  if(hs){try{const o=JSON.parse(localStorage.getItem(KEY));if(o&&o.meta){$('#title .desc').innerHTML=`🏢 ${escH(o.company||DEFAULT_CO)}<br>📍 ${cityDef(o.meta.city).name}編 ・ 威光 ${o.meta.pts}pt`;}}catch(e){}}
   b.innerHTML=hs?`<button class="btn g" id="tContinue">▶ つづきから</button><br><button class="btn" id="tNew" style="font-size:14px;padding:8px 20px">最初から</button>`:`<button class="btn g" id="tStart">▶ はじめる</button>`;
   const go=f=>{const run=()=>start(f);(document.fonts&&document.fonts.ready?document.fonts.ready:Promise.resolve()).then(run,run);};
   if(hs){$('#tContinue').onclick=()=>go(false);$('#tNew').onclick=()=>{b.innerHTML=`<p style="font-weight:800;color:#5a2200">本当にデータを消して最初から？</p><button class="btn r" id="tYes">はい</button><button class="btn" id="tNo">いいえ</button>`;$('#tYes').onclick=()=>go(true);$('#tNo').onclick=title;};}
