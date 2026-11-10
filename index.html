@@ -1,0 +1,1506 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
+<meta name="theme-color" content="#ff9f1c">
+<meta name="description" content="プノンペンで$10とボロボロのトゥクトゥク1台から、交通の天下を取る3D経営シミュレーション。運転・送迎・雇用・建設・カジノ・カーチェイス！">
+<meta property="og:title" content="トゥクトゥク幕府 〜みんなでトゥクろう。〜">
+<meta property="og:description" content="$10とボロボロのトゥクトゥク1台から大企業へ。プノンペンが舞台の3D経営シム。">
+<meta property="og:type" content="website">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22%3E%3Ctext y=%22.9em%22 font-size=%2290%22%3E%F0%9F%9B%BA%3C/text%3E%3C/svg%3E">
+<title>トゥクトゥク幕府 〜みんなでトゥクろう。〜</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=M+PLUS+Rounded+1c:wght@500;800&display=swap" rel="stylesheet">
+<style>
+:root{--o:#ff9f1c;--o2:#e07b00;--r:#e63946;--t:#2a9d8f;--d:#264653;--y:#ffd166;--cream:#fff8ec;--navh:66px;--sb:env(safe-area-inset-bottom,0px);--st:env(safe-area-inset-top,0px)}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent;user-select:none;-webkit-user-select:none;-webkit-touch-callout:none}
+html,body{margin:0;height:100%;overflow:hidden;background:#cfe6ee;font-family:'M PLUS Rounded 1c',system-ui,-apple-system,sans-serif;touch-action:none;color:#3a2a1a}
+button{font-family:inherit;cursor:pointer}
+#c{position:fixed;inset:0;width:100%;height:100%;display:block}
+.hidden{display:none!important}
+/* HUD */
+#top{position:fixed;left:0;right:0;top:0;padding:calc(var(--st) + 8px) 10px 0;display:flex;align-items:flex-start;gap:8px;pointer-events:none;z-index:10}
+#lvl{background:linear-gradient(#2a9d8f,#1f7a70);color:#fff;border-radius:14px;padding:4px 10px;box-shadow:0 3px 0 #145a52;text-align:center;min-width:64px}
+#lvl b{display:block;font-size:18px;line-height:1.1}
+#lvl small{font-size:9px;display:block;max-width:76px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#moneyBox{flex:1;text-align:center}
+#money{display:inline-block;font-size:32px;font-weight:800;color:#fff;background:linear-gradient(#ffcf4a,#ff9f1c);padding:2px 18px 2px 46px;border-radius:22px;box-shadow:0 4px 0 #c46d00,0 6px 12px rgba(0,0,0,.2);position:relative;text-shadow:0 2px 0 #b35c00;letter-spacing:.5px}
+#money:before{content:'💰';position:absolute;left:10px;top:50%;transform:translateY(-50%);font-size:24px;text-shadow:none}
+#money.pop{animation:pop .25s}
+@keyframes pop{50%{transform:scale(1.12)}}
+#evBanner{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(var(--navh) + var(--sb) + 8px);z-index:11;pointer-events:none;background:linear-gradient(90deg,#7b2ff7,#e63946);color:#fff;font-size:11px;font-weight:800;padding:2px 10px;border-radius:10px;box-shadow:0 2px 6px rgba(0,0,0,.25);max-width:58vw;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.evch{display:flex;flex-direction:column;gap:8px;margin-top:12px}.evch .btn{width:100%;text-align:left;padding:10px 12px}.evch .btn small{font-weight:500}
+#rate{font-size:12px;font-weight:800;color:#1b5e20;background:rgba(255,255,255,.85);display:inline-block;padding:1px 10px;border-radius:10px;margin-top:4px}
+#dayBox{background:rgba(38,70,83,.88);color:#fff;border-radius:14px;padding:4px 10px;text-align:center;min-width:64px}
+#dayBox b{display:block;font-size:13px}#dayBox small{font-size:11px}
+#dayBar{height:4px;background:rgba(255,255,255,.25);border-radius:2px;margin-top:2px;overflow:hidden}#dayBar i{display:block;height:100%;background:var(--y);width:0}
+#fuel{position:fixed;left:10px;top:calc(var(--st) + 66px);display:flex;align-items:center;gap:4px;max-width:calc(100vw - 140px);background:rgba(255,255,255,.88);padding:3px 8px;border-radius:12px;font-size:12px;font-weight:800;z-index:10;pointer-events:none}
+#fuel .bar{width:42px;height:8px;background:#ddd;border-radius:4px;overflow:hidden}#fuel .bar i{display:block;height:100%;background:linear-gradient(90deg,#e63946,#ffd166 40%,#4caf50);width:100%}
+#fuel.low{animation:blink 1s infinite}#fuel .cb i{background:linear-gradient(90deg,#8b5a2b,#e9c46a 50%,#3a86ff)!important}#rep{color:#b8860b;margin-left:2px}#rep.bad{color:#c1121f}
+#repairBtn{background:linear-gradient(#ffe0b3,#ff9f1c);font-size:20px}#repairBtn small{position:absolute;bottom:-6px;left:50%;transform:translateX(-50%);background:#264653;color:#fff;font-size:9px;border-radius:6px;padding:0 4px;font-weight:800}
+#appChip{position:fixed;left:50%;top:calc(var(--st) + 128px);transform:translateX(-50%);background:#7b2ff7;color:#fff;font-weight:800;font-size:12px;padding:4px 12px;border-radius:12px;z-index:11;pointer-events:none}
+.chip.late{background:#ffe3e3;color:#c1121f}.chip.warn{background:#fff3c4}
+.shake{animation:shk .3s}@keyframes shk{25%{transform:translate(4px,-2px)}50%{transform:translate(-4px,2px)}75%{transform:translate(2px,1px)}}@keyframes blink{50%{background:#ffb3b3}}
+#goal{position:fixed;left:10px;top:calc(var(--st) + 96px);max-width:min(58vw,260px);background:rgba(255,248,236,.95);border:2px solid var(--o);border-radius:14px;padding:6px 10px;font-size:12px;font-weight:800;z-index:10;box-shadow:0 3px 8px rgba(0,0,0,.15);pointer-events:none}
+#goal .gt{font-size:10px;color:var(--o2)}
+#goal .gp{height:6px;background:#eee;border-radius:3px;margin-top:4px;overflow:hidden}#goal .gp i{display:block;height:100%;background:var(--t)}
+#pax{position:fixed;left:10px;top:calc(var(--st) + 162px);display:flex;flex-direction:column;gap:4px;z-index:10;pointer-events:none}
+.chip{background:#fff;border-radius:10px;padding:3px 8px;font-size:11px;font-weight:800;box-shadow:0 2px 4px rgba(0,0,0,.15);border-left:6px solid #999}
+#hint{position:fixed;left:50%;top:36%;transform:translateX(-50%);background:rgba(38,70,83,.9);color:#fff;padding:6px 14px;border-radius:16px;font-size:13px;font-weight:800;z-index:11;pointer-events:none;white-space:nowrap}
+#mini{position:fixed;right:10px;top:calc(var(--st) + 66px);width:112px;height:112px;border-radius:50%;border:3px solid #fff;box-shadow:0 3px 10px rgba(0,0,0,.25);z-index:10;background:#9fbf7a;pointer-events:auto;cursor:pointer}
+#mapView{position:fixed;inset:0;z-index:58;background:rgba(10,20,30,.92);display:flex;flex-direction:column;align-items:center;justify-content:center}#mapView canvas{width:min(96vw,96vh);height:min(96vw,96vh);touch-action:none}#mapView .mclose{position:absolute;top:calc(var(--st) + 12px);right:14px}#mapView .mtitle{position:absolute;top:calc(var(--st) + 16px);left:16px;color:#fff;font-weight:800;font-size:18px}#mapView .mleg{position:absolute;bottom:calc(var(--sb) + 14px);left:10px;right:10px;color:#fff;font-size:11px;text-align:center;line-height:1.7}
+#side{position:fixed;right:10px;top:calc(var(--st) + 186px);display:flex;flex-direction:column;gap:8px;z-index:10}
+.rb{width:48px;height:48px;border-radius:50%;border:0;background:#fff;box-shadow:0 3px 0 #bbb,0 4px 8px rgba(0,0,0,.2);font-size:22px;position:relative}
+.rb:active{transform:translateY(2px);box-shadow:0 1px 0 #bbb}
+.rb .badge{position:absolute;top:-4px;right:-4px;background:var(--r);color:#fff;font-size:11px;border-radius:9px;min-width:18px;height:18px;line-height:18px;font-weight:800}
+#phoneBtn{background:linear-gradient(#7b2ff7,#5a17c9);box-shadow:0 3px 0 #3d0d8f}
+#joyZone{position:fixed;left:0;bottom:calc(var(--navh) + var(--sb));width:55%;height:46%;z-index:9;touch-action:none}
+#joyBase{position:absolute;width:120px;height:120px;border-radius:50%;background:rgba(255,255,255,.22);border:3px solid rgba(255,255,255,.6);left:28px;bottom:24px;pointer-events:none;transition:opacity .2s;opacity:.7}
+#joyKnob{position:absolute;width:56px;height:56px;border-radius:50%;background:radial-gradient(circle at 35% 35%,#fff,#ffd166 60%,#ff9f1c);left:32px;top:32px;box-shadow:0 3px 8px rgba(0,0,0,.3)}
+#joyZone.on #joyBase{opacity:1}
+#drive{position:fixed;right:12px;bottom:calc(var(--navh) + var(--sb) + 18px);display:flex;gap:10px;align-items:flex-end;z-index:10}
+#gearBox{display:flex;flex-direction:column;align-items:center;gap:3px}#gears{display:flex;gap:3px;background:rgba(0,0,0,.4);padding:3px;border-radius:12px}#gears button{width:30px;height:26px;border:0;border-radius:8px;background:#fff;font-weight:800;color:#666;font-size:13px}#gears button.on{background:linear-gradient(#ffd166,#ff9f1c);color:#4a2500}
+#speedo{width:88px;height:88px;pointer-events:none}
+#footBtn{width:56px;height:56px;border-radius:50%;border:0;background:linear-gradient(#bde0fe,#3a86ff);color:#fff;font-size:22px;box-shadow:0 4px 0 #1d56b3;display:flex;flex-direction:column;align-items:center;justify-content:center;line-height:1}#footBtn small{font-size:9px;font-weight:800}#footBtn.dis{filter:grayscale(.8);opacity:.6}
+body.foot #gearBox,body.foot #brakeBtn,body.foot #hornBtn{display:none}
+#punchBtn{display:none;width:66px;height:66px;border-radius:50%;border:0;background:linear-gradient(#ff9a9a,#e63946);color:#fff;font-size:28px;box-shadow:0 4px 0 #9d1c27;flex-direction:column;align-items:center;justify-content:center;line-height:1}#punchBtn small{font-size:10px;font-weight:800}
+body.foot #punchBtn{display:flex}body.car #punchBtn{display:none}#punchBtn:active{transform:translateY(3px);box-shadow:0 1px 0 #9d1c27}
+#casinoBtn{background:linear-gradient(#ffe066,#d4a017);animation:pop 1s infinite}
+#wantedBox{position:fixed;left:50%;top:calc(var(--st) + 150px);transform:translateX(-50%);background:#c1121f;color:#fff;font-weight:800;font-size:13px;padding:5px 14px;border-radius:14px;z-index:12;pointer-events:none;box-shadow:0 0 0 3px #fff,0 4px 14px rgba(0,0,0,.4);animation:wblink .5s infinite alternate;text-align:center}
+@keyframes wblink{to{background:#1d4ed8}}#wantedBox small{display:block;font-size:10px;font-weight:500}
+#casino{position:fixed;inset:0;z-index:55;background:radial-gradient(ellipse at 50% 0%,#5c0a0a,#1a0505 70%);color:#ffe9a8;display:flex;flex-direction:column;padding:calc(var(--st) + 10px) 12px calc(var(--sb) + 12px);overflow-y:auto;touch-action:pan-y}
+#casino h2{margin:0;font-size:20px;color:#ffd700;text-shadow:0 2px 0 #000}#casino .ctop{display:flex;align-items:center;gap:8px}#casino .ctop>div{flex:1}
+#cMoney{font-size:28px;font-weight:800;color:#fff}#cMoney.neg{color:#ff6b6b}#cInfo{font-size:11px;opacity:.85}
+.ctabs{display:flex;gap:6px;margin:10px 0}.ctabs button{flex:1;border:2px solid #d4a017;background:transparent;color:#ffd700;border-radius:12px;padding:8px;font-weight:800}.ctabs button.on{background:#d4a017;color:#3a0d0d}
+.chips{display:flex;gap:6px;flex-wrap:wrap;margin:6px 0}.chips button{flex:1;min-width:58px;border:0;border-radius:20px;padding:8px 4px;font-weight:800;background:#2b0a0a;color:#ffd700;box-shadow:inset 0 0 0 2px #d4a017}.chips button.on{background:#ffd700;color:#3a0d0d}
+#betTxt{text-align:center;font-weight:800;font-size:16px;margin:4px 0}
+.reels{display:flex;gap:8px;justify-content:center;margin:14px 0}.reel{width:84px;height:96px;background:linear-gradient(#fff,#e9e2cf);border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:54px;box-shadow:inset 0 -6px 0 rgba(0,0,0,.15),0 0 0 4px #d4a017}
+.reel.spin{animation:rs .1s infinite}@keyframes rs{50%{transform:translateY(4px)}}
+.bigbtn{width:100%;border:0;border-radius:18px;padding:14px;font-size:20px;font-weight:800;background:linear-gradient(#ffe066,#d4a017);color:#3a0d0d;box-shadow:0 5px 0 #8a6200;margin-top:8px}.bigbtn:active{transform:translateY(3px);box-shadow:0 2px 0 #8a6200}.bigbtn.dis{filter:grayscale(.7);opacity:.6}
+#cResult{text-align:center;min-height:30px;font-size:18px;font-weight:800;margin:6px 0}
+.rwheel{width:150px;height:150px;border-radius:50%;margin:12px auto;display:flex;align-items:center;justify-content:center;font-size:52px;font-weight:800;color:#fff;border:8px solid #d4a017;box-shadow:0 0 30px rgba(255,215,0,.4)}
+.rbets{display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px}.rbets button{border:0;border-radius:12px;padding:10px 4px;font-weight:800;color:#fff;font-size:13px}.rbets button.on{outline:3px solid #ffd700}
+.rhist{display:flex;gap:4px;justify-content:center;flex-wrap:wrap;margin-top:8px}.rhist span{width:24px;height:24px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:800;color:#fff}
+.paytab{font-size:11px;opacity:.8;text-align:center;margin-top:8px;line-height:1.6}
+#brakeBtn{width:78px;height:78px;border-radius:50%;border:0;background:linear-gradient(#ff6b6b,#e63946);color:#fff;font-weight:800;font-size:14px;box-shadow:0 4px 0 #a4161a,0 6px 10px rgba(0,0,0,.25)}
+#brakeBtn.on,#brakeBtn:active{transform:translateY(3px);box-shadow:0 1px 0 #a4161a}
+#hornBtn{width:56px;height:56px;border-radius:50%;border:0;background:linear-gradient(#ffe08a,#ffb703);font-size:24px;box-shadow:0 4px 0 #b77b00}
+#hornBtn:active{transform:translateY(3px);box-shadow:0 1px 0 #b77b00}
+#refuel{position:fixed;left:50%;bottom:calc(var(--navh) + var(--sb) + 120px);transform:translateX(-50%);background:#fff;border-radius:14px;padding:6px 14px;font-weight:800;font-size:13px;z-index:11;box-shadow:0 3px 8px rgba(0,0,0,.2);pointer-events:none}
+/* nav */
+#nav{position:fixed;left:0;right:0;bottom:0;height:calc(var(--navh) + var(--sb));padding-bottom:var(--sb);background:linear-gradient(#3d2a1e,#24170f);display:flex;z-index:30;box-shadow:0 -3px 10px rgba(0,0,0,.25)}
+#nav button{flex:1;border:0;background:none;color:#f5deb3;font-size:10px;font-weight:800;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;position:relative}
+#nav button span{font-size:24px;line-height:1;filter:drop-shadow(0 2px 0 rgba(0,0,0,.4))}
+#nav button.on{color:#fff;background:linear-gradient(rgba(255,159,28,.45),rgba(255,159,28,.1))}
+#nav button.on:after{content:'';position:absolute;top:0;left:20%;right:20%;height:3px;background:var(--o);border-radius:0 0 3px 3px}
+#nav .dot{position:absolute;top:6px;right:calc(50% - 20px);width:10px;height:10px;border-radius:50%;background:var(--r);border:2px solid #24170f}
+/* sheet */
+#sheet{position:fixed;left:0;right:0;bottom:calc(var(--navh) + var(--sb));height:min(62vh,640px);background:var(--cream);border-radius:22px 22px 0 0;z-index:25;display:flex;flex-direction:column;box-shadow:0 -6px 20px rgba(0,0,0,.25);max-width:720px;margin:0 auto;animation:up .22s ease-out}
+@keyframes up{from{transform:translateY(40px);opacity:0}}
+#sheetHead{display:flex;align-items:center;padding:12px 14px 8px;border-bottom:2px dashed #f0d9b5}
+#sheetHead h2{margin:0;font-size:19px;flex:1}
+#sheetClose{border:0;background:#f0d9b5;width:34px;height:34px;border-radius:50%;font-size:16px;font-weight:800;color:#6b4a2b}
+#sheetBody{flex:1;overflow-y:auto;padding:10px 12px 24px;touch-action:pan-y;-webkit-overflow-scrolling:touch}
+.sec{font-size:13px;font-weight:800;color:var(--o2);margin:14px 2px 6px;display:flex;align-items:center;gap:6px}
+.sec:first-child{margin-top:2px}
+.card{background:#fff;border-radius:16px;padding:10px 12px;margin-bottom:8px;box-shadow:0 2px 0 #f0d9b5;display:flex;align-items:center;gap:10px}
+.card .ic{font-size:30px;width:46px;height:46px;flex:none;display:flex;align-items:center;justify-content:center;background:#fff3dc;border-radius:12px}
+.card .mid{flex:1;min-width:0}
+.card .nm{font-weight:800;font-size:14px}
+.card .ds{font-size:11px;color:#7a6550;line-height:1.35}
+.card.lock{opacity:.55}
+.pips{display:flex;gap:2px;margin-top:3px;flex-wrap:wrap}.pips i{width:10px;height:6px;border-radius:2px;background:#eadcc6}.pips i.f{background:var(--t)}
+.btn{border:0;border-radius:12px;padding:8px 12px;font-weight:800;font-size:13px;color:#4a2500;background:linear-gradient(#ffe08a,#ff9f1c);box-shadow:0 3px 0 #c46d00;white-space:nowrap;min-width:72px}
+.btn:active{transform:translateY(2px);box-shadow:0 1px 0 #c46d00}
+.btn.g{background:linear-gradient(#7fe0a6,#2a9d8f);color:#fff;box-shadow:0 3px 0 #1d6f65}
+.btn.b{background:linear-gradient(#8ec5ff,#3a86ff);color:#fff;box-shadow:0 3px 0 #1d56b3}
+.btn.r{background:linear-gradient(#ff9a9a,#e63946);color:#fff;box-shadow:0 3px 0 #9d1c27}
+.btn.p{background:linear-gradient(#c49bff,#7b2ff7);color:#fff;box-shadow:0 3px 0 #4a12a8}
+.btn.dis{filter:grayscale(.85);opacity:.55}
+.btn.sm{padding:5px 8px;font-size:11px;min-width:0}
+.btn small{display:block;font-size:10px;opacity:.85}
+.row{display:flex;gap:8px}.row>*{flex:1}
+.stat{background:#fff;border-radius:14px;padding:8px;text-align:center;box-shadow:0 2px 0 #f0d9b5}
+.stat b{display:block;font-size:18px}.stat small{font-size:10px;color:#7a6550}
+.bars{display:grid;grid-template-columns:auto 1fr;gap:2px 6px;font-size:10px;align-items:center;margin-top:4px}
+.bars .bb{height:6px;background:#eee;border-radius:3px;overflow:hidden}.bars .bb i{display:block;height:100%}
+table.tb{width:100%;border-collapse:collapse;font-size:12px;background:#fff;border-radius:14px;overflow:hidden}
+.tb td{padding:5px 8px;border-bottom:1px solid #f5ead8}.tb td:last-child{text-align:right;font-weight:800}
+.tb tr.tot td{background:#fff3dc;font-weight:800}
+.plus{color:#1b8a3a}.minus{color:#c1121f}
+.req{font-size:12px;padding:3px 0}.req.ok{color:#1b8a3a}
+.lvlcard{background:linear-gradient(135deg,#2a9d8f,#264653);color:#fff;border-radius:18px;padding:12px;margin-bottom:8px}
+.lvlcard h3{margin:0 0 4px;font-size:17px}
+.lvlcard .req{color:#ffe8c2}.lvlcard .req.ok{color:#9ff0b5}
+canvas.chart{width:100%;height:120px;background:#fff;border-radius:14px;display:block}
+/* floats */
+#floats{position:fixed;inset:0;pointer-events:none;z-index:20;overflow:hidden}
+.ft{position:absolute;transform:translate(-50%,-50%);font-weight:800;font-size:24px;color:#fff;text-shadow:0 2px 0 #1b5e20,0 0 6px rgba(0,0,0,.4);animation:fly 1.3s ease-out forwards;white-space:nowrap}
+.ft.small{font-size:16px}.ft.bad{text-shadow:0 2px 0 #9d1c27}.ft.gold{color:#ffe066;text-shadow:0 2px 0 #8a5a00,0 0 8px rgba(0,0,0,.4);font-size:28px}
+@keyframes fly{0%{opacity:0;transform:translate(-50%,-30%) scale(.6)}15%{opacity:1;transform:translate(-50%,-80%) scale(1.15)}100%{opacity:0;transform:translate(-50%,-260%) scale(1)}}
+.coin{position:absolute;width:22px;height:22px;border-radius:50%;background:radial-gradient(circle at 35% 35%,#fff6b0,#ffc300 55%,#d48a00);box-shadow:0 0 0 2px #b8860b inset;transition:transform .7s cubic-bezier(.5,-0.3,.7,.6),opacity .7s;z-index:21}
+/* toasts */
+#toasts{position:fixed;left:50%;top:calc(var(--st) + 128px);transform:translateX(-50%);z-index:40;display:flex;flex-direction:column;gap:6px;align-items:center;pointer-events:none;width:92%}
+.toast{background:rgba(38,26,16,.92);color:#fff;padding:7px 14px;border-radius:14px;font-size:13px;font-weight:800;animation:tin .25s,tout .4s 2.6s forwards;text-align:center;max-width:100%}
+@keyframes tin{from{transform:translateY(-10px);opacity:0}}@keyframes tout{to{opacity:0;transform:translateY(-8px)}}
+/* modal */
+#modal{position:fixed;inset:0;background:rgba(20,12,6,.55);z-index:60;display:flex;align-items:center;justify-content:center;padding:20px}
+#modalBox{background:var(--cream);border-radius:24px;padding:20px;max-width:380px;width:100%;text-align:center;box-shadow:0 10px 30px rgba(0,0,0,.35);animation:mz .3s cubic-bezier(.3,1.6,.6,1)}
+@keyframes mz{from{transform:scale(.6);opacity:0}}
+#modalBox h2{margin:4px 0 8px;font-size:22px}
+#modalBox .big{font-size:56px;line-height:1.1}
+#modalBox p{font-size:13px;line-height:1.6;margin:6px 0}
+#modalBox ul{text-align:left;font-size:13px;padding-left:20px;line-height:1.7}
+#modalBox .btns{display:flex;gap:10px;justify-content:center;margin-top:12px}
+.burst{background:repeating-conic-gradient(from 0deg,#ffd16655 0 10deg,transparent 10deg 20deg);border-radius:50%;width:110px;height:110px;margin:0 auto;display:flex;align-items:center;justify-content:center;animation:spin 6s linear infinite}
+.burst>span{animation:spin 6s linear infinite reverse;font-size:56px}
+@keyframes spin{to{transform:rotate(360deg)}}
+/* phone */
+#phone{position:fixed;inset:0;background:rgba(10,10,20,.55);z-index:50;display:flex;align-items:center;justify-content:center;padding:12px}
+#pf{width:min(340px,94vw);height:min(640px,84vh);background:#111;border-radius:38px;padding:12px;box-shadow:0 12px 40px rgba(0,0,0,.5);display:flex;flex-direction:column;position:relative;animation:mz .3s}
+#pscr{flex:1;background:#f4f2fb;border-radius:28px;overflow:hidden;display:flex;flex-direction:column}
+#phead{background:linear-gradient(135deg,#7b2ff7,#f107a3);color:#fff;padding:22px 14px 10px;position:relative}
+#phead h3{margin:0;font-size:17px}#phead small{opacity:.9;font-size:11px}
+#pclose{position:absolute;right:10px;top:16px;border:0;background:rgba(255,255,255,.25);color:#fff;width:30px;height:30px;border-radius:50%;font-weight:800}
+#ptabs{display:flex;background:#fff;border-bottom:1px solid #e6e1f5}
+#ptabs button{flex:1;border:0;background:none;padding:9px 0;font-weight:800;font-size:12px;color:#8a84a3}
+#ptabs button.on{color:#7b2ff7;box-shadow:inset 0 -3px 0 #7b2ff7}
+#pbody{flex:1;overflow-y:auto;padding:10px;touch-action:pan-y}
+.req-card{background:#fff;border-radius:16px;padding:10px;margin-bottom:8px;box-shadow:0 2px 6px rgba(80,40,160,.08);display:flex;gap:8px;align-items:center}
+.applogo{width:38px;height:38px;border-radius:12px;color:#fff;font-weight:800;display:flex;align-items:center;justify-content:center;font-size:16px;flex:none}
+.req-card .mid{flex:1;font-size:11px;color:#555}.req-card .mid b{font-size:13px;color:#222}
+.tag{display:inline-block;font-size:10px;padding:1px 6px;border-radius:6px;color:#fff;font-weight:800;margin-right:4px}
+.tbar{height:5px;background:#eee;border-radius:3px;overflow:hidden;margin-top:3px}.tbar i{display:block;height:100%;background:#7b2ff7}
+.empty{text-align:center;color:#999;font-size:12px;padding:30px 10px}
+/* title */
+#title{position:fixed;inset:0;z-index:100;background:radial-gradient(ellipse at 50% 30%,#ffe6a8,#ff9f1c 55%,#c8501e);display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:20px;overflow:hidden}
+#title:before{content:'';position:absolute;inset:-50%;background:repeating-conic-gradient(from 0deg,rgba(255,255,255,.12) 0 8deg,transparent 8deg 16deg);animation:spin 40s linear infinite}
+#title>*{position:relative}
+#title .sub{font-size:15px;font-weight:800;color:#7a2e00;letter-spacing:2px}
+#title h1{margin:4px 0 0;font-size:clamp(40px,12vw,72px);color:#fff;text-shadow:0 4px 0 #b33c00,0 8px 0 #7a2400,0 12px 20px rgba(0,0,0,.3);line-height:1.05;letter-spacing:2px}
+#title .tuk{font-size:84px;animation:drive 1.6s ease-in-out infinite;margin:18px 0 6px;filter:drop-shadow(0 8px 4px rgba(0,0,0,.25))}
+@keyframes drive{0%,100%{transform:translateX(-14px) rotate(-2deg)}50%{transform:translateX(14px) rotate(2deg)}}
+#title .desc{font-size:13px;color:#5a2200;font-weight:800;margin-bottom:22px;line-height:1.6}
+#title .btn{font-size:20px;padding:14px 42px;border-radius:20px;margin:5px}
+#title .ver{position:absolute;bottom:calc(var(--sb) + 10px);font-size:10px;color:#7a2e00;opacity:.7}
+@media (min-width:900px){#sheet{border-radius:22px;bottom:calc(var(--navh) + 10px)}}
+</style>
+</head>
+<body>
+<canvas id="c"></canvas>
+
+<div id="top">
+  <div id="lvl"><b id="lvlNum">Lv1</b><small id="lvlName">個人ドライバー</small></div>
+  <div id="moneyBox"><div id="money">$10</div><br><div id="rate">+$0 /分</div></div>
+  <div id="dayBox"><b id="dayTxt">1日目</b><small id="clock">06:00</small><div id="dayBar"><i></i></div></div>
+</div>
+<div id="fuel"><span>⛽</span><div class="bar"><i id="fuelFill"></i></div><span>🛺</span><div class="bar cb"><i id="condFill"></i></div><span id="condPct">100%</span><span id="rep">★4.0</span></div><div id="appChip" class="hidden"></div><div id="wantedBox" class="hidden"></div><div id="evBanner" class="hidden"></div>
+<div id="goal"></div>
+<div id="pax"></div>
+<div id="hint" class="hidden"></div>
+<canvas id="mini" width="224" height="224"></canvas>
+<div id="side">
+  <button class="rb hidden" id="phoneBtn" title="配車アプリ">📱<span class="badge hidden" id="phoneBadge">0</span></button>
+  <button class="rb hidden" id="repairBtn" title="修理">🔧<small id="repairPct"></small></button><button class="rb hidden" id="casinoBtn" title="カジノに入る">🎰</button><button class="rb" id="bgmBtn" title="BGM">🎵</button><button class="rb" id="zoomBtn" title="ズーム">🔍</button>
+  <button class="rb" id="homeBtn" title="本拠地へカメラ">🏠</button>
+</div>
+<div id="joyZone"><div id="joyBase"><div id="joyKnob"></div></div></div>
+<div id="drive"><div id="gearBox"><div id="gears"><button data-gc="at" class="on">AT</button><button data-gc="dn">▼</button><button data-gc="up">▲</button></div><canvas id="speedo" width="176" height="176"></canvas></div><button id="punchBtn" title="殴る (G)">👊<small>殴る</small></button><button id="footBtn" title="降りる/乗る (F)">🚶<small>降りる</small></button><button id="hornBtn" title="クラクション (H)">📯</button><button id="brakeBtn">ブレーキ</button></div>
+<div id="refuel" class="hidden">⛽ 給油中…</div>
+<div id="floats"></div>
+
+<div id="sheet" class="hidden"><div id="sheetHead"><h2 id="sheetTitle"></h2><button id="sheetClose">✕</button></div><div id="sheetBody"></div></div>
+
+<nav id="nav">
+  <button data-tab="home" class="on"><span>🏠</span>ホーム</button>
+  <button data-tab="veh"><span>🛺</span>車両</button>
+  <button data-tab="staff"><span>👥</span>スタッフ</button>
+  <button data-tab="fac"><span>🏗️</span>設備</button>
+  <button data-tab="biz"><span>📊</span>経営</button>
+  <button data-tab="upg"><span>⬆️</span>アップグレード</button>
+</nav>
+
+<div id="phone" class="hidden"><div id="pf"><div id="pscr">
+  <div id="phead"><h3 id="pTitle">配車アプリ</h3><small id="pSub"></small><button id="pclose">✕</button></div>
+  <div id="ptabs"><button data-pt="req" class="on">依頼</button><button data-pt="drv">ドライバー</button><button data-pt="sales">売上</button></div>
+  <div id="pbody"></div>
+</div></div></div>
+
+<div id="casino" class="hidden"><div class="ctop"><div><h2>🎰 ロイヤル・メコン・カジノ</h2><div id="cMoney">$0</div><div id="cInfo"></div></div><button class="btn r" data-act="cexit">退店</button></div>
+<div class="ctabs"><button data-cg="slot" class="on">🎰 スロット</button><button data-cg="rou">🎡 ルーレット</button></div>
+<div style="font-size:12px;font-weight:800">賭け金（会社のお金）</div><div class="chips" id="cChips"></div><div id="betTxt"></div>
+<div id="cGame"></div><div id="cResult"></div></div>
+<div id="mapView" class="hidden"><div class="mtitle">🗺️ プノンペン全体マップ</div><button class="btn r mclose" data-act="mapclose">✕ 閉じる</button><canvas id="bigMap" width="1000" height="1000"></canvas><div class="mleg">🔺あなた 🛺愛車 ●待ち客（色=距離） ■目的地 🟣アプリ客 🟡社用車 🚔警察 🎰カジノ ⛽GAS ／ オレンジ=自社の土地</div></div>
+<div id="modal" class="hidden"><div id="modalBox"></div></div>
+<div id="toasts"></div>
+
+<div id="title">
+  <div class="sub">みんなでトゥクろう。</div>
+  <h1>トゥクトゥク<br>幕府</h1>
+  <div class="tuk">🛺</div>
+  <div class="desc">所持金$10、ボロボロのトゥクトゥク1台。<br>プノンペンの街から、交通の天下を取れ！</div>
+  <div id="titleBtns"></div>
+  <div class="ver">prototype v0.1 ・ 進行状況はこのブラウザに自動保存されます</div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script>
+(function(){
+'use strict';
+/* ================= utilities ================= */
+const $=s=>document.querySelector(s);
+const rnd=Math.random;
+const clamp=(v,a,b)=>v<a?a:v>b?b:v;
+const lerp=(a,b,t)=>a+(b-a)*t;
+const pick=a=>a[Math.floor(rnd()*a.length)];
+const dist2=(ax,az,bx,bz)=>{const dx=ax-bx,dz=az-bz;return Math.sqrt(dx*dx+dz*dz);};
+function fmt(n){const neg=n<0;n=Math.abs(n);let s;
+  if(n>=1e12)s=(n/1e12).toFixed(2)+'T';else if(n>=1e9)s=(n/1e9).toFixed(2)+'B';else if(n>=1e6)s=(n/1e6).toFixed(2)+'M';else if(n>=1e5)s=(n/1e3).toFixed(1)+'K';
+  else s=Math.floor(n).toLocaleString('en-US');return (neg?'-$':'$')+s;}
+function fmtD(n){if(Math.abs(n)<100){const s=(Math.round(n*100)/100).toFixed(2).replace(/\.?0+$/,'');return (n<0?'-$':'$')+s.replace('-','');}return fmt(n);}
+function mulberry(a){return function(){a|=0;a=a+0x6D2B79F5|0;let t=Math.imul(a^a>>>15,1|a);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296;};}
+function angDiff(a,b){let d=b-a;while(d>Math.PI)d-=Math.PI*2;while(d<-Math.PI)d+=Math.PI*2;return d;}
+
+/* ================= game data ================= */
+const KEY='tukbakufu_save_v1', DAY=120;
+const LEVELS=[null,
+ {name:'個人ドライバー',icon:'🛺'},
+ {name:'小規模事業者',icon:'🏪'},
+ {name:'配車サービス事業者',icon:'📱'},
+ {name:'中規模会社',icon:'🏢'},
+ {name:'大企業',icon:'🏙️'},
+ {name:'カンボジア最大級の交通会社',icon:'👑'}];
+const LMULT=[1,1,1.3,1.8,2.6,3.8,5.5];
+const LEVEL_UNLOCKS={2:['整備場・ガソリンスタンド・事務所を建設可能に','配車アプリ「ロータスライド」に登録可能に','整備士・マネージャーなどの職種'],
+ 3:['受付カウンター・休憩所・大型駐車場','配車アプリ「ナーガGO」','トゥクトゥク10台まとめ買い／ドライバー一括採用'],
+ 4:['車両洗浄施設・修理工場・本社ビル','VIP送迎・観光ツアー事業部'],
+ 5:['営業所（支店）の開設','空港送迎事業部','配車アプリ「アンコール・エクスプレス」'],
+ 6:['物流事業部','あなたはプノンペン交通界の将軍となった！']};
+const EXT=[
+ {name:'ボロボロ',body:'#8b6b4a',trim:'#5c4a3a',roof:'#7a6d5c',stripe:'#6b5d4e',seat:'#6e4b3a'},
+ {name:'レッド塗装',body:'#d62828',trim:'#d9d9d9',roof:'#f4f1de',stripe:'#d62828',seat:'#3d405b'},
+ {name:'ブルーライン',body:'#277da1',trim:'#e6e6e6',roof:'#f9c74f',stripe:'#277da1',seat:'#1d3557'},
+ {name:'グリーン＆ゴールド',body:'#2a9d8f',trim:'#e9c46a',roof:'#264653',stripe:'#e9c46a',seat:'#8d5524'},
+ {name:'ブラック・ラグジュアリー',body:'#1b1b24',trim:'#d4af37',roof:'#2b2b36',stripe:'#d4af37',seat:'#7b2d26'},
+ {name:'ロイヤル・ホワイト',body:'#f8f4ea',trim:'#d4af37',roof:'#c1121f',stripe:'#d4af37',seat:'#c1121f',glow:'#ffd166'}];
+const UPG=[
+ {id:'engine',name:'エンジン',icon:'⚙️',max:10,base:8,mul:1.55,eff:l=>`最高速度 ${Math.round(maxSpeedOf(l)*2.2)}km/h`},
+ {id:'tank',name:'燃料タンク',icon:'🛢️',max:8,base:6,mul:1.6,eff:l=>`航続距離 ${(rangeOf(l)/100).toFixed(1)}km`},
+ {id:'seats',name:'座席',icon:'💺',max:3,costs:[30,180,900],eff:l=>`同時に${1+l}組まで乗車可能`},
+ {id:'exterior',name:'外装',icon:'🎨',max:5,costs:[15,80,400,2000,9000],eff:l=>`「${EXT[l].name}」 運賃+${l*10}%`},
+ {id:'tires',name:'タイヤ',icon:'🛞',max:8,base:10,mul:1.6,eff:l=>`加速・旋回 +${l*12}%`},
+ {id:'cargo',name:'荷物スペース',icon:'🧳',max:5,base:20,mul:1.9,eff:l=>l?`荷物チップ +$${(0.5*l).toFixed(1)}〜`:'荷物チップなし'},
+ {id:'ac',name:'エアコン',icon:'❄️',max:5,base:40,mul:1.9,eff:l=>`VIP客の出現率 ${Math.round(vipChanceOf(l)*100)}%`}];
+const FAC=[
+ {id:'parkS',name:'小さな駐車場',icon:'🅿️',lv:1,cost:60,mul:1.8,max:5,maint:1,desc:'駐車枠 +3／Lv'},
+ {id:'garage',name:'トゥクトゥク整備場',icon:'🔧',lv:2,cost:150,mul:2.5,max:3,maint:3,desc:'故障率 -15%／Lv・整備士を雇用可能'},
+ {id:'gas',name:'ガソリンスタンド',icon:'⛽',lv:2,cost:250,mul:2.5,max:3,maint:4,desc:'社用車の燃料費 -20%／Lv・自分の給油が無料'},
+ {id:'office',name:'事務所',icon:'🏢',lv:2,cost:300,mul:2.5,max:3,maint:5,desc:'運賃 +5%／Lv・マネージャー/経理/営業を雇用可能'},
+ {id:'reception',name:'受付カウンター',icon:'🛎️',lv:3,cost:500,mul:2.5,max:3,maint:4,desc:'依頼数 +8%／Lv・受付スタッフを雇用可能'},
+ {id:'rest',name:'スタッフ休憩所',icon:'☕',lv:3,cost:600,mul:2.5,max:3,maint:4,desc:'ドライバーの運転速度 +6%／Lv'},
+ {id:'parkL',name:'大型駐車場',icon:'🅿️',lv:3,cost:1500,mul:1.45,max:10,maint:10,desc:'駐車枠 +12／Lv'},
+ {id:'wash',name:'車両洗浄施設',icon:'🧽',lv:4,cost:2500,mul:2.2,max:3,maint:12,desc:'運賃 +8%／Lv・VIP率アップ'},
+ {id:'repair',name:'修理工場',icon:'🛠️',lv:4,cost:4000,mul:2.2,max:3,maint:15,desc:'修理費 -25%／Lv・故障率 -10%／Lv'},
+ {id:'hq',name:'本社ビル',icon:'🏯',lv:4,cost:15000,mul:2,max:5,maint:40,desc:'全運賃 +10%／Lv・駐車枠 +40／Lv'},
+ {id:'branch',name:'営業所（支店）',icon:'🏬',lv:5,cost:30000,mul:1.5,max:8,maint:80,desc:'駐車枠 +60・依頼数 +5%（街に支店が出現）'}];
+const FACM={};FAC.forEach(f=>FACM[f.id]=f);
+const ROLES={
+ driver:{name:'ドライバー',icon:'🧑‍✈️',color:'#e76f51'},
+ mechanic:{name:'整備士',icon:'🧑‍🔧',color:'#1d4e89',req:'garage',desc:'故障率を下げる',a:0.03,b:0.006,cap:0.4},
+ reception:{name:'受付スタッフ',icon:'💁',color:'#ff9f1c',req:'reception',desc:'配車依頼数を増やす',a:0.02,b:0.005,cap:0.5},
+ manager:{name:'マネージャー',icon:'🧑‍💼',color:'#333344',req:'office',desc:'ドライバー全体の運賃アップ',a:0.02,b:0.004,cap:0.5},
+ accountant:{name:'経理担当',icon:'🧮',color:'#eeeeee',req:'office',desc:'給料・燃料・維持費を削減',a:0.01,b:0.004,cap:0.35},
+ sales:{name:'営業担当',icon:'🤝',color:'#2a9d8f',req:'office',desc:'運賃と特別依頼の確率アップ',a:0.015,b:0.004,cap:0.5}};
+const APPS=[
+ {id:'lotus',name:'ロータスライド',short:'L',color:'#f107a3',lv:2,cost:100,fee:0.15,boost:0.25,desc:'プノンペン定番の配車アプリ'},
+ {id:'naga',name:'ナーガGO',short:'N',color:'#3a86ff',lv:3,cost:1200,fee:0.12,boost:0.2,desc:'長距離依頼が多い新興アプリ'},
+ {id:'angkor',name:'アンコール・エクスプレス',short:'A',color:'#d4a017',lv:5,cost:15000,fee:0.10,boost:0.2,desc:'富裕層・VIP向けプレミアム配車'}];
+const INS=[
+ {name:'未加入',icon:'⚠️',rate:0,repair:0,comp:0,ded:0,desc:'保険料0。事故の修理代も賠償金も全額自腹！'},
+ {name:'ベーシック（対人・対物）',icon:'🛡️',rate:1.2,repair:0,comp:1,ded:0,desc:'賠償金を全額カバー。車の修理代は自腹'},
+ {name:'フルカバー（車両保険付き）',icon:'🛡️✨',rate:2.2,repair:1,comp:1,ded:5,desc:'賠償金も修理代もカバー。自己負担は少額の免責のみ'}];
+const CITIES=[
+ {name:'プノンペン',m:1,seed:20261110,ground:'#b4c886',water:'#4f9dcc',tall:0.12,lm:['独立記念塔','王宮','中央市場','ワット・プノン','プノンペン空港']},
+ {name:'シェムリアップ',m:1.5,seed:7771,ground:'#a7c072',water:'#5a9e9a',tall:0.02,stone:'#9a9184',stone2:'#857c70',roofA:'#8a8174',roofB:'#6f675c',pal:['#e8d7b5','#d9c3a0','#c9b28c','#f0e2c4','#b9d4b0','#e3c9a0'],lm:['アンコール・ワット','バイヨン寺院','オールドマーケット','プノン・バケン','シェムリアップ空港']},
+ {name:'シアヌークビル',m:2.2,seed:5150,ground:'#d9cfa0',water:'#2fb3c9',tall:0.32,pal:['#ffffff','#bde0fe','#a2d2ff','#ffc8dd','#caffbf','#fdffb6'],lm:['ゴールデンライオン像','カジノタワー','港の市場','ビーチの丘','シアヌークビル空港']},
+ {name:'バッタンバン',m:3.2,seed:31337,ground:'#b9c97c',water:'#6a9fb5',tall:0.05,lm:['竹列車の駅','ワット・エク','中央市場','プノン・サンポー','バッタンバン空港']},
+ {name:'バンコク',m:4.6,seed:8080,ground:'#a9b98a',water:'#7a8f6a',tall:0.5,roofA:'#c1121f',roofB:'#1d3557',pal:['#e0e1dd','#c9d6ea','#f1faee','#a8dadc','#ffd6a5','#fbf8cc'],lm:['王宮寺院','暁の寺','巨大マーケット','黄金の丘','バンコク空港']},
+ {name:'ホーチミン',m:6.5,seed:9090,ground:'#b0c48a',water:'#6c8f9e',tall:0.42,pal:['#ffe5b4','#f4a261','#e9c46a','#f6f4d2','#d4e09b','#cbdfbd'],lm:['統一会堂','聖母大聖堂','ベンタイン市場','展望の丘','タンソンニャット空港']}];
+function cityDef(i){return i<=0?CITIES[0]:Object.assign({},CITIES[0],{name:'プノンペン 第'+(i+1)+'期',m:Math.pow(1.5,i)});const b=CITIES[(i-CITIES.length)%CITIES.length];const k=i-CITIES.length+2;return Object.assign({},b,{name:b.name+' 第'+k+'期',m:CITIES[CITIES.length-1].m*Math.pow(1.45,i-CITIES.length+1),seed:b.seed+i*97});}
+let CITY=CITIES[0];
+const CM=()=>CITY.m;
+function PB(){return 1+0.05*((S&&S.meta&&S.meta.pts)||0);}
+const DIVS=[
+ {id:'vip',name:'VIP送迎事業部',icon:'💎',lv:4,cost:3000,desc:'社用車にVIP依頼（運賃×4）。自分のVIP客も増加'},
+ {id:'tour',name:'観光ツアー事業部',icon:'📸',lv:4,cost:6000,desc:'観光ツアー（運賃×2.5）。観光客が街に出現'},
+ {id:'airport',name:'空港送迎事業部',icon:'✈️',lv:5,cost:20000,desc:'空港送迎（運賃×4）。空港行きの客が出現'},
+ {id:'logi',name:'物流事業部',icon:'📦',lv:6,cost:80000,desc:'荷物配送（運賃×3）で社用車の稼ぎが増加'}];
+const INC_L={casino:'カジノの勝ち',fare:'乗客の運賃（自分）',app:'アプリ経由の配車',vip:'VIP送迎',tour:'観光ツアー',airport:'空港送迎',logi:'物流',fleet:'スタッフによる自動収益',offline:'留守中の収益'};
+const EXP_L={fuel:'ガソリン代',salary:'スタッフの給料',repair:'車両修理費',maint:'設備維持費',appfee:'アプリ手数料',fine:'罰金・違反金',casino:'カジノの負け',accident:'事故の賠償金',insurance:'自動車保険料',vehicle:'車両購入費',invest:'設備・強化投資',hire:'採用費・登録費'};
+const EVENTS=[
+ {id:'rain',w:3,cond:()=>true,icon:'🌧️',title:'雨季のスコール！',desc:'突然の大雨で道路が冠水！走りにくく、ぶつかると壊れやすい。でも雨の日はトゥクトゥクの需要が増える！',dur:100,base:{pSpeed:0.75,dmg:1.6,fleetDur:1.35,fare:1.3,spawn:1.4,rain:1},
+  ch:[{t:'そのまま営業',d:'社用車の稼働が35%遅くなる'},{t:'全車に防水カバーを配る',cost:()=>8*LM()*Math.max(1,D.drivers.length),d:'社用車の遅れなし',fx:{fleetDur:1}}]},
+ {id:'festival',w:2,cond:()=>S.level>=2,icon:'🎉',title:'水祭り（ボートレース祭り）開幕！',desc:'街中が人であふれる！乗車依頼が爆増中。花火も上がる！',dur:120,base:{req:1.8,spawn:2,fare:1.5,fw:1},
+  ch:[{t:'通常営業でも稼げる',d:'依頼×1.8・自分の運賃×1.5'},{t:'ドライバーに臨時ボーナス',cost:()=>4*LM()*Math.max(1,D.drivers.length),d:'さらに社用車の稼ぎ×1.3',fx:{fleetFare:1.3}}]},
+ {id:'gas',w:2,cond:()=>D.drivers.length>=1,icon:'⛽',title:'ガソリン価格が急騰！',desc:'国際情勢の影響でガソリンが急騰。社用車の燃料代が跳ね上がる…',dur:0,
+  ch:[{t:'耐える',d:'ガソリン価格 +60%',run:()=>{S.gasP=Math.min(2.2,S.gasP+0.6);}},{t:'燃料を安値でまとめ買い',cost:()=>3*LM()*Math.max(1,D.drivers.length)*5,d:'2日間 ガソリン価格を安値で固定',run:()=>{S.gasLock=2;S.gasP=0.8;}}]},
+ {id:'strike',w:2,cond:()=>D.drivers.length>=5,icon:'✊',title:'ドライバーがストライキ！',desc:'「給料を上げろ！」ドライバーたちが車を止めて集まっている。',dur:0,
+  ch:[{t:'給料を10%アップ',d:'全ドライバーの給料が永久に+10%',run:()=>{D.drivers.forEach(d=>d.salary=Math.round(d.salary*1.1*10)/10);recalc();}},{t:'一時金で解決',cost:()=>D.drivers.length*6*LM(),d:'今回だけ一時金を払う'},{t:'要求を拒否',d:'90秒間 社用車が全停止・評判ダウン',run:()=>{applyRating(1.5);startEv('strikeOn');}}]},
+ {id:'strikeOn',hidden:true,icon:'✊',title:'ストライキ中',dur:90,base:{stop:1},ch:[{t:''}]},
+ {id:'police',w:2,cond:()=>D.drivers.length>=3,icon:'👮',title:'警察の一斉取り締まり',desc:'整備不良や違反の車をチェック中。',dur:90,
+  ch:[{t:'点検に協力する',d:'30秒間 社用車が停止・評判アップ',run:()=>applyRating(5),fx:{stop:1},dur:30},{t:'そのまま営業',d:'送迎ごとに10%の確率で罰金',fx:{fine:1}}]},
+ {id:'tourist',w:2,cond:()=>S.level>=2,icon:'✈️',title:'観光ハイシーズン到来！',desc:'外国人観光客が急増！街に観光客とVIPがあふれている。',dur:150,base:{tourist:1,fleetFare:1.25,spawn:1.3},ch:[{t:'稼ぎまくる！',d:'観光客・VIP増加、社用車の稼ぎ×1.25'}]},
+ {id:'influencer',w:2,cond:()=>S.trips>=3,icon:'📸',title:'有名インフルエンサーが乗車希望！',desc:'フォロワー100万人の配信者が近くで待っている！最高の送迎（★5）ができればバズって客が殺到。失敗すると炎上…',dur:0,
+  ch:[{t:'迎えに行く！',d:'金色の柱の客。ボロ車だと乗ってくれない',run:()=>spawnInfluencer()},{t:'断る',d:'何も起きない'}]},
+ {id:'rival',w:2,cond:()=>S.level>=3,icon:'⚔️',title:'ライバル会社が値下げ攻勢！',desc:'「激安トゥクトゥク」が街に参入。客を奪われている！',dur:120,base:{fleetFare:0.7},
+  ch:[{t:'耐える',d:'社用車の稼ぎ×0.7'},{t:'広告キャンペーンで対抗',cost:()=>15*LM()*Math.pow(Math.max(1,D.drivers.length),0.7),d:'影響を打ち消し、さらに依頼×1.2',fx:{fleetFare:1,req:1.2}},{t:'対抗値下げ',d:'運賃×0.85 だが依頼×1.4',fx:{fleetFare:0.85,req:1.4}}]},
+ {id:'sale',w:1,cond:()=>S.vehicles<D.mods.cap,icon:'🛺',title:'中古トゥクトゥクの大セール！',desc:'業者が在庫処分中。90秒間 車両が30%オフ！',dur:90,base:{vehDisc:0.7},ch:[{t:'車両を見に行く！',run:()=>setTimeout(()=>openSheet('veh'),50)},{t:'OK'}]},
+ {id:'buzz',hidden:true,icon:'📈',title:'動画がバズり中！',dur:120,base:{fleetFare:1.3,spawn:1.5,req:1.3},ch:[{t:''}]}];
+const EVM={};EVENTS.forEach(e=>EVM[e.id]=e);
+function EV(k,def){const f=S.ev&&S.ev.fx;if(!f||f[k]===undefined)return def===undefined?1:def;return f[k];}
+const PTYPE={short:{n:'短距離',c:'#2fbf5f',f:1},mid:{n:'中距離',c:'#3b82f6',f:3},long:{n:'長距離',c:'#ff8a1f',f:5},vip:{n:'VIP',c:'#a742ff',f:10},tour:{n:'観光',c:'#ff4fa3',f:15},airport:{n:'空港',c:'#00b4c8',f:25}};
+const FN=['ソカ','ダラ','ヴァンナク','ソピア','チェンダ','リティ','ボパ','コサル','スレイモム','ピセイ','ヴティ','マリス','サンバット','ナリン','チャンタ','ラタナ','ソワン','ピルン','モニー','ヴィチェカ','ボラ','キムリー','サライ','ティダ'];
+const LN=['ソック','チャン','キム','ヘン','リム','オーク','メアス','セン','ケオ','プラク','ヌオン','ロス'];
+
+function maxSpeedOf(l){return 14+l*1.6;}
+function rangeOf(l){return 650*(1+0.45*l);}
+function vipChanceOf(l){return 0.03+l*0.05+(S&&S.divs&&S.divs.vip?0.05:0)+(S&&S.ev&&S.ev.fx&&S.ev.fx.tourist?0.1:0);}
+function costUpg(u,l){return Math.round((u.costs?u.costs[l]:u.base*Math.pow(u.mul,l))*CM());}
+function vehPrice(n){return Math.round((35*Math.pow(1.05,Math.min(n,50))+0.25*n*n)*CM()*EV('vehDisc'));}
+function facCost(f,l){return Math.round(f.cost*Math.pow(f.mul,l)*CM());}
+function gradeCost(l){return Math.round(100*Math.pow(1.75,l)*CM());}
+const aCost=a=>Math.round(a.cost*CM());
+
+/* ================= state ================= */
+function DEF(){return {v:1,money:10,earned:0,level:1,upg:{engine:0,tank:0,seats:0,exterior:0,tires:0,cargo:0,ac:0},fuel:1,vehicles:1,grade:0,
+ staff:[],nid:1,fac:{},apps:{},divs:{},day:1,dayT:0,today:{inc:{},exp:{}},hist:[],cand:[],candR:{},trips:0,fleetTrips:0,appTrips:0,
+ lastSave:Date.now(),sound:true,bgm:true,meta:{pts:0,city:0,runs:0,total:0},ev:null,evT:150,gasLock:0,justMoved:false,gasP:1,gasPrev:1,ins:0,hiredToday:0,bankrupt:0,wanted:0,crimes:0,arrests:0,casinoNet:0,accidents:0,insSaved:0,accLoss:0,cond:1,rep:4,ratings:[],streak:0,bestStreak:0,hq:1,px:0,pz:-25,ph:0,intro:false};}
+let S=DEF();
+function load(){try{const raw=localStorage.getItem(KEY);if(!raw)return false;const o=JSON.parse(raw);const d=DEF();
+  for(const k in d){if(o[k]!==undefined){if(d[k]&&typeof d[k]==='object'&&!Array.isArray(d[k]))d[k]=Object.assign(d[k],o[k]);else d[k]=o[k];}}
+  S=d;return true;}catch(e){return false;}}
+function save(){if(resetting)return;S.lastSave=Date.now();S.px=player.x;S.pz=player.z;S.ph=player.h;try{localStorage.setItem(KEY,JSON.stringify(S));}catch(e){}}
+function hasSave(){try{return !!localStorage.getItem(KEY);}catch(e){return false;}}
+
+/* ===== derived ===== */
+const D={drivers:[],cnt:{},mods:{}};
+const RT=new Map(); // runtime per driver
+function recalc(){
+  D.drivers=S.staff.filter(s=>s.role==='driver');
+  D.cnt={};for(const r in ROLES)D.cnt[r]=0;S.staff.forEach(s=>D.cnt[s.role]++);
+  const f=S.fac, bonus=r=>{const R=ROLES[r];let v=0;S.staff.forEach(s=>{if(s.role===r)v+=R.a+R.b*s.skill;});return Math.min(R.cap,v);};
+  const m=D.mods;
+  m.mech=bonus('mechanic');m.recep=bonus('reception');m.mgr=bonus('manager');m.acct=bonus('accountant');m.sales=bonus('sales');
+  m.repF=0.8+S.rep*0.05;m.fare=PB()*m.repF*(1+S.grade*0.12)*(1+(f.office||0)*0.05)*(1+(f.wash||0)*0.08)*(1+(f.hq||0)*0.1)*(1+m.mgr)*(1+m.sales*0.5);
+  const apps=APPS.filter(a=>S.apps[a.id]);
+  m.appCount=apps.length;m.appShare=apps.length?Math.min(0.8,0.4+0.15*(apps.length-1)):0;
+  m.appFee=apps.length?apps.reduce((s,a)=>s+a.fee,0)/apps.length:0;
+  m.req=1+(f.reception||0)*0.04;
+  const DB=[0,3,8,22,50,120,320];
+  m.demand=DB[S.level]*(1+apps.length*0.3)*(0.6+S.rep*0.1)*(1+(f.reception||0)*0.08+m.recep)*(1+(f.branch||0)*0.15)*(1+(S.divs.vip?0.1:0)+(S.divs.tour?0.15:0)+(S.divs.airport?0.15:0)+(S.divs.logi?0.25:0));
+  const nd=S.staff.filter(x=>x.role==='driver').length;
+  m.mgmtCap=4+D.cnt.manager*12+(f.office||0)*4+(f.hq||0)*15;m.mgmt=nd>m.mgmtCap?m.mgmtCap/nd:1;
+  m.utilBase=nd?Math.min(1,m.demand/nd):1;
+  m.hireCap=3+(f.reception||0)*2+(f.office||0)*2+(f.hq||0)*4+D.cnt.manager+(f.branch||0)*3;
+  m.speed=1+(f.rest||0)*0.06;
+  m.breakRed=Math.min(0.85,(f.garage||0)*0.15+(f.repair||0)*0.1+m.mech);
+  m.repairCost=Math.max(0.2,1-(f.repair||0)*0.25);
+  m.fuel=(1-(f.gas||0)*0.2)*(1-m.acct);
+  m.vip=S.divs.vip?0.05+(f.wash||0)*0.015+m.sales*0.1:0;
+  m.special=1+m.sales;
+  m.cap=2+(f.parkS||0)*3+(f.parkL||0)*12+(f.hq||0)*40+(f.branch||0)*60;
+  m.salary=S.staff.reduce((s,x)=>s+x.salary,0)*(1-m.acct);
+  m.ins=D.drivers.length*INS[S.ins].rate*LM()*(1-m.acct);
+  m.maint=FAC.reduce((s,x)=>s+(f[x.id]||0)*x.maint,0)*(1-m.acct);
+  D.drivers.forEach(d=>{if(!RT.has(d.id))RT.set(d.id,{t:rnd()*20,dur:tripDur(d),broken:0,trips:0});});
+  for(const id of RT.keys()){if(!D.drivers.find(d=>d.id===id))RT.delete(id);}
+}
+const LM=()=>LMULT[S.level]*CITY.m;
+function tripDur(d){return 22/(0.75+d.spd*0.05)/D.mods.speed/D.mods.req;}
+function curUtil(){const n=D.drivers.length;return n?Math.min(1,D.mods.demand*EV('req')/n):1;}
+function baseFleetFare(d){return 4*LM()*D.mods.mgmt*(0.7+d.eff*0.06)*(1+d.svc*0.025)*D.mods.fare;}
+function fleetFuel(){return 0.8*LM()*S.gasP*D.mods.fuel;}
+function gasPriceTxt(){const d=(S.gasP/S.gasPrev-1)*100;return `$${(1.1*S.gasP).toFixed(2)}/L（${d>=0?'▲':'▼'}${Math.abs(d).toFixed(0)}%）`;}
+function breakP(d){return (0.012+(10-d.rel)*0.004)*(1-D.mods.breakRed);}
+function freeVeh(){return S.vehicles-1-D.drivers.length;}
+function fleetNetPerSec(){let s=0;const m=D.mods;
+  D.drivers.forEach(d=>{const dur=tripDur(d);let fare=baseFleetFare(d)*(1+(S.divs.logi?0.24:0)+(S.divs.airport?0.24:0)+(S.divs.tour?0.15:0)+m.vip*3);
+    fare-=fare*m.appShare*m.appFee;const accP=(0.004+(10-d.rel)*0.0012)*(1-(S.fac.rest||0)*0.1)*(1-m.mech*0.5),P=INS[S.ins];const accCost=(22*LM()*m.repairCost*1.12*(1-P.repair)+72*LM()*1.24*(1-P.comp)+(P.ded*LM()));
+    s+=(fare-fleetFuel()-breakP(d)*4*LM()*m.repairCost-accP*accCost)/dur;});
+  return s*m.utilBase-(m.salary+m.maint+m.ins)/DAY;}
+
+/* ================= audio ================= */
+let AC=null,engOsc=null,engGain=null,engFilt=null;
+function initAudio(){if(AC){if(AC.state==='suspended')AC.resume();return;}try{AC=new (window.AudioContext||window.webkitAudioContext)();musicGain=AC.createGain();musicGain.gain.value=0.33;musicGain.connect(AC.destination);
+  noiseBuf=AC.createBuffer(1,AC.sampleRate,AC.sampleRate);const nd=noiseBuf.getChannelData(0);for(let i=0;i<nd.length;i++)nd[i]=Math.random()*2-1;
+  engOsc=AC.createOscillator();engOsc.type='sawtooth';engFilt=AC.createBiquadFilter();engFilt.type='lowpass';engFilt.frequency.value=380;
+  engGain=AC.createGain();engGain.gain.value=0;engOsc.connect(engFilt);engFilt.connect(engGain);engGain.connect(AC.destination);engOsc.start();}catch(e){AC=null;}}
+function tone(freq,dur,type,vol,delay,slide){if(!AC||!S.sound)return;const t=AC.currentTime+(delay||0);const o=AC.createOscillator(),g=AC.createGain();o.type=type||'sine';o.frequency.setValueAtTime(freq,t);if(slide)o.frequency.exponentialRampToValueAtTime(slide,t+dur);
+  g.gain.setValueAtTime(vol||0.1,t);g.gain.exponentialRampToValueAtTime(0.0008,t+dur);o.connect(g);g.connect(AC.destination);o.start(t);o.stop(t+dur+0.02);}
+const SFX={punch(){tone(140,0.12,'square',0.14,0,50);if(AC&&S.sound&&noiseBuf){const t=AC.currentTime,s_=AC.createBufferSource(),g=AC.createGain(),f=AC.createBiquadFilter();s_.buffer=noiseBuf;f.type='lowpass';f.frequency.value=900;g.gain.setValueAtTime(0.35,t);g.gain.exponentialRampToValueAtTime(0.001,t+0.12);s_.connect(f);f.connect(g);g.connect(AC.destination);s_.start(t);s_.stop(t+0.13);}},
+ siren(hi){tone(hi?960:720,0.42,'sawtooth',0.035);},
+ reel(){tone(500+rnd()*500,0.04,'square',0.03);},
+ jackpot(){[523,659,784,1047,1319,1568,2093].forEach((f,i)=>tone(f,0.3,'square',0.06,i*0.08));},
+ coin(p){p=p||1;tone(988*p,0.08,'square',0.05);tone(1319*p,0.25,'square',0.05,0.07);},
+ tick(){tone(1500,0.05,'square',0.04);},
+ angry(){tone(300,0.18,'sawtooth',0.05,0,180);tone(240,0.25,'sawtooth',0.05,0.15,140);},
+ crash(){tone(90,0.25,'square',0.1,0,40);if(AC&&S.sound&&noiseBuf){const t=AC.currentTime,s_=AC.createBufferSource(),g=AC.createGain(),f=AC.createBiquadFilter();s_.buffer=noiseBuf;f.type='lowpass';f.frequency.value=1200;g.gain.setValueAtTime(0.25,t);g.gain.exponentialRampToValueAtTime(0.001,t+0.3);s_.connect(f);f.connect(g);g.connect(AC.destination);s_.start(t);s_.stop(t+0.32);}},
+ star(){[784,988,1175,1568].forEach((f,i)=>tone(f,0.2,'triangle',0.06,i*0.06));},
+ repair(){tone(600,0.06,'square',0.04);tone(900,0.06,'square',0.04,0.08);},
+ big(){[523,659,784,1047].forEach((f,i)=>tone(f,0.18,'square',0.05,i*0.07));},
+ horn(){tone(420,0.28,'square',0.06);tone(530,0.28,'square',0.05);},
+ build(){tone(140,0.3,'sine',0.25,0,60);tone(90,0.4,'triangle',0.18,0.12,50);},
+ click(){tone(700,0.05,'triangle',0.06);},
+ bump(){tone(110,0.15,'square',0.08,0,60);},
+ lvl(){[392,523,659,784,1047,1319].forEach((f,i)=>tone(f,0.25,'triangle',0.07,i*0.09));},
+ err(){tone(200,0.15,'square',0.05);tone(160,0.2,'square',0.05,0.1);}};
+
+/* ===== BGM: procedural tropical pentatonic loop ===== */
+let musicGain=null,noiseBuf=null;const BGM={timer:null,next:0,step:0};
+const SC=[67,69,72,74,76,79,81,84,86,88];
+const MEL=['4.5.6...5.4.2...','1...2.4.5...4...','2.4.5.7.6...5.4.','5.......4.5.6...','7.6.7.9.8...7.6.','6...5.4.5.6.7...','6.5.4.2.4.5.6.5.','4...2...3.4.5...'];
+const CH=[[60,64,67],[57,60,64],[53,57,60],[55,59,62]],BASS=[48,45,41,43];
+const mtof=n=>440*Math.pow(2,(n-69)/12);
+function bv(freq,t,dur,type,vol){const o=AC.createOscillator(),g=AC.createGain();o.type=type;o.frequency.setValueAtTime(freq,t);g.gain.setValueAtTime(0.0001,t);g.gain.exponentialRampToValueAtTime(vol,t+0.008);g.gain.exponentialRampToValueAtTime(0.0001,t+dur);o.connect(g);g.connect(musicGain);o.start(t);o.stop(t+dur+0.05);}
+function nh(t,dur,vol,freq,type){const s_=AC.createBufferSource();s_.buffer=noiseBuf;const f=AC.createBiquadFilter();f.type=type;f.frequency.value=freq;const g=AC.createGain();g.gain.setValueAtTime(vol,t);g.gain.exponentialRampToValueAtTime(0.0001,t+dur);s_.connect(f);f.connect(g);g.connect(musicGain);s_.start(t);s_.stop(t+dur+0.02);}
+function playStep(s_,t){const bar=Math.floor(s_/16)%8,st=s_%16,ci=bar%4,L=S.level;
+  if(st===0||st===8||(st===10&&bar%2)){const o=AC.createOscillator(),g=AC.createGain();o.frequency.setValueAtTime(150,t);o.frequency.exponentialRampToValueAtTime(42,t+0.12);g.gain.setValueAtTime(0.55,t);g.gain.exponentialRampToValueAtTime(0.0001,t+0.2);o.connect(g);g.connect(musicGain);o.start(t);o.stop(t+0.22);}
+  if(st===4||st===12)nh(t,0.12,0.22,1800,'bandpass');
+  if(st%4===2)nh(t,0.05,0.12,7000,'highpass');else if(L>=3&&st%2===1)nh(t,0.03,0.05,8000,'highpass');
+  if([0,3,6,8,11,14].includes(st))bv(mtof(BASS[ci]+(st===6||st===14?7:0)),t,0.22,'triangle',0.32);
+  if(st%4===2)CH[ci].forEach(n=>bv(mtof(n+12),t,0.11,'square',0.025));
+  const c=MEL[bar][st];if(c!=='.'){const f=mtof(SC[+c]);bv(f,t,0.35,'triangle',0.16);bv(f*2,t,0.15,'sine',0.05);}
+  if(L>=2&&st%2===0)bv(mtof(CH[ci][(st/2)%3]+24),t,0.08,'sine',0.03);
+  if(player.onboard&&player.onboard.length&&st%8===4)nh(t,0.08,0.06,5000,'bandpass');}
+function schedBGM(){if(!AC||!S.bgm||AC.state!=='running')return;if(BGM.next<AC.currentTime-0.3)BGM.next=AC.currentTime+0.05;const sp=60/118/4;while(BGM.next<AC.currentTime+0.2){playStep(BGM.step,BGM.next);BGM.next+=sp;BGM.step=(BGM.step+1)%128;}}
+function startBGM(){if(!AC||BGM.timer||!S.bgm)return;BGM.next=AC.currentTime+0.1;BGM.timer=setInterval(schedBGM,40);}
+function stopBGM(){if(BGM.timer){clearInterval(BGM.timer);BGM.timer=null;}}
+function toggleBGM(){S.bgm=!S.bgm;initAudio();if(S.bgm)startBGM();else stopBGM();$('#bgmBtn').textContent=S.bgm?'🎵':'🔇';toast(S.bgm?'🎵 BGM ON':'🔇 BGM OFF');}
+
+/* ================= three setup ================= */
+const canvas=$('#c');
+const renderer=new THREE.WebGLRenderer({canvas,antialias:true,powerPreference:'high-performance'});
+const scene=new THREE.Scene();
+scene.background=new THREE.Color('#bfe3f0');
+scene.fog=new THREE.Fog('#d7ecf2',150,330);
+const camera=new THREE.PerspectiveCamera(38,1,1,700);
+const hemi=new THREE.HemisphereLight('#fff6e0','#8a7a5a',0.75);scene.add(hemi);const SKYBG=new THREE.Color('#bfe3f0'),RAINBG=new THREE.Color('#8fa3ad'),FOGC=new THREE.Color('#d7ecf2'),RAINFOG=new THREE.Color('#9aaab3');
+const sun=new THREE.DirectionalLight('#fff1d6',0.75);sun.position.set(60,120,30);scene.add(sun);
+function resize(){const dpr=Math.min(window.devicePixelRatio||1,S.hq?1.75:1);renderer.setPixelRatio(dpr);renderer.setSize(innerWidth,innerHeight,false);camera.aspect=innerWidth/innerHeight;camera.updateProjectionMatrix();}
+window.addEventListener('resize',resize);
+
+const G={box:new THREE.BoxGeometry(1,1,1),box0:new THREE.BoxGeometry(1,1,1).translate(0,0.5,0),cyl:new THREE.CylinderGeometry(1,1,1,12),cyl6:new THREE.CylinderGeometry(1,1,1,6),
+ sph:new THREE.SphereGeometry(1,12,8),cone4:new THREE.ConeGeometry(1,1,4),cone8:new THREE.ConeGeometry(1,1,10),oct:new THREE.OctahedronGeometry(1),
+ wheel:new THREE.CylinderGeometry(1,1,1,12).rotateZ(Math.PI/2),hemi:new THREE.SphereGeometry(1,16,10,0,Math.PI*2,0,Math.PI/2)};
+const MC={};
+function M(c){return MC[c]||(MC[c]=new THREE.MeshLambertMaterial({color:c}));}
+function mesh(geo,col,sx,sy,sz,x,y,z,parent){const m=new THREE.Mesh(geo,(typeof col==='string')?M(col):col);m.scale.set(sx,sy,sz);m.position.set(x,y,z);if(parent)parent.add(m);return m;}
+const bx=(p,c,w,h,d,x,y,z)=>mesh(G.box,c,w,h,d,x,y,z,p);
+function inst(geo,items){if(!items.length)return null;const mat=new THREE.MeshLambertMaterial({color:'#ffffff'});const im=new THREE.InstancedMesh(geo,mat,items.length);
+  const o=new THREE.Object3D(),col=new THREE.Color();items.forEach((it,i)=>{o.position.set(it.x,it.y,it.z);o.rotation.set(0,it.ry||0,0);o.scale.set(it.sx,it.sy,it.sz);o.updateMatrix();im.setMatrixAt(i,o.matrix);col.set(it.c);im.setColorAt(i,col);});
+  im.instanceMatrix.needsUpdate=true;if(im.instanceColor)im.instanceColor.needsUpdate=true;im.frustumCulled=false;scene.add(im);return im;}
+function label(text,opt){opt=opt||{};const size=44,bg=opt.bg||'#264653',fg=opt.fg||'#fff';const c=document.createElement('canvas');const ctx=c.getContext('2d');
+  const font=`800 ${size}px "M PLUS Rounded 1c",sans-serif`;ctx.font=font;const w=Math.ceil(ctx.measureText(text).width+size*0.9);c.width=w;c.height=Math.ceil(size*1.5);
+  ctx.font=font;ctx.fillStyle=bg;const r=c.height/2;ctx.beginPath();ctx.moveTo(r,0);ctx.lineTo(w-r,0);ctx.arc(w-r,r,r,-Math.PI/2,Math.PI/2);ctx.lineTo(r,c.height);ctx.arc(r,r,r,Math.PI/2,Math.PI*1.5);ctx.fill();
+  ctx.fillStyle=fg;ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText(text,w/2,c.height/2+2);
+  const tex=new THREE.CanvasTexture(c);tex.minFilter=THREE.LinearFilter;const sp=new THREE.Sprite(new THREE.SpriteMaterial({map:tex,transparent:true}));
+  const sc=opt.scale||4;sp.scale.set(sc*w/c.height,sc,1);return sp;}
+const shadowTex=(()=>{const c=document.createElement('canvas');c.width=c.height=64;const x=c.getContext('2d');const g=x.createRadialGradient(32,32,4,32,32,32);g.addColorStop(0,'rgba(0,0,0,.45)');g.addColorStop(1,'rgba(0,0,0,0)');x.fillStyle=g;x.fillRect(0,0,64,64);return new THREE.CanvasTexture(c);})();
+const shadowMat=new THREE.MeshBasicMaterial({map:shadowTex,transparent:true,depthWrite:false});
+const shadowGeo=new THREE.PlaneGeometry(1,1).rotateX(-Math.PI/2);
+function blob(p,w,d){const m=new THREE.Mesh(shadowGeo,shadowMat);m.scale.set(w,1,d);m.position.y=0.06;p.add(m);return m;}
+
+const VCMAT=new THREE.MeshLambertMaterial({vertexColors:true});
+function bake(src){src.updateMatrixWorld(true);const inv=new THREE.Matrix4().copy(src.matrixWorld).invert();const P=[],Nn=[],Cc=[],keep=[];const tmp=new THREE.Matrix4(),col=new THREE.Color();
+  (function walk(o){for(const ch of o.children.slice()){
+    if(ch.userData.keep||ch.isSprite||ch.isLineSegments||(ch.isMesh&&!ch.material.isMeshLambertMaterial)){keep.push(ch);continue;}
+    if(ch.isMesh){const g=ch.geometry.index?ch.geometry.toNonIndexed():ch.geometry.clone();tmp.multiplyMatrices(inv,ch.matrixWorld);g.applyMatrix4(tmp);
+      const pa=g.attributes.position.array,na=g.attributes.normal.array,vc=g.attributes.color;col.copy(ch.material.color);
+      for(let i=0;i<pa.length;i++){P.push(pa[i]);Nn.push(na[i]);}const cnt=pa.length/3;
+      for(let i=0;i<cnt;i++){if(vc)Cc.push(vc.getX(i)*col.r,vc.getY(i)*col.g,vc.getZ(i)*col.b);else Cc.push(col.r,col.g,col.b);}g.dispose();}
+    walk(ch);}})(src);
+  const out=new THREE.Group();out.position.copy(src.position);out.rotation.copy(src.rotation);out.scale.copy(src.scale);out.userData=src.userData;
+  if(P.length){const geo=new THREE.BufferGeometry();geo.setAttribute('position',new THREE.Float32BufferAttribute(P,3));geo.setAttribute('normal',new THREE.Float32BufferAttribute(Nn,3));geo.setAttribute('color',new THREE.Float32BufferAttribute(Cc,3));
+    geo.computeBoundingSphere();out.add(new THREE.Mesh(geo,VCMAT));}
+  keep.forEach(ch=>{const rel=new THREE.Matrix4().multiplyMatrices(inv,ch.matrixWorld);rel.decompose(ch.position,ch.quaternion,ch.scale);out.add(ch);});
+  return out;}
+const bakeCache={};function cached(key,fn){if(!bakeCache[key])bakeCache[key]=bake(fn());return bakeCache[key].clone();}
+
+/* ================= city layout ================= */
+const N=8,CELL=50,HALF=200,RW=12,RH=6,BLK=CELL-RW;
+const nX=i=>-HALF+i*CELL;
+function bRect(bx,bz){const x0=nX(bx)+RH,z0=nX(bz)+RH;return{x0,z0,x1:x0+BLK,z1:z0+BLK,cx:x0+BLK/2,cz:z0+BLK/2};}
+const COMPANY={'3,3':1,'4,3':1,'5,3':1,'3,4':1,'4,4':1,'2,4':1,'3,2':1};
+const LANDMARK={'2,5':'monument','6,2':'palace','5,5':'market','1,1':'watphnom','0,7':'airport'};
+const BRANCH_LOTS=['1,6','6,6','7,1','1,3','6,4','2,1','7,7','5,1'];
+const GASB={'2,3':1,'5,7':1,'7,4':1};const CASINO_KEY='6,3';let CASINO_PT={x:103,z:-25};
+const colliders=[],footColliders=[];const facColl={};
+const refuelZones=[];
+const landmarkPts=[];
+let AIRPORT_PT={x:-175,z:153};
+const roadPts=[];
+
+function buildCity(){
+  const rng=mulberry(CITY.seed);const R=()=>rng();
+  const g=new THREE.Mesh(new THREE.PlaneGeometry(1800,1800),M(CITY.ground));g.rotation.x=-Math.PI/2;g.position.y=-0.06;scene.add(g);
+  const asp=new THREE.Mesh(new THREE.PlaneGeometry(HALF*2+RW,HALF*2+RW),M('#5b5e66'));asp.rotation.x=-Math.PI/2;scene.add(asp);
+  // river & promenade
+  const river=new THREE.Mesh(new THREE.PlaneGeometry(600,1800),M(CITY.water));river.rotation.x=-Math.PI/2;river.position.set(212+300,-0.03,0);scene.add(river);
+  const dash=[],zebra=[],side=[],bodies=[],roofs=[],wins=[],balc=[],awn=[],trunks=[],crowns=[];
+  side.push({x:209,y:0.15,z:0,sx:6,sy:0.3,sz:HALF*2+RW,c:'#e5d6b0'});
+  for(let z=-200;z<=200;z+=12){trunks.push({x:209,y:2.5,z,sx:0.25,sy:5,sz:0.25,c:'#8a6a45'});crowns.push({x:209,y:5.2,z,sx:2.2,sy:0.7,sz:2.2,c:'#3f8f3a'});}
+  // lane dashes & zebra crossings
+  for(let i=0;i<=N;i++)for(let j=0;j<N;j++){const x=nX(i),a=nX(j)+RH+3,b=nX(j+1)-RH-3;
+    for(let z=a+2;z<b;z+=5){dash.push({x,y:0.03,z,sx:0.3,sy:0.04,sz:2.4,c:'#efe7c7'});dash.push({x:z,y:0.03,z:x,sx:2.4,sy:0.04,sz:0.3,c:'#efe7c7'});}
+    for(let k=-2;k<=2;k++){zebra.push({x:x+k*2.2,y:0.03,z:nX(j)+RH+1.2,sx:1.2,sy:0.04,sz:2,c:'#f2f2f2'});zebra.push({x:x+k*2.2,y:0.03,z:nX(j+1)-RH-1.2,sx:1.2,sy:0.04,sz:2,c:'#f2f2f2'});
+      zebra.push({z:x+k*2.2,y:0.03,x:nX(j)+RH+1.2,sz:1.2,sy:0.04,sx:2,c:'#f2f2f2'});zebra.push({z:x+k*2.2,y:0.03,x:nX(j+1)-RH-1.2,sz:1.2,sy:0.04,sx:2,c:'#f2f2f2'});}}
+  const PAL=['#f2d49b','#f6e7c8','#e8a87c','#9fd3c7','#f7b7a3','#d4e09b','#c9d6ea','#f1c6d3','#fff1b5','#e3c4a8','#b8e0d2','#f4a261'];
+  const AWN=['#e63946','#2a9d8f','#ff9f1c','#3a86ff','#8338ec','#06d6a0','#ef476f'];
+  function bld(x0,z0,w,d,h,face){const c=pick2(CITY.pal||PAL);const y0=0.35;const rec={x:x0+w/2,z:z0+d/2,w,d,h,k:1,bi:bodies.length,ri:roofs.length,w0:wins.length,b0:balc.length};CUT.list.push(rec);bodies.push({x:x0+w/2,y:y0,z:z0+d/2,sx:w,sy:h,sz:d,c});
+    const dk=new THREE.Color(c).multiplyScalar(0.62).getStyle();roofs.push({x:x0+w/2,y:y0+h,z:z0+d/2,sx:w+0.5,sy:0.5,sz:d+0.5,c:R()<0.3?'#b5523b':dk});
+    const floors=Math.floor(h/3.2);const along=(face==='n'||face==='s')?w:d;const nw=Math.max(1,Math.floor(along/3.4));
+    for(let f=0;f<floors;f++){const y=y0+1.4+f*3.2;
+      for(let k=0;k<nw;k++){const t=(k+0.5)/nw;
+        if(face==='n')wins.push({x:x0+w*t,y,z:z0-0.06,sx:1.3,sy:1.6,sz:0.15,c:'#3d5a73'});
+        else if(face==='s')wins.push({x:x0+w*t,y,z:z0+d+0.06,sx:1.3,sy:1.6,sz:0.15,c:'#3d5a73'});
+        else if(face==='w')wins.push({x:x0-0.06,y,z:z0+d*t,sx:0.15,sy:1.6,sz:1.3,c:'#3d5a73'});
+        else wins.push({x:x0+w+0.06,y,z:z0+d*t,sx:0.15,sy:1.6,sz:1.3,c:'#3d5a73'});}
+      if(f>0){const bc='#fafafa';if(face==='n')balc.push({x:x0+w/2,y:y-1.25,z:z0-0.45,sx:w*0.92,sy:0.2,sz:0.9,c:bc});else if(face==='s')balc.push({x:x0+w/2,y:y-1.25,z:z0+d+0.45,sx:w*0.92,sy:0.2,sz:0.9,c:bc});
+        else if(face==='w')balc.push({x:x0-0.45,y:y-1.25,z:z0+d/2,sx:0.9,sy:0.2,sz:d*0.92,c:bc});else balc.push({x:x0+w+0.45,y:y-1.25,z:z0+d/2,sx:0.9,sy:0.2,sz:d*0.92,c:bc});}}
+    rec.w1=wins.length;rec.b1=balc.length;
+    const ac=pick2(AWN);if(face==='n')awn.push({x:x0+w/2,y:2.7,z:z0-0.7,sx:w*0.9,sy:0.2,sz:1.4,c:ac});else if(face==='s')awn.push({x:x0+w/2,y:2.7,z:z0+d+0.7,sx:w*0.9,sy:0.2,sz:1.4,c:ac});
+    else if(face==='w')awn.push({x:x0-0.7,y:2.7,z:z0+d/2,sx:1.4,sy:0.2,sz:d*0.9,c:ac});else awn.push({x:x0+w+0.7,y:2.7,z:z0+d/2,sx:1.4,sy:0.2,sz:d*0.9,c:ac});}
+  function pick2(a){return a[Math.floor(R()*a.length)];}
+  function tree(x,z,palm){if(palm){trunks.push({x,y:3.2,z,sx:0.22,sy:6,sz:0.22,c:'#9a7a50'});crowns.push({x,y:6.3,z,sx:2.4,sy:0.6,sz:2.4,c:'#4c9a3a'});}
+    else{trunks.push({x,y:2.2,z,sx:0.3,sy:4,sz:0.3,c:'#7a5a3a'});crowns.push({x,y:4.6,z,sx:1.9,sy:1.5,sz:1.9,c:R()<0.5?'#3f8f3a':'#5aa845'});}}
+  function edgeTrees(r){for(let t=6;t<BLK-4;t+=10){tree(r.x0+t,r.z0+1,R()<0.4);tree(r.x0+t,r.z1-1,R()<0.4);tree(r.x0+1,r.z0+t,R()<0.4);tree(r.x1-1,r.z0+t,R()<0.4);}}
+  for(let bx=0;bx<N;bx++)for(let bz=0;bz<N;bz++){const r=bRect(bx,bz),key=bx+','+bz;
+    let top='#d8cfbf';if(COMPANY[key])top='#d3c3a3';else if(BRANCH_LOTS.includes(key))top='#c7ad84';else if(GASB[key])top='#a9adb3';else if(LANDMARK[key])top=LANDMARK[key]==='airport'?'#9aa3ab':'#a9cf86';
+    side.push({x:r.cx,y:0.175,z:r.cz,sx:BLK,sy:0.35,sz:BLK,c:top});
+    if(COMPANY[key])continue;
+    if(LANDMARK[key]){buildLandmark(LANDMARK[key],r);edgeTrees(r);continue;}
+    if(BRANCH_LOTS.includes(key)){colliders.push({x0:r.x0+0.5,z0:r.z0+0.5,x1:r.x1-0.5,z1:r.z1-0.5});footColliders.push({x0:r.x0+2.6,z0:r.z0+2.6,x1:r.x1-2.6,z1:r.z1-2.6});continue;}
+    if(GASB[key]){buildGas(r);continue;}
+    if(key===CASINO_KEY){buildCasino(r);continue;}
+    colliders.push({x0:r.x0+0.5,z0:r.z0+0.5,x1:r.x1-0.5,z1:r.z1-0.5});footColliders.push({x0:r.x0+2.6,z0:r.z0+2.6,x1:r.x1-2.6,z1:r.z1-2.6});
+    const I=3,DEP=10;const tall=R()<CITY.tall;
+    // north/south rows
+    [['n',r.z0+I],['s',r.z1-I-DEP]].forEach(([face,z])=>{let x=r.x0+I;const end=r.x1-I;while(x<end-2){let w=6+R()*7;if(end-x-w<5)w=end-x;bld(x,z,w-0.4,DEP,5+Math.floor(R()*4)*3.2+(R()<0.15?6:0),face);x+=w;}});
+    const ez0=r.z0+I+DEP,ez1=r.z1-I-DEP;
+    bld(r.x0+I,ez0+0.3,9,ez1-ez0-0.6,5+Math.floor(R()*3)*3.2,'w');bld(r.x1-I-9,ez0+0.3,9,ez1-ez0-0.6,5+Math.floor(R()*3)*3.2,'e');
+    if(tall){const h=22+R()*14;const rec={x:r.cx,z:r.cz,w:12,d:10,h,k:1,bi:bodies.length,ri:roofs.length,w0:wins.length,w1:wins.length,b0:balc.length};CUT.list.push(rec);bodies.push({x:r.cx,y:0.35,z:r.cz,sx:12,sy:h,sz:10,c:pick2(['#9ecae1','#bcd4e6','#cfd8dc'])});roofs.push({x:r.cx,y:0.35+h,z:r.cz,sx:12.5,sy:0.6,sz:10.5,c:'#455a64'});
+      for(let y=3;y<h;y+=3)balc.push({x:r.cx,y:0.35+y,z:r.cz,sx:12.3,sy:0.25,sz:10.3,c:'#eceff1'});rec.b1=balc.length;}
+    else{tree(r.cx-3,r.cz,false);tree(r.cx+3,r.cz+1,true);}
+    edgeTrees(r);}
+  // company & branch & gas lots trees
+  inst(G.box,side);inst(G.box,dash);inst(G.box,zebra);CUT.bodies=bodies;CUT.roofs=roofs;CUT.wins=wins;CUT.balc=balc;CUT.im={body:inst(G.box0,bodies),roof:inst(G.box,roofs),win:inst(G.box,wins),balc:inst(G.box,balc)};CUT.gim={body:ginst(G.box0,bodies),roof:ginst(G.box,roofs),win:ginst(G.box,wins),balc:ginst(G.box,balc)};inst(G.box,awn);inst(G.cyl6,trunks);inst(new THREE.IcosahedronGeometry(1,1),crowns);
+  // road points for passengers
+  for(let i=0;i<=N;i++)for(let j=0;j<N;j++){const x=nX(i);for(const t of [0.3,0.5,0.7]){const z=lerp(nX(j),nX(j+1),t);
+    for(const s of [-1,1]){if((i===0&&s<0)||(i===N&&s>0))continue;roadPts.push({sx:x+s*6.6,sz:z,rx:x+s*3,rz:z,ry:s>0?-Math.PI/2:Math.PI/2});
+      if((i===0&&s<0)||(i===N&&s>0))continue;roadPts.push({sx:z,sz:x+s*6.6,rx:z,rz:x+s*3,ry:s>0?Math.PI:0});}}}
+  // boat
+  boat=new THREE.Group();bx(boat,'#8d5a2b',4,1.2,16,0,0.6,0);bx(boat,'#f4f1de',3.2,2,6,0,2,1);bx(boat,'#e63946',3.6,0.3,7,0,3.1,1);boat.position.set(270,0,0);boat=bake(boat);scene.add(boat);
+  // outer decor: runway near airport
+  bx(scene,'#6b6f76',30,0.05,140,-250,0.01,120);for(let z=60;z<190;z+=14)bx(scene,'#fff',1,0.06,6,-250,0.03,z);
+}
+let boat=null;
+const CUT={list:[],ghosts:{}};const cutO=new THREE.Object3D();
+function setInst(im,i,it,sy,y,hide){cutO.position.set(it.x,y,it.z);cutO.rotation.set(0,0,0);if(hide)cutO.scale.set(0.0001,0.0001,0.0001);else cutO.scale.set(it.sx,sy,it.sz);cutO.updateMatrix();im.setMatrixAt(i,cutO.matrix);}
+function ginst(geo,items){const mat=new THREE.MeshLambertMaterial({color:'#ffffff',transparent:true,opacity:0.3,depthWrite:false});const im=new THREE.InstancedMesh(geo,mat,items.length);const col=new THREE.Color();
+  cutO.position.set(0,0,0);cutO.scale.set(0.0001,0.0001,0.0001);cutO.updateMatrix();items.forEach((it,i)=>{im.setMatrixAt(i,cutO.matrix);col.set(it.c);im.setColorAt(i,col);});
+  im.instanceMatrix.needsUpdate=true;if(im.instanceColor)im.instanceColor.needsUpdate=true;im.frustumCulled=false;im.renderOrder=5;scene.add(im);return im;}
+function applyCut(b){const gh=b.ghost;for(const [A,G_] of [[CUT.im,false],[CUT.gim,true]]){const hide=gh!==G_;const bd=CUT.bodies[b.bi],rf=CUT.roofs[b.ri];
+    setInst(A.body,b.bi,bd,bd.sy,0.35,hide);setInst(A.roof,b.ri,rf,rf.sy,rf.y,hide);for(let i=b.w0;i<b.w1;i++){const it=CUT.wins[i];setInst(A.win,i,it,it.sy,it.y,hide);}for(let i=b.b0;i<b.b1;i++){const it=CUT.balc[i];setInst(A.balc,i,it,it.sy,it.y,hide);}
+    A.body.instanceMatrix.needsUpdate=A.roof.instanceMatrix.needsUpdate=A.win.instanceMatrix.needsUpdate=A.balc.instanceMatrix.needsUpdate=true;}}
+function occludes(x,z,half,h){const dx=x-camT.x,dz=z-camT.z,along=(dx+dz)*0.7071,lat=Math.abs(dx-dz)*0.7071;return along>-half&&along<h*0.9+half&&lat<half+4;}
+function ghost(key,g,x,z,half,h){const old=CUT.ghosts[key];if(old&&old.mat)old.mat.dispose();let mat=null;g.traverse(o=>{if(o.isMesh&&o.material===VCMAT){if(!mat)mat=VCMAT.clone();o.material=mat;}});if(mat)CUT.ghosts[key]={mat,x,z,half,h};}
+function updateCutaway(dt){if(!CUT.im)return;const k=Math.min(1,dt*8);
+  for(const b of CUT.list){if(b.h<7)continue;const tgt=occludes(b.x,b.z,Math.max(b.w,b.d)*0.55,b.h);if(!!b.ghost===tgt)continue;b.ghost=tgt;applyCut(b);}
+  for(const key in CUT.ghosts){const g=CUT.ghosts[key];const tgt=occludes(g.x,g.z,g.half,g.h)?0.28:1;const m=g.mat;if(m.opacity===tgt)continue;m.opacity=lerp(m.opacity,tgt,k);if(Math.abs(m.opacity-tgt)<0.02)m.opacity=tgt;
+    const tr=m.opacity<0.99;if(m.transparent!==tr){m.transparent=tr;m.needsUpdate=true;}m.depthWrite=!tr;}}
+function buildGas(r){const g=new THREE.Group();g.position.set(r.cx,0.35,r.cz);scene.add(g);
+  bx(g,'#e63946',16,0.6,11,0,6,0);bx(g,'#fff',16.2,0.25,11.2,0,5.6,0);[[-7,-4.5],[7,-4.5],[-7,4.5],[7,4.5]].forEach(p=>mesh(G.cyl,'#ddd',0.3,6,0.3,p[0],3,p[1],g));
+  [-3,3].forEach(x=>{bx(g,'#e63946',1,2,0.8,x,1,0);bx(g,'#fff',1.1,0.5,0.9,x,2.2,0);});
+  bx(g,'#f6e7c8',8,3.5,6,-10,1.75,-12);bx(g,'#e63946',8.5,0.4,6.5,-10,3.7,-12);
+  const sp=label('⛽ GAS',{bg:'#e63946',scale:3.2});sp.position.set(12,8,-12);g.add(sp);mesh(G.cyl,'#999',0.2,7,0.2,12,3.5,-12,g);
+  colliders.push({x0:r.cx-14.5,z0:r.cz-15.5,x1:r.cx-5.5,z1:r.cz-8.5});footColliders.push({x0:r.cx-14.5,z0:r.cz-15.5,x1:r.cx-5.5,z1:r.cz-8.5});
+  scene.remove(g);scene.add(bake(g));refuelZones.push({x:r.cx,z:r.cz,r:12,own:false});}
+function buildCasino(r){const g=new THREE.Group();g.position.set(r.cx,0.35,r.cz);
+  colliders.push({x0:r.x0+0.5,z0:r.z0+0.5,x1:r.x1-0.5,z1:r.z1-0.5});footColliders.push({x0:r.x0+2.6,z0:r.z0+2.6,x1:r.x1-2.6,z1:r.z1-2.6});
+  bx(g,'#3a0d0d',34,0.3,34,0,0.15,0);mesh(G.box0,'#8b0000',24,10,22,2,0.3,0,g);mesh(G.box0,'#d4a017',16,26,14,4,0.3,-2,g);
+  for(let y=4;y<26;y+=3)bx(g,'#ffd700',16.4,0.35,14.4,4,0.3+y,-2);[[12,3.6,'#c1121f'],[9,3,'#d4a017'],[6,2.6,'#c1121f']].forEach((t,i)=>{const m=mesh(G.cone4,t[2],t[0]/1.41,t[1],t[0]/1.41,4,27.6+i*2.6,-2,g);m.rotation.y=Math.PI/4;});
+  mesh(G.cone8,'#ffd700',0.5,5,0.5,4,36,-2,g);bx(g,'#ffd700',3,0.5,12,-11,4.5,0);for(let z=-5;z<=5;z+=5)mesh(G.cyl,'#ffd700',0.35,4.5,0.35,-12,2.3,z,g);
+  mesh(G.cyl,'#7fc8f8',3,0.6,3,-14,0.6,-11,g);mesh(G.cyl,'#d4a017',0.4,2.5,0.4,-14,1.5,-11,g);
+  const nm=label('🎰 ロイヤル・メコン・カジノ',{bg:'#8b0000',fg:'#ffd700',scale:3.4});nm.position.set(0,30,6);g.add(nm);
+  const ent=label('🎰 入口',{bg:'#ffd700',fg:'#8b0000',scale:2});ent.position.set(-16,7,0);g.add(ent);
+  const bg=bake(g);scene.add(bg);ghost('casino',bg,r.cx,r.cz,BLK*0.5,30);
+  CASINO_PT={x:r.x0-3,z:r.cz};const ring=new THREE.Mesh(new THREE.RingGeometry(4.5,5.5,32).rotateX(-Math.PI/2),new THREE.MeshBasicMaterial({color:'#ffd700',transparent:true,opacity:0.7}));ring.position.set(CASINO_PT.x,0.08,CASINO_PT.z);scene.add(ring);casinoRing=ring;}
+let casinoRing=null;
+function buildLandmark(type,r){const g=new THREE.Group();g.position.set(r.cx,0.35,r.cz);scene.add(g);let name='';
+  colliders.push({x0:r.x0+0.5,z0:r.z0+0.5,x1:r.x1-0.5,z1:r.z1-0.5});footColliders.push({x0:r.x0+2.6,z0:r.z0+2.6,x1:r.x1-2.6,z1:r.z1-2.6});
+  if(type==='monument'){name=CITY.lm[0];mesh(G.cyl,'#7fb3d5',12,0.4,12,0,0.2,0,g);
+    let s=11;for(let i=0;i<6;i++){bx(g,i%2?(CITY.stone||'#c46b3c'):(CITY.stone2||'#b5582e'),s,2.4,s,0,1.2+i*2.4,0);s*=0.78;}
+    mesh(G.cone4,CITY.stone||'#c46b3c',2.6,6,2.6,0,17.4,0,g);mesh(G.cone4,'#e9c46a',0.8,3,0.8,0,21.5,0,g);}
+  else if(type==='palace'){name=CITY.lm[1];[[0,-16,34,1],[0,16,34,1],[-16,0,1,34],[16,0,1,34]].forEach(w=>{bx(g,'#f6efe1',w[2],3,w[3],w[0],1.5,w[1]);bx(g,'#e9c46a',w[2]+.3,0.4,w[3]+.3,w[0],3.2,w[1]);});
+    bx(g,'#fff8ec',16,5,11,0,2.5,0);[[18,6,13,CITY.roofA||'#d97706'],[14,5,10,CITY.roofB||'#2a9d8f'],[9,4,7,CITY.roofA||'#d97706']].forEach((t,i)=>{const m=mesh(G.cone4,t[3],t[0]/1.41,t[1],t[2]/1.41,0,5+i*3.2+t[1]/2,0,g);m.rotation.y=Math.PI/4;});
+    mesh(G.cone8,'#f4c430',0.9,9,0.9,0,19,0,g);mesh(G.cyl,'#f4c430',1.2,1,1.2,0,14.5,0,g);}
+  else if(type==='market'){name=CITY.lm[2];mesh(G.hemi,'#f2e3b3',11,9,11,0,0,0,g);mesh(G.cyl,'#e8d39a',3,3,3,0,9,0,g);
+    [[0,13,10,6],[0,-13,10,6],[13,0,6,10],[-13,0,6,10]].forEach(w=>{bx(g,'#f2e3b3',w[2],5,w[3],w[0],2.5,w[1]);bx(g,'#d9c27a',w[2]+.5,.5,w[3]+.5,w[0],5.2,w[1]);});}
+  else if(type==='watphnom'){name=CITY.lm[3];mesh(G.cone8,'#5a9e48',17,9,17,0,4.5,0,g);mesh(G.cyl,'#fafafa',2.4,3,2.4,0,9.5,0,g);mesh(G.cone8,'#fafafa',2.4,7,2.4,0,14.5,0,g);mesh(G.cone8,'#e9c46a',0.5,2.5,0.5,0,18.5,0,g);
+    bx(g,'#fff8ec',7,3,5,-11,1.5,11);const rf=mesh(G.cone4,'#d97706',6,3,4.5,-11,4.5,11,g);rf.rotation.y=Math.PI/4;}
+  else if(type==='airport'){name=CITY.lm[4];bx(g,'#dfe6ec',30,6,12,0,3,-8);bx(g,'#7fb7d6',30.2,3,12.2,0,4,-8);bx(g,'#f4f4f4',32,0.8,14,0,6.4,-8);
+    mesh(G.cyl,'#eee',1.4,14,1.4,12,7,8,g);bx(g,'#7fb7d6',4,2.5,4,12,15,8);
+    const pl=new THREE.Group();mesh(G.cyl,'#fafafa',1.2,14,1.2,0,0,0,pl).rotation.x=Math.PI/2;bx(pl,'#e0e0e0',18,0.3,3,0,0,1);bx(pl,'#3a86ff',0.3,4,2.5,0,2,-6);bx(pl,'#e0e0e0',7,0.3,1.8,0,0.5,-6);pl.position.set(-5,2,8);pl.rotation.y=0.6;g.add(pl);
+    AIRPORT_PT={x:r.cx,z:r.z0-3};}
+  if(name){const sp=label(name,{bg:'rgba(38,70,83,.88)',scale:3.4});sp.position.set(0,type==='monument'||type==='palace'?26:18,0);g.add(sp);}
+  scene.remove(g);const bgL=bake(g);scene.add(bgL);ghost('lm'+type,bgL,r.cx,r.cz,BLK*0.5,type==='monument'||type==='palace'?24:16);landmarkPts.push({x:r.cx,z:r.z1+3,name});}
+
+/* ================= vehicles models ================= */
+function person(color,parent){const g=cached('p'+color,()=>personRaw(color));if(parent)parent.add(g);return g;}
+const SKINS=['#c68c5a','#b07a4a','#8d5a35','#d9a066','#a86b3c'],PANTS=['#2b2d42','#3d405b','#5c4033','#1d3557','#6b705c','#495057'],HAIR=['#1b1410','#2b1d14','#3a2a1e','#111'];
+function hsh(s_){let h=7;for(const c of String(s_))h=(h*31+c.charCodeAt(0))|0;return Math.abs(h);}
+function personParts(shirt,h){const skin=SKINS[h%5],pants=PANTS[(h>>3)%6],hair=HAIR[(h>>5)%4],fem=((h>>7)&1)===1;const body=new THREE.Group();
+  bx(body,shirt,0.56,0.4,0.3,0,1.43,0);bx(body,shirt,0.48,0.3,0.27,0,1.1,0);bx(body,pants,0.5,0.16,0.29,0,0.9,0);
+  mesh(G.cyl,skin,0.08,0.14,0.08,0,1.68,0,body);mesh(G.sph,skin,0.19,0.23,0.2,0,1.88,0,body);
+  bx(body,skin,0.06,0.07,0.06,0,1.86,0.2);bx(body,'#1a1a1a',0.05,0.035,0.02,0.075,1.92,0.185);bx(body,'#1a1a1a',0.05,0.035,0.02,-0.075,1.92,0.185);bx(body,'#7a3b2e',0.09,0.02,0.02,0,1.79,0.19);
+  if(fem){mesh(G.sph,hair,0.205,0.2,0.215,0,1.95,-0.02,body);bx(body,hair,0.34,0.42,0.1,0,1.74,-0.15);}else mesh(G.sph,hair,0.2,0.12,0.21,0,2.0,-0.01,body);
+  const hat=(h>>9)%5;if(hat===0){mesh(G.cyl,'#d8c08a',0.34,0.04,0.34,0,2.06,0,body);mesh(G.cone8,'#d8c08a',0.22,0.18,0.22,0,2.15,0,body);}else if(hat===1){mesh(G.cyl,pick2h(h),0.21,0.12,0.21,0,2.04,0,body);bx(body,pick2h(h),0.3,0.03,0.18,0,1.99,0.16);}
+  if((h>>11)%4===0)bx(body,'#e63946',0.6,0.08,0.32,0,1.62,0);
+  const mk=(x,y,len,w,c1,c2,leg)=>{const pv=new THREE.Group();pv.position.set(x,y,0);bx(pv,c1,w,len*0.55,w,0,-len*0.275,0);bx(pv,c2,w*0.88,len*0.45,w*0.88,0,-len*0.775,0);if(leg)bx(pv,'#222',w*1.05,0.08,w*1.7,0,-len-0.0,0.07);return pv;};
+  const sleeve=((h>>13)&1)?shirt:skin;
+  return{body,limbs:[mk(-0.13,0.88,0.84,0.2,pants,pants,true),mk(0.13,0.88,0.84,0.2,pants,(h>>14)&1?skin:pants,true),mk(-0.35,1.6,0.68,0.14,shirt,sleeve===shirt?skin:skin,false),mk(0.35,1.6,0.68,0.14,shirt,skin,false)]};}
+function pick2h(h){return ['#e63946','#264653','#f4a261','#2a9d8f','#fff'][(h>>16)%5];}
+function personRaw(color){const P=personParts(color,hsh(color));const g=new THREE.Group();g.add(P.body);P.limbs.forEach(l=>g.add(l));g.scale.setScalar(1.15);return g;}
+function personAnim(color,seed){const P=personParts(color,seed===undefined?Math.floor(rnd()*1e7):seed);const g=new THREE.Group();g.add(bake(P.body));P.limbs.forEach(l=>g.add(bake(l)));g.userData.limbs=g.children.slice(1);g.scale.setScalar(1.15);return g;}
+function animLimbs(g,ph,amp){const L=g.userData.limbs;if(!L)return;const s_=Math.sin(ph)*amp;L[0].rotation.x=s_;L[1].rotation.x=-s_;L[2].rotation.x=-s_*0.8;L[3].rotation.x=s_*0.8;}
+function condTier(){const c=S.cond;return c>=0.75?0:c>=0.5?1:c>=0.25?2:3;}
+function dirtyE(E,t){if(!t)return E;const o={},k=t*0.17,dc=new THREE.Color('#4a3b2e');for(const key in E){if(key==='name'||key==='glow'){o[key]=E[key];continue;}o[key]='#'+new THREE.Color(E[key]).lerp(dc,k).getHexString();}if(t>=2)delete o.glow;return o;}
+function buildPlayerTuk(u){const g=new THREE.Group();const T=condTier();const E=dirtyE(EXT[u.exterior],T);const L=2.8+u.seats*0.55;const back=1.0-L;const cz=(1.0+back)/2;
+  const wr=0.45+u.tires*0.035;const rim=u.tires>=5?'#d4af37':u.tires>=2?'#c0c0c0':'#777';
+  blob(g,3.6,L+3.6).position.z=cz+0.8;
+  bx(g,E.body,2.3,0.35,L,0,0.85,cz);
+  bx(g,E.body,0.14,0.55,L,1.12,1.25,cz);bx(g,E.body,0.14,0.55,L,-1.12,1.25,cz);bx(g,E.body,2.3,0.9,0.16,0,1.45,back);
+  bx(g,E.trim,2.34,0.1,0.18,0,1.92,back);bx(g,E.trim,0.18,0.1,L,1.13,1.55,cz);bx(g,E.trim,0.18,0.1,L,-1.13,1.55,cz);
+  const nb=1+u.seats;for(let i=0;i<Math.min(nb,3);i++){const z=back+0.5+i*((L-1.0)/Math.max(1,Math.min(nb,3)-1||1));bx(g,E.seat,1.9,0.35,0.7,0,1.2,Math.min(z,0.55));bx(g,E.seat,1.9,0.6,0.15,0,1.6,Math.min(z,0.55)-0.33);}
+  const posts=[[1.05,back+0.1],[-1.05,back+0.1],[1.05,0.9],[-1.05,0.9]];posts.forEach(p=>mesh(G.cyl,E.trim,0.06,1.9,0.06,p[0],1.95,p[1],g));
+  const roof=bx(g,E.roof,2.5,0.16,L+1.7,0,2.95,cz+0.8);if(u.exterior===0)roof.rotation.z=0.05;
+  bx(g,E.stripe,2.54,0.22,0.3,0,2.88,back-0.05);bx(g,E.stripe,2.54,0.22,0.3,0,2.88,cz+0.8+(L+1.7)/2-0.15);bx(g,E.stripe,0.08,0.22,L+1.7,1.25,2.88,cz+0.8);bx(g,E.stripe,0.08,0.22,L+1.7,-1.25,2.88,cz+0.8);
+  // motorbike
+  bx(g,E.body,0.75,0.7,1.6,0,1.05,2.15);bx(g,'#222',0.55,0.2,0.75,0,1.5,1.95);bx(g,E.trim,0.6,0.4,0.6,0,1.5,2.6);
+  mesh(G.cyl,'#444',0.05,1.0,0.05,0,1.6,2.85,g).rotation.x=-0.35;bx(g,'#333',1.2,0.08,0.08,0,2.05,2.95);
+  const hl=new THREE.Mesh(G.box,new THREE.MeshBasicMaterial({color:'#fff6c2'}));hl.scale.set(0.38,0.3,0.12);hl.position.set(0,1.75,3.05);g.add(hl);
+  mesh(G.cyl,E.trim,0.06,1.9,0.06,0.35,2.0,2.55,g);mesh(G.cyl,E.trim,0.06,1.9,0.06,-0.35,2.0,2.55,g);
+  const drv=person('#f4a261',g);drv.position.set(0,0.9,2.0);drv.scale.setScalar(1.05);drv.userData.keep=true;g.userData.drv=drv;
+  // wheels
+  [[0,3.05],[0,1.45],[1.28,back+0.75],[-1.28,back+0.75]].forEach(p=>{mesh(G.wheel,'#1e1e1e',0.32,wr,wr,p[0],wr,p[1],g);mesh(G.wheel,rim,0.34,wr*0.5,wr*0.5,p[0],wr,p[1],g);});
+  // exhaust
+  const exl=0.8+u.engine*0.07,exr=0.12+u.engine*0.012,exc=u.engine>=4?'#d0d0d0':'#5a5a5a';
+  mesh(G.cyl,exc,exr,exl,exr,0.5,0.65,1.4,g).rotation.x=Math.PI/2;if(u.engine>=6)mesh(G.cyl,exc,exr,exl,exr,-0.5,0.65,1.4,g).rotation.x=Math.PI/2;
+  if(u.exterior===0){bx(g,'#5e3f26',0.5,0.3,0.6,1.2,1.2,cz+0.3);bx(g,'#6e4a2e',0.4,0.25,0.5,-1.2,1.3,cz-0.4);}
+  if(u.cargo>0){bx(g,'#3a3a3a',2.0,0.12,0.9,0,1.15,back-0.55);for(let i=0;i<Math.min(u.cargo,4);i++)bx(g,['#c69c6d','#b5835a','#d4a373','#a47148'][i],0.75,0.6,0.7,(i%2?0.45:-0.45),1.5+Math.floor(i/2)*0.6,back-0.55);}
+  if(u.ac>0){bx(g,'#f4f4f4',1.3,0.5,1.0,0,3.3,cz);bx(g,'#3a6ea5',1.0,0.06,0.7,0,3.57,cz);if(u.ac>=3)bx(g,'#f4f4f4',1.3,0.5,1.0,0,3.3,cz-1.4);}
+  if(E.glow){const gl=new THREE.Mesh(shadowGeo,new THREE.MeshBasicMaterial({color:E.glow,transparent:true,opacity:0.5,depthWrite:false}));gl.scale.set(3.4,1,L+3);gl.position.set(0,0.08,cz+0.8);g.add(gl);
+    const fl=label('★',{bg:'#d4af37',scale:1.1});fl.position.set(0,3.9,2.6);g.add(fl);}
+  if(T>=1){const rr=mulberry(7);for(let i=0;i<T*3;i++){const sd=rr()<0.5?1:-1;bx(g,i%2?'#3b2f25':'#6b4a2e',0.06,0.25+rr()*0.3,0.3+rr()*0.5,sd*1.2,1.05+rr()*0.4,back+0.3+rr()*(L-0.6));}}
+  if(T>=2){roof.rotation.z=0.1;roof.rotation.x=0.05;bx(g,'#8a8f96',0.8,0.06,0.6,0.7,3.08,cz+0.5);bx(g,'#3b2f25',0.5,0.4,0.06,0.2,1.2,3.0);}
+  if(T>=3){hl.material=new THREE.MeshBasicMaterial({color:'#3a3a3a'});bx(g,'#2b2b2b',0.06,0.6,1.0,-1.21,1.25,cz);}
+  // seated pax
+  const slots=[];for(let i=0;i<4;i++){const p=person(['#e76f51','#8ecae6','#ffb703','#cdb4db'][i]);p.scale.setScalar(0.95);p.position.set(i%2?0.5:-0.5,0.95,back+0.65+Math.floor(i/2)*0.9);p.rotation.y=Math.PI;p.visible=false;p.userData.keep=true;g.add(p);slots.push(p);}
+  g.userData.slots=slots;return g;}
+const fleetGeo={};
+function buildFleetTuk(col){return cached('f'+col,()=>fleetTukRaw(col));}
+function fleetTukRaw(col){const g=new THREE.Group();blob(g,3.4,6.4).position.z=0.6;
+  bx(g,col,2.3,0.9,3,0,1.1,-0.4);bx(g,'#ffd166',2.5,0.16,4.6,0,2.9,0.3);bx(g,col,0.8,0.9,1.6,0,1.1,2.0);bx(g,'#1e1e1e',2.6,0.8,1.2,0,0.45,-0.8);bx(g,'#1e1e1e',0.3,0.8,0.9,0,0.45,2.7);
+  mesh(G.cyl,'#ddd',0.06,1.9,0.06,1.05,1.95,-1.7,g);mesh(G.cyl,'#ddd',0.06,1.9,0.06,-1.05,1.95,-1.7,g);mesh(G.cyl,'#ddd',0.06,1.9,0.06,1.05,1.95,1.1,g);mesh(G.cyl,'#ddd',0.06,1.9,0.06,-1.05,1.95,1.1,g);
+  const d=person('#2a9d8f',g);d.position.set(0,0.95,1.9);d.scale.setScalar(1.0);return g;}
+function buildCar(){const m=bake(carRaw());m.userData.kind='car';return m;}
+function carRaw(){const g=new THREE.Group();const c=pick(['#f1faee','#e63946','#1d3557','#a8dadc','#222','#c0c0c0','#ffb703','#6a994e','#f4f1de']);const suv=rnd()<0.4;
+  blob(g,3.4,6);bx(g,c,2.4,suv?1.3:1,4.6,0,suv?1.15:0.95,0);bx(g,'#2b3a4a',2.15,0.85,suv?3:2.4,0,suv?2.2:1.85,-0.2);bx(g,c,2.2,0.12,suv?3:2.4,0,suv?2.68:2.32,-0.2);bx(g,'#151515',2.5,0.7,3.4,0,0.4,0);
+  const hl=new THREE.Mesh(G.box,new THREE.MeshBasicMaterial({color:'#fffbe0'}));hl.scale.set(2,0.25,0.1);hl.position.set(0,1.1,2.32);g.add(hl);return g;}
+function buildMoto(){const m=bake(motoRaw());m.userData.kind='moto';return m;}
+function motoRaw(){const g=new THREE.Group();blob(g,1.4,3);bx(g,pick(['#e63946','#222','#3a86ff','#fff','#ffb703']),0.5,0.7,1.8,0,0.75,0);bx(g,'#151515',0.3,0.8,2.4,0,0.4,0);const p=person(pick(['#e9c46a','#8ecae6','#f4a261','#fff']),g);p.position.set(0,0.6,-0.1);if(rnd()<0.4){const q=person(pick(['#ffafcc','#bde0fe']),g);q.position.set(0,0.6,-0.8);}return g;}
+
+/* ================= company lot & facilities ================= */
+const PLOT={office:{x:-15.5,z:-15.5,w:14,d:14},reception:{x:-34.5,z:-15.5,w:13,d:13},rest:{x:-34.5,z:-34.5,w:13,d:13},parkS:{x:-15.5,z:-34.5,w:14,d:14},
+ parkL:{x:25,z:-25,w:30,d:30},gas:{x:75,z:-25,w:26,d:26},garage:{x:-25,z:25,w:24,d:24},repair:{x:25,z:25,w:26,d:26},wash:{x:-75,z:25,w:26,d:26},hq:{x:-25,z:-75,w:26,d:26}};
+const facG={};const plotSigns={};let moneyPile=null,lotSign=null;
+function buildLot(){for(const id in PLOT){const p=PLOT[id];const g=new THREE.Group();g.position.set(p.x,0.36,p.z);scene.add(g);
+    bx(g,'#c4ab82',p.w,0.04,p.d,0,0.02,0);[[0,-p.d/2,p.w,0.25],[0,p.d/2,p.w,0.25],[-p.w/2,0,0.25,p.d],[p.w/2,0,0.25,p.d]].forEach(e=>bx(g,'#f6efe1',e[2],0.06,e[3],e[0],0.05,e[1]));
+    mesh(G.cyl,'#8b5e34',0.12,2.2,0.12,p.w/2-1.5,1.1,p.d/2-1,g);const sp=label(FACM[id].icon,{bg:'#fff8ec',scale:1.6});sp.position.set(p.w/2-1.5,2.6,p.d/2-1);g.add(sp);scene.remove(g);const bg=bake(g);scene.add(bg);plotSigns[id]=bg;}
+  lotSign=new THREE.Group();mesh(G.cyl,'#8b5e34',0.15,4,0.15,-1.5,2,0,lotSign);mesh(G.cyl,'#8b5e34',0.15,4,0.15,1.5,2,0,lotSign);bx(lotSign,'#fff8ec',4.4,1.6,0.2,0,3.4,0);
+  const s=label('売地',{bg:'#e63946',scale:1.3});s.position.set(0,3.4,0.3);lotSign.add(s);lotSign.position.set(-8,0.35,-25);lotSign=bake(lotSign);scene.add(lotSign);
+  moneyPile=new THREE.Group();moneyPile.position.set(-25,0.35,-25);scene.add(moneyPile);
+  const ref=refuelZones;ref.push({x:PLOT.gas.x,z:PLOT.gas.z,r:12,own:true,id:'gas'});}
+let pileN=-1;
+function updatePile(){const n=Math.min(48,Math.max(0,Math.floor(Math.log10(Math.max(1,S.money))*7)));if(n===pileN)return;pileN=n;
+  while(moneyPile.children.length){const c=moneyPile.children[0];moneyPile.remove(c);c.traverse(o=>{if(o.geometry&&o.geometry!==G.box)o.geometry.dispose();});}
+  const tg=new THREE.Group();for(let i=0;i<n;i++){const layer=Math.floor(i/6),k=i%6;const gold=S.money>1e5&&layer>=4;bx(tg,gold?'#f4c430':(k%2?'#5aa55a':'#4c934c'),1.3,0.45,0.7,(k%2)*1.4-0.7,0.23+layer*0.47,Math.floor(k/2)*0.8-0.8);}if(n)moneyPile.add(bake(tg));}
+function facSlots(id,lvl){const out=[];if(id==='parkS'){const n=Math.min(6,lvl*3);for(let i=0;i<n;i++)out.push({x:(i%2?2.8:-2.8),z:-4+Math.floor(i/2)*4,y:0.35});}
+  if(id==='parkL'){const n=Math.min(lvl>=4?16:12,lvl*4);for(let i=0;i<n;i++){const deck=i>=8?1:0;const j=i%8;out.push({x:-6+(j%4)*4,z:(j<4?-4.5:4.5),y:0.35+deck*3.6});}}return out;}
+function buildFacility(id,lvl,animate){if(id==='branch'){buildBranches(animate);return;}
+  const p=PLOT[id];if(!p)return;if(facG[id]){scene.remove(facG[id]);}
+  const g=new THREE.Group();g.position.set(p.x,0.36,p.z);const W=p.w,Dp=p.d;plotSigns[id].visible=false;
+  if(id==='parkS'||id==='parkL'){bx(g,'#5f6268',W-0.6,0.1,Dp-0.6,0,0.05,0);const n=id==='parkS'?3:4;
+      for(let i=0;i<=n;i++){bx(g,'#fff',0.15,0.12,3.2,-W/2+0.8+i*((W-1.6)/n),0.08,-Dp/2+2.2);bx(g,'#fff',0.15,0.12,3.2,-W/2+0.8+i*((W-1.6)/n),0.08,Dp/2-2.2);}
+      const s=label('P',{bg:'#1d56b3',scale:1.6});s.position.set(W/2-0.8,3,-Dp/2+0.8);g.add(s);mesh(G.cyl,'#aaa',0.1,2.5,0.1,W/2-0.8,1.25,-Dp/2+0.8,g);
+      if(id==='parkL'&&lvl>=4){[[-7,-7],[7,-7],[-7,7],[7,7],[0,-7],[0,7]].forEach(q=>bx(g,'#bfc3c8',0.7,3.6,0.7,q[0],1.8,q[1]));bx(g,'#8e9399',W-1,0.3,Dp-1,0,3.6,0);bx(g,'#e9c46a',W-0.8,0.5,0.3,0,4.0,Dp/2-0.6);}
+      if(id==='parkL'&&lvl>=8){bx(g,'#8e9399',W-1,0.3,Dp-1,0,7.2,0);[[-7,-7],[7,-7],[-7,7],[7,7]].forEach(q=>bx(g,'#bfc3c8',0.7,3.6,0.7,q[0],5.4,q[1]));}}
+  else if(id==='garage'){bx(g,'#9aa0a6',W-1,0.15,Dp-1,0,0.08,0);bx(g,'#c9ccd1',W-1,4,0.3,0,2,-Dp/2+0.7);bx(g,'#c9ccd1',0.3,4,Dp-1.4,-W/2+0.6,2,0);bx(g,'#c9ccd1',0.3,4,Dp-1.4,W/2-0.6,2,0);
+      const r=bx(g,'#6c7a89',W,0.25,Dp,0,4.3,0);r.rotation.x=0.08;bx(g,'#e63946',W*0.6,0.9,0.15,0,3.4,Dp/2-0.5);const s=label('整備場',{bg:'#264653',scale:1.4});s.position.set(0,5.4,Dp/2-0.6);g.add(s);
+      for(let i=0;i<3;i++)mesh(G.wheel,'#222',0.5,0.55,0.55,-3.6,0.4+i*0.5,-3,g).rotation.y=Math.PI/2;bx(g,'#e76f51',1.6,1.6,0.7,3.5,0.8,-3.8);
+      if(lvl>=2){bx(g,'#f4c430',3,0.25,5,1,1.4,1);bx(g,'#f4c430',0.4,1.4,0.4,1,0.7,1);}if(lvl>=3)bx(g,'#3a86ff',2,2,1,-3,1,2.5);}
+  else if(id==='gas'){bx(g,'#a9adb3',W-0.6,0.1,Dp-0.6,0,0.05,0);bx(g,'#ff9f1c',W-1.5,0.55,Dp-4,0,5.2,0);bx(g,'#fff',W-1.3,0.2,Dp-3.8,0,4.85,0);
+      [[-4,-3.5],[4,-3.5],[-4,3.5],[4,3.5]].forEach(q=>mesh(G.cyl,'#eee',0.25,5,0.25,q[0],2.5,q[1],g));
+      for(let i=0;i<lvl+1;i++){const x=-3+i*(6/Math.max(1,lvl));bx(g,'#ff9f1c',0.8,1.8,0.6,x,0.9,0);bx(g,'#fff',0.9,0.4,0.7,x,2,0);}
+      const s=label('幕府 GAS',{bg:'#ff9f1c',scale:1.5});s.position.set(0,6.4,0);g.add(s);}
+  else if(id==='office'){const h=5+lvl*2.6;bx(g,'#a9adb3',W-0.6,0.1,Dp-0.6,0,0.05,0);mesh(G.box0,'#f4e3c1',8.5,h,8,0,0.1,-1.5,g);bx(g,'#2a6f97',9.2,0.5,8.7,0,h+0.35,-1.5);
+      for(let y=1.6;y<h-0.5;y+=2.6)for(let x=-2.8;x<=2.8;x+=2.8)bx(g,'#3d5a73',1.4,1.4,0.12,x,y,2.55);bx(g,'#6b4a2b',1.4,2.2,0.15,0,1.1,2.58);
+      const s=label('トゥクトゥク幕府',{bg:'#e63946',scale:1.3});s.position.set(0,h+1.6,2.4);g.add(s);colliders.push(facColl[id]={x0:p.x-4.3,z0:p.z-5.5,x1:p.x+4.3,z1:p.z+2.5});}
+  else if(id==='reception'){bx(g,'#e9d8b8',W-1,0.2,Dp-1,0,0.1,0);[[-4,-4],[4,-4],[-4,4],[4,4]].forEach(q=>mesh(G.cyl,'#8b5e34',0.2,3.4,0.2,q[0],1.8,q[1],g));
+      const r=mesh(G.cone4,'#c1121f',7,2.6,7,0,4.6,0,g);r.rotation.y=Math.PI/4;bx(g,'#ff9f1c',5,1.2,1.2,0,0.8,0);bx(g,'#fff',5.2,0.15,1.4,0,1.45,0);
+      const s=label('受付',{bg:'#ff9f1c',scale:1.3});s.position.set(0,6.6,0);g.add(s);for(let i=0;i<lvl;i++)mesh(G.cyl,'#3a86ff',0.6,0.9,0.6,-3+i*1.6,0.5,3,g);}
+  else if(id==='rest'){bx(g,'#b08968',W-1,0.25,Dp-1,0,0.12,0);bx(g,'#f4f1de',W-2,0.15,Dp-5,0,3.6,-1);[[-4.5,-4],[4.5,-4],[-4.5,2],[4.5,2]].forEach(q=>mesh(G.cyl,'#7f5539',0.15,3.5,0.15,q[0],1.8,q[1],g));
+      bx(g,'#7f5539',3,0.9,1.2,-2,0.6,-1);bx(g,'#7f5539',3,0.9,1.2,2,0.6,-1);mesh(G.cyl,'#ddb892',1.2,0.15,1.2,0,1.0,-1,g);
+      if(lvl>=2){const h=bx(g,'#e63946',3,0.15,1,0,1.5,4);h.rotation.z=0.1;}if(lvl>=3)bx(g,'#3a86ff',1.2,1,0.8,4,0.6,4);
+      const s=label('休憩所',{bg:'#7f5539',scale:1.2});s.position.set(0,5,0);g.add(s);}
+  else if(id==='wash'){bx(g,'#a9adb3',W-0.6,0.1,Dp-0.6,0,0.05,0);bx(g,'#48cae4',0.6,5,12,-4.5,2.5,0);bx(g,'#48cae4',0.6,5,12,4.5,2.5,0);bx(g,'#0096c7',10,0.6,12.5,0,5.3,0);
+      for(let i=0;i<lvl+1;i++){mesh(G.cyl,'#00b4d8',0.6,3.5,0.6,-3,2,-3+i*3,g);mesh(G.cyl,'#00b4d8',0.6,3.5,0.6,3,2,-3+i*3,g);}
+      for(let i=0;i<8;i++)mesh(G.sph,'#ffffff',0.6+rnd()*0.4,0.6+rnd()*0.4,0.6+rnd()*0.4,-4+rnd()*8,5.6+rnd()*0.8,-5+rnd()*10,g);
+      const s=label('洗車',{bg:'#0096c7',scale:1.5});s.position.set(0,7.2,0);g.add(s);colliders.push(facColl[id]={x0:p.x-5,z0:p.z-6.3,x1:p.x-4,z1:p.z+6.3});colliders.push(facColl[id+'2']={x0:p.x+4,z0:p.z-6.3,x1:p.x+5,z1:p.z+6.3});}
+  else if(id==='repair'){bx(g,'#a9adb3',W-0.6,0.1,Dp-0.6,0,0.05,0);mesh(G.box0,'#adb5bd',14,6,12,0,0.1,-1,g);for(let i=0;i<3;i++){const r=bx(g,'#6c757d',4.8,0.3,12.4,-4.7+i*4.7,7,-1);r.rotation.z=0.35;bx(g,'#90e0ef',0.2,1.4,12,-2.5+i*4.7,6.7,-1);}
+      bx(g,'#343a40',6,4.5,0.2,0,2.35,5.05);mesh(G.cyl,'#9d0208',0.8,10+lvl*2,0.8,5.5,5+lvl,-5,g);bx(g,'#fff',1.7,0.6,1.7,5.5,8+lvl*1.5,-5);
+      const s=label('修理工場',{bg:'#343a40',scale:1.4});s.position.set(0,9.5,4);g.add(s);if(lvl>=2){bx(g,'#f4c430',0.5,9,0.5,-7.5,4.5,6);bx(g,'#f4c430',8,0.4,0.4,-4,9,6);}
+      colliders.push(facColl[id]={x0:p.x-7,z0:p.z-7,x1:p.x+7,z1:p.z+5});}
+  else if(id==='hq'){const h=12+lvl*5;bx(g,'#e9d8b8',15,2,15,0,1,0);mesh(G.box0,'#7fb7be',10,h,10,0,2,0,g);for(let y=4;y<h;y+=3.2)bx(g,'#d4af37',10.3,0.3,10.3,0,2+y,0);
+      [[11,4,'#c1121f'],[8,3.4,'#d4af37'],[5,3,'#c1121f']].forEach((t,i)=>{const r=mesh(G.cone4,t[2],t[0]/1.41,t[1],t[0]/1.41,0,2+h+1.4+i*2.6,0,g);r.rotation.y=Math.PI/4;});
+      mesh(G.cone8,'#f4c430',0.4,4,0.4,0,2+h+9.5,0,g);const s=label('トゥクトゥク幕府 本社',{bg:'#c1121f',scale:2});s.position.set(0,2+h+13,0);g.add(s);
+      colliders.push(facColl[id]={x0:p.x-7.5,z0:p.z-7.5,x1:p.x+7.5,z1:p.z+7.5});}
+  const bg=bake(g);scene.add(bg);facG[id]=bg;ghost('f'+id,bg,p.x,p.z,Math.max(W,Dp)*0.5,id==='hq'?20+lvl*5:id==='office'?6+lvl*2.6:8);if(animate)constructFx(bg,p.x,p.z,W,Dp);}
+const branchG=[];
+function buildBranches(animate){for(let i=0;i<(S.fac.branch||0);i++){if(branchG[i])continue;const [bx_,bz_]=BRANCH_LOTS[i].split(',').map(Number);const r=bRect(bx_,bz_);
+    const g=new THREE.Group();g.position.set(r.cx,0.36,r.cz);bx(g,'#5f6268',30,0.1,14,0,0.05,8);mesh(G.box0,'#f4e3c1',18,9,10,0,0.1,-8,g);bx(g,'#c1121f',19,0.6,11,0,9.4,-8);
+    for(let x=-6;x<=6;x+=4)bx(g,'#3d5a73',2,2,0.12,x,5,-2.9);bx(g,'#3d5a73',4,3,0.12,0,1.6,-2.9);
+    const s=label(`幕府 第${i+1}営業所`,{bg:'#c1121f',scale:2});s.position.set(0,12,-6);g.add(s);
+    for(let k=0;k<4;k++){const t=buildFleetTuk(fleetColor());t.position.set(-9+k*6,0.1,9);t.rotation.y=Math.PI;g.add(t);}
+    const bg=bake(g);scene.add(bg);branchG[i]=bg;ghost('br'+i,bg,r.cx,r.cz-6,12,12);if(animate)constructFx(bg,r.cx,r.cz,BLK,BLK);}}
+function fleetColor(){const l=S.grade;return l<3?'#2a9d8f':l<7?'#3a86ff':l<12?'#e63946':'#d4a017';}
+/* construction effects */
+const fx=[];const builds=[];
+function constructFx(g,x,z,w,d){g.scale.set(1,0.01,1);builds.push({g,t:0});
+  const sc=new THREE.LineSegments(new THREE.EdgesGeometry(new THREE.BoxGeometry(w,8,d)),new THREE.LineBasicMaterial({color:'#f4c430',transparent:true}));sc.position.set(x,4.4,z);scene.add(sc);fx.push({m:sc,t:0,life:1.8,type:'scaf'});
+  for(let i=0;i<14;i++){const m=mesh(G.sph,'#d9c3a0',1,1,1,x+(rnd()-0.5)*w,0.8,z+(rnd()-0.5)*d,scene);m.scale.setScalar(0.4+rnd()*0.6);fx.push({m,t:0,life:1.2+rnd()*0.6,vx:(rnd()-0.5)*8,vy:3+rnd()*4,vz:(rnd()-0.5)*8,type:'dust'});}
+  SFX.build();}
+function sparkle(x,y,z,col){for(let i=0;i<18;i++){const m=new THREE.Mesh(G.oct,new THREE.MeshBasicMaterial({color:col||'#ffd166'}));m.scale.setScalar(0.35);m.position.set(x,y,z);scene.add(m);
+  const a=rnd()*Math.PI*2;fx.push({m,t:0,life:0.9,vx:Math.cos(a)*7,vy:4+rnd()*5,vz:Math.sin(a)*7,type:'spark'});}}
+
+/* ================= road graph & AI ================= */
+function nodePos(i,j){return{x:nX(i),z:nX(j)};}
+function nextNode(cur,prev){const opts=[];[[1,0],[-1,0],[0,1],[0,-1]].forEach(d=>{const i=cur.i+d[0],j=cur.j+d[1];if(i<0||j<0||i>N||j>N)return;if(prev&&prev.i===i&&prev.j===j)return;opts.push({i,j});});return opts.length?pick(opts):prev;}
+function makeAgent(model,speed,lane){const i=Math.floor(rnd()*(N+1)),j=Math.floor(rnd()*(N+1));const a={from:{i,j},to:null,t:rnd(),speed,lane,model,wait:0};a.to=nextNode(a.from,null);scene.add(model);return a;}
+function updateAgent(a,dt,avoidPlayer){const f=nodePos(a.from.i,a.from.j),t=nodePos(a.to.i,a.to.j);const len=CELL;
+  const dx=(t.x-f.x)/len,dz=(t.z-f.z)/len;const rx=-dz,rz=dx;
+  let x=lerp(f.x,t.x,a.t)+rx*a.lane,z=lerp(f.z,t.z,a.t)+rz*a.lane;let sp=a.speed;
+  if(avoidPlayer){let blk=false;const chk=(ox_,oz_,lw)=>{const px=ox_-x,pz=oz_-z;const ahead=px*dx+pz*dz;const lat=Math.abs(px*rx+pz*rz);return ahead>0&&ahead<8&&lat<lw;};
+    blk=chk(player.x,player.z,2.6)||(player.onFoot&&chk(walker.x,walker.z,1.8));
+    if(blk){a.blockT=(a.blockT||0)+dt;if(a.blockT<(player.onFoot?4:30))sp=0;}else a.blockT=0;}
+  a.t+=sp*dt/len;if(a.t>=1){a.t-=1;const prev=a.from;a.from=a.to;a.to=nextNode(a.from,prev);}
+  a.model.position.set(x,0.36,z);const target=Math.atan2(dx,dz);a.model.rotation.y+=angDiff(a.model.rotation.y,target)*Math.min(1,dt*8);a.x=x;a.z=z;}
+const traffic=[];const fleetVis=[];const peds=[];
+function spawnTraffic(){for(let i=0;i<13;i++)traffic.push(makeAgent(buildCar(),9+rnd()*4,3));for(let i=0;i<9;i++)traffic.push(makeAgent(buildMoto(),11+rnd()*4,4.6));
+  for(let i=0;i<22;i++){let bx_,bz_,k;do{bx_=Math.floor(rnd()*N);bz_=Math.floor(rnd()*N);k=bx_+','+bz_;}while(COMPANY[k]);
+    const r=bRect(bx_,bz_);const p=personAnim(pick(['#e76f51','#2a9d8f','#e9c46a','#8ecae6','#ffafcc','#cdb4db','#fff','#6c757d']));scene.add(p);peds.push({m:p,r,s:rnd()*BLK*4,v:(rnd()<0.5?-1:1)*(1.2+rnd()*0.8),down:0,flee:0});}}
+function syncFleetVis(){const want=Math.min(D.drivers.length,16);while(fleetVis.length<want){const a=makeAgent(buildFleetTuk(fleetColor()),10+rnd()*3,3);a.from={i:3+Math.floor(rnd()*2),j:3};a.to=nextNode(a.from,null);fleetVis.push(a);}
+  while(fleetVis.length>want){const a=fleetVis.pop();scene.remove(a.model);}}
+function refreshFleetColors(){fleetVis.forEach(a=>{scene.remove(a.model);a.model=buildFleetTuk(fleetColor());scene.add(a.model);});}
+/* parked & staff walkers */
+const parked=[];const walkers=[];
+function syncParked(){parked.forEach(m=>scene.remove(m));parked.length=0;let idle=Math.max(0,freeVeh());const spots=[];
+  ['parkS','parkL'].forEach(id=>{const l=S.fac[id]||0;if(!l)return;const p=PLOT[id];facSlots(id,l).forEach(s=>spots.push({x:p.x+s.x,z:p.z+s.z,y:s.y}));});
+  if(!spots.length){spots.push({x:-6.5,z:-30,y:0.35,r:0},{x:-6.5,z:-20,y:0.35});}
+  for(let i=0;i<Math.min(idle,spots.length);i++){const m=buildFleetTuk(fleetColor());m.position.set(spots[i].x,spots[i].y+0.02,spots[i].z);m.rotation.y=spots[i].r!==undefined?spots[i].r:Math.PI;m.scale.setScalar(0.85);
+    m.children.forEach(c=>{});scene.add(m);parked.push(m);}}
+const ROLEFAC={mechanic:['garage','repair'],reception:['reception'],manager:['office','hq'],accountant:['office','hq'],sales:['office','hq']};
+function syncWalkers(){walkers.forEach(w=>scene.remove(w.m));walkers.length=0;const others=S.staff.filter(s=>s.role!=='driver');
+  others.slice(0,28).forEach(s=>{const facs=ROLEFAC[s.role].filter(f=>S.fac[f]);const fid=facs.length?pick(facs):'office';const p=PLOT[fid];
+    const m=walkers.length<12?personAnim(ROLES[s.role].color):person(ROLES[s.role].color);m.position.set(p.x+(rnd()-0.5)*p.w*0.6,0.36,p.z+p.d/2+0.5);scene.add(m);walkers.push({m,p,tx:m.position.x,tz:m.position.z,wait:rnd()*3});});
+  if(D.drivers.length){for(let i=0;i<Math.min(3,D.drivers.length);i++){const p=PLOT.parkS;const m=person('#e76f51');m.position.set(-25+(rnd()-0.5)*20,0.36,-25);scene.add(m);walkers.push({m,p:{x:-25,z:-25,w:34,d:3},tx:m.position.x,tz:-25,wait:rnd()*3});}}}
+
+/* ================= player ================= */
+const GEARS=[0.22,0.38,0.55,0.72,0.87,1].map((f,i)=>({f,a:[1.8,1.55,1.35,1.18,1.07,1][i],n:(i+1)+'速'}));
+const player={gear:0,at:true,onFoot:false,x:0,z:-25,h:0,v:0,mesh:null,onboard:[],hornT:0,bumpT:0};
+function rebuildPlayer(){player.tier=condTier();const old=player.mesh;player.mesh=bake(buildPlayerTuk(S.upg));if(player.mesh.userData.drv)player.mesh.userData.drv.visible=!player.onFoot;if(old){player.mesh.position.copy(old.position);player.mesh.rotation.copy(old.rotation);scene.remove(old);}scene.add(player.mesh);updateSeats();}
+const walker={x:0,z:0,h:0,walk:0,m:null,car:null,punchT:0};
+const victims=[],abandoned=[],police=[];let evadeT=0,sirenT=0,lightT=0;
+function ctrlPos(){if(player.onFoot)return{x:walker.x,z:walker.z};return{x:player.x,z:player.z};}
+function punch(){if(!player.onFoot||walker.car)return;initAudio();walker.punchT=0.25;const fx_=Math.sin(walker.h),fz_=Math.cos(walker.h);const inFront=(x,z,r)=>{const dx=x-walker.x,dz=z-walker.z,d=Math.hypot(dx,dz);return d<r&&(dx*fx_+dz*fz_)>-0.3*d;};
+  for(const a of traffic){if(a.x!==undefined&&inFront(a.x,a.z,3.6)){stealVehicle(a);return;}}
+  for(const p of peds){if(p.down<=0&&p.x!==undefined&&inFront(p.x,p.z,2.6)){SFX.punch();p.down=4.5;p.m.rotation.x=-Math.PI/2;p.m.position.y=0.55;floatText('ドカッ！💫',p.x,4,p.z,'bad');stars(p.x,p.z);crime('assault',p);return;}}
+  for(const w of waiting){if(!w.refused&&inFront(w.m.position.x,w.m.position.z,2.6)){const x=w.m.position.x,z=w.m.position.z;removeWaiting(w);SFX.punch();floatText('ドカッ！💫',x,4,z,'bad');const v=spawnVictim(x,z,walker.h);crime('assault',v);return;}}
+  tone(300,0.06,'triangle',0.03);floatText('スカッ',walker.x,3.5,walker.z,'small');}
+function stars(x,z){for(let i=0;i<6;i++){const m=new THREE.Mesh(G.oct,new THREE.MeshBasicMaterial({color:'#ffd700'}));m.scale.setScalar(0.25);m.position.set(x,2,z);scene.add(m);const a=rnd()*6.28;fx.push({m,t:0,life:0.8,vx:Math.cos(a)*3,vy:5,vz:Math.sin(a)*3,type:'spark'});}}
+function spawnVictim(x,z,h){const m=personAnim(pick(['#e76f51','#8ecae6','#ffb703','#cdb4db','#90be6d']));m.position.set(x,0.55,z);m.rotation.x=-Math.PI/2;scene.add(m);const v={m,x,z,h,down:3.5,t:0};victims.push(v);stars(x,z);return v;}
+function stealVehicle(a){SFX.punch();traffic.splice(traffic.indexOf(a),1);const kind=a.model.userData.kind||'car';
+  const vx=a.x+Math.cos(a.model.rotation.y)*2.4,vz=a.z-Math.sin(a.model.rotation.y)*2.4;const v=spawnVictim(vx,vz,0);floatText('ドカッ！ 奪った！',a.x,5,a.z,'bad');
+  walker.car={m:a.model,kind,v:0,h:a.model.rotation.y,x:a.x,z:a.z};walker.m.visible=false;document.body.classList.add('car');
+  traffic.push(makeAgent(kind==='car'?buildCar():buildMoto(),kind==='car'?9+rnd()*4:11+rnd()*4,kind==='car'?3:4.6));crime('theft',v);updateFootBtn();}
+function crime(type,victim){S.crimes++;const pos=ctrlPos();let w=0;const R=34;
+  peds.forEach(p=>{if(p!==victim&&p.down<=0&&p.x!==undefined&&dist2(p.x,p.z,pos.x,pos.z)<R)w++;});traffic.forEach(a=>{if(a.x!==undefined&&dist2(a.x,a.z,pos.x,pos.z)<R)w++;});
+  waiting.forEach(q=>{if(dist2(q.m.position.x,q.m.position.z,pos.x,pos.z)<R)w++;});walkers.forEach(q=>{if(dist2(q.m.position.x,q.m.position.z,pos.x,pos.z)<R)w++;});
+  const pRep=1-Math.pow(0.68,w)*(type==='theft'?0.45:0.8);
+  floatText(w?`👀 目撃者 ${w}人…`:'👀 誰も見ていない…？',pos.x,7,pos.z,'small');
+  setTimeout(()=>{if(rnd()<pRep){const add=type==='theft'?2:1;S.wanted=Math.min(3,S.wanted+add);evadeT=0;SFX.siren(true);toast(`📞 通報された！指名手配 ${'★'.repeat(S.wanted)}  警察が来るぞ！`);spawnPolice();}else{toast('😎 誰にも通報されなかった…');}},1400);}
+function buildPolice(){const g=new THREE.Group();blob(g,3.4,6);bx(g,'#f4f4f4',2.4,1,4.6,0,0.95,0);bx(g,'#111',2.42,0.45,2.6,0,0.75,0);bx(g,'#2b3a4a',2.15,0.85,2.4,0,1.85,-0.2);bx(g,'#f4f4f4',2.2,0.12,2.4,0,2.32,-0.2);bx(g,'#151515',2.5,0.7,3.4,0,0.4,0);
+  const l1=new THREE.Mesh(G.box,new THREE.MeshBasicMaterial({color:'#ff0000'}));l1.scale.set(0.8,0.3,0.4);l1.position.set(-0.45,2.5,-0.2);g.add(l1);const l2=new THREE.Mesh(G.box,new THREE.MeshBasicMaterial({color:'#0044ff'}));l2.scale.set(0.8,0.3,0.4);l2.position.set(0.45,2.5,-0.2);g.add(l2);
+  const lb=label('POLICE',{bg:'#1d3557',scale:1.1});lb.position.set(0,3.3,0);g.add(lb);const out=bake(g);out.userData.lights=out.children.filter(c=>c.isMesh&&c.material.isMeshBasicMaterial&&c.material.color.getHex()!==0xffffff&&c.scale.y<0.5);return out;}
+function spawnPolice(){const want=S.wanted;const pos=ctrlPos();while(police.length<want){let best=null;for(let k=0;k<40;k++){const i=Math.floor(rnd()*(N+1)),j=Math.floor(rnd()*(N+1));const q=nodePos(i,j);const d=dist2(q.x,q.z,pos.x,pos.z);if(d>70&&d<150){best={i,j,x:q.x,z:q.z};break;}}
+    if(!best)best={i:0,j:0,x:nX(0),z:nX(0)};const m=buildPolice();m.position.set(best.x,0.36,best.z);scene.add(m);police.push({m,x:best.x,z:best.z,h:0,node:{i:best.i,j:best.j},catchT:0,stuck:0});}}
+function clearPolice(){police.forEach(c=>scene.remove(c.m));police.length=0;}
+function updatePolice(dt){if(!S.wanted){if(police.length)clearPolice();$('#wantedBox').classList.add('hidden');return;}
+  const pos=ctrlPos();const sp=15+S.wanted*2.5;let minD=1e9;lightT+=dt;sirenT-=dt;
+  for(const c of police){const d=dist2(c.x,c.z,pos.x,pos.z);minD=Math.min(minD,d);let tx,tz;
+    if(d<28){tx=pos.x;tz=pos.z;}else{const q=nodePos(c.node.i,c.node.j);if(dist2(c.x,c.z,q.x,q.z)<3){let bn=null,bd=1e9;[[1,0],[-1,0],[0,1],[0,-1]].forEach(o=>{const i=c.node.i+o[0],j=c.node.j+o[1];if(i<0||j<0||i>N||j>N)return;const qq=nodePos(i,j);const dd=dist2(qq.x,qq.z,pos.x,pos.z);if(dd<bd){bd=dd;bn={i,j};}});if(bn)c.node=bn;}
+      const q2=nodePos(c.node.i,c.node.j);tx=q2.x;tz=q2.z;}
+    const want_=Math.atan2(tx-c.x,tz-c.z);c.h+=clamp(angDiff(c.h,want_),-3.2*dt,3.2*dt);const ox=c.x,oz=c.z;c.x+=Math.sin(c.h)*sp*dt;c.z+=Math.cos(c.h)*sp*dt;
+    const q={x:c.x,z:c.z};if(collide(q,1.6)){c.stuck+=dt;}else c.stuck=Math.max(0,c.stuck-dt);c.x=q.x;c.z=q.z;
+    if(c.stuck>1.5){let bn=null,bd=1e9;for(let i=0;i<=N;i++)for(let j=0;j<=N;j++){const qq=nodePos(i,j);const dd=dist2(qq.x,qq.z,c.x,c.z);if(dd<bd){bd=dd;bn={i,j};}}c.node=bn;c.stuck=0;c.x=lerp(c.x,nodePos(bn.i,bn.j).x,0.3);c.z=lerp(c.z,nodePos(bn.i,bn.j).z,0.3);}
+    c.m.position.set(c.x,0.36,c.z);c.m.rotation.y=c.h;const on=Math.floor(lightT*6)%2;c.m.userData.lights.forEach((l,i)=>l.material.color.set((i+on)%2?'#ff0000':'#0044ff'));
+    if(d<3.8){c.catchT+=dt;if(c.catchT>1.0){arrest();return;}}else c.catchT=Math.max(0,c.catchT-dt);}
+  if(sirenT<=0&&minD<120){sirenT=0.45;SFX.siren(Math.floor(lightT*2.2)%2===0);}
+  if(minD>75)evadeT+=dt;else evadeT=Math.max(0,evadeT-dt*2);const need=12+S.wanted*6;
+  const wb=$('#wantedBox');wb.classList.remove('hidden');wb.innerHTML=`🚨 指名手配 ${'★'.repeat(S.wanted)}${'☆'.repeat(3-S.wanted)}<small>${minD>75?`逃走中… あと${Math.ceil(need-evadeT)}秒で逃げ切り`:'警察が接近中！収入凍結・客が乗らない'}</small>`;
+  if(evadeT>=need){S.wanted=0;clearPolice();toast('😮‍💨 警察を撒いた！指名手配が解除された');SFX.coin();}}
+function arrest(){const fine=Math.round((40+45*S.wanted)*LM());S.arrests++;const lv=S.wanted;S.wanted=0;clearPolice();addExp('fine',fine);SFX.err();
+  if(walker.car){scene.remove(walker.car.m);walker.car=null;document.body.classList.remove('car');}
+  if(player.onFoot){walker.x=player.x+3;walker.z=player.z;walker.m.visible=true;}
+  modal(`<div class="big">🚔</div><h2>逮捕された！</h2><p>指名手配 ${'★'.repeat(lv)} で警察に捕まった…</p><table class="tb"><tr><td>⚖️ 罰金</td><td class="minus">-${fmt(fine)}</td></tr></table><p style="font-size:11px">釈放されて愛車のそばに戻された。${S.money<0?'<br><b style="color:#c1121f">お金がマイナス！決算までに返済しないと差し押さえ</b>':''}</p><div class="btns"><button class="btn" data-act="closemodal">反省する…</button></div>`);updateFootBtn();}
+function updateVictims(dt){for(let i=victims.length-1;i>=0;i--){const v=victims[i];if(v.down>0){v.down-=dt;if(v.down<=0){v.m.rotation.x=0;v.m.position.y=0.36;}continue;}
+    v.t+=dt;const pos=ctrlPos();const a=Math.atan2(v.x-pos.x,v.z-pos.z);v.x+=Math.sin(a)*7*dt;v.z+=Math.cos(a)*7*dt;v.m.position.set(v.x,0.36,v.z);v.m.rotation.y=a;animLimbs(v.m,v.t*12,0.9);
+    if(v.t>5){scene.remove(v.m);victims.splice(i,1);}}
+  for(let i=abandoned.length-1;i>=0;i--){const c=abandoned[i];if(dist2(c.x,c.z,player.x,player.z)>160&&(!player.onFoot||dist2(c.x,c.z,walker.x,walker.z)>160)){scene.remove(c.m);abandoned.splice(i,1);}}}
+function driveCar(dt,wx,wz,mag,brk){const c=walker.car;const cfg=c.kind==='car'?{max:22,acc:12,turn:2.6,r:1.8}:{max:19,acc:15,turn:3.4,r:0.9};
+  if(mag>0.12&&!sheetOpen){const t=Math.atan2(wx,wz);const d=angDiff(c.h,t);c.h+=clamp(d,-cfg.turn*dt,cfg.turn*dt);const al=Math.max(0,Math.cos(d));c.v+=clamp(cfg.max*mag*(0.35+0.65*al)-c.v,-cfg.acc*1.6*dt,cfg.acc*dt);}else c.v-=Math.min(c.v,6*dt);
+  if(brk)c.v=Math.max(0,c.v-30*dt);c.x+=Math.sin(c.h)*c.v*dt;c.z+=Math.cos(c.h)*c.v*dt;c.x=clamp(c.x,-205,205);c.z=clamp(c.z,-205,205);
+  const q={x:c.x,z:c.z};if(collide(q,cfg.r)){if(c.v>8&&(!c.bt||gameTime-c.bt>0.6)){c.bt=gameTime;SFX.crash();player.shake=0.25;}c.v*=0.6;}c.x=q.x;c.z=q.z;
+  for(const a of traffic){if(a.x===undefined)continue;const d=dist2(a.x,a.z,c.x,c.z);if(d<3.4){c.x+=(c.x-a.x)/(d||1)*(3.4-d);c.z+=(c.z-a.z)/(d||1)*(3.4-d);if(c.v>6&&(!c.bt||gameTime-c.bt>0.6)){c.bt=gameTime;SFX.crash();c.v*=0.4;}}}
+  c.m.position.set(c.x,0.36,c.z);c.m.rotation.y=c.h;walker.x=c.x;walker.z=c.z;walker.h=c.h;}
+/* ===== casino ===== */
+let casinoOpen=false,cGame='slot',cBet=10,cBusy=false,rBet='red';const rHist=[];
+const SLOTS=[{s:'🍒',w:30,p:5},{s:'🍋',w:25,p:8},{s:'🛺',w:20,p:15},{s:'⭐',w:12,p:25},{s:'💎',w:8,p:50},{s:'7️⃣',w:5,p:100}];
+const REDS=[1,3,5,7,9,12,14,16,18,19,21,23,25,27,30,32,34,36];
+function assetsValue(){let v=Math.max(0,S.vehicles-1)*vehPrice(Math.floor((S.vehicles-1)/2))*0.4;FAC.forEach(f=>{for(let l=0;l<(S.fac[f.id]||0);l++)v+=facCost(f,l)*0.4;});return v;}
+function creditLimit(){return Math.max(30*LM(),assetsValue()*0.5);}
+function betLimit(){return Math.max(0,S.money+creditLimit());}
+function nearCasino(){const p=ctrlPos();return dist2(p.x,p.z,CASINO_PT.x,CASINO_PT.z)<7;}
+function openCasino(){if(S.wanted>0){toast('🛑 警備員「指名手配犯はお断りだ！」');SFX.err();return;}if(!player.onFoot&&player.v>3){toast('🛑 停車してから入ろう');return;}
+  casinoOpen=true;$('#casino').classList.remove('hidden');SFX.big();renderCasino();}
+function closeCasino(){if(cBusy)return;casinoOpen=false;$('#casino').classList.add('hidden');
+  if(S.money<0)modal(`<div class="big">💸</div><h2>借金 ${fmt(-S.money)}</h2><p>カジノで会社のお金がマイナスに…<br><b>今日の決算までに返済しないと、車両・設備・従業員が差し押さえられます！</b></p><div class="btns"><button class="btn r" data-act="closemodal">稼いで返す…</button></div>`);}
+function renderCasino(){const chips=[[10*LM(),fmt(10*LM())],[100*LM(),fmt(100*LM())],[1000*LM(),fmt(1000*LM())],['p10','10%'],['p50','50%'],['all','ALL IN']];
+  $('#cChips').innerHTML=chips.map(c=>`<button data-chip="${c[0]}">${c[1]}</button>`).join('');
+  if(cGame==='slot')$('#cGame').innerHTML=`<div class="reels"><div class="reel" id="r0">🛺</div><div class="reel" id="r1">💎</div><div class="reel" id="r2">7️⃣</div></div><button class="bigbtn" id="cSpin" data-act="cspin">スピン！</button><div class="paytab">3つ揃い: 🍒×5 🍋×8 🛺×15 ⭐×25 💎×50 7️⃣×100<br>🍒が2つ: ×2.5</div>`;
+  else $('#cGame').innerHTML=`<div class="rwheel" id="rw" style="background:#1b5e20">0</div><div class="rbets">${[['red','赤 ×2','#c1121f'],['black','黒 ×2','#222'],['zero','0 ×36','#1b5e20'],['d1','1-12 ×3','#6a4c93'],['d2','13-24 ×3','#6a4c93'],['d3','25-36 ×3','#6a4c93']].map(b=>`<button data-rb="${b[0]}" style="background:${b[2]}" class="${rBet===b[0]?'on':''}">${b[1]}</button>`).join('')}</div><button class="bigbtn" data-act="cspin">ルーレットを回す！</button><div class="rhist" id="rh"></div>`;
+  document.querySelectorAll('.ctabs button').forEach(b=>b.classList.toggle('on',b.dataset.cg===cGame));renderRHist();updCasino();}
+function renderRHist(){const h=$('#rh');if(h)h.innerHTML=rHist.map(n=>`<span style="background:${n===0?'#1b5e20':REDS.includes(n)?'#c1121f':'#222'}">${n}</span>`).join('');}
+function resolveBet(){const lim=betLimit();let b=cBet;if(b==='p10')b=Math.max(1,S.money*0.1);else if(b==='p50')b=Math.max(1,S.money*0.5);else if(b==='all')b=Math.max(0,S.money);return Math.min(+b,lim);}
+function updCasino(){const m=$('#cMoney');m.textContent=fmt(S.money);m.classList.toggle('neg',S.money<0);
+  $('#cInfo').innerHTML=`借入枠 ${fmt(creditLimit())}（資産の50%まで借金して賭けられる）<br>本日のカジノ収支 <b style="color:${(S.casinoNet||0)>=0?'#7fff9f':'#ff8080'}">${(S.casinoNet||0)>=0?'+':''}${fmt(S.casinoNet||0)}</b>${S.money<0?' ・ <b style="color:#ff6b6b">⚠️ 借金中：決算で差し押さえ</b>':''}<br>自己破産できる残り回数: <b>${BANKRUPT_MAX-S.bankrupt}回</b>（超えると倒産＝ゲームオーバー）`;
+  const b=resolveBet();$('#betTxt').textContent=`賭け金: ${fmt(b)}${b>Math.max(0,S.money)?'（借金）':''}`;document.querySelectorAll('#cChips button').forEach(x=>x.classList.toggle('on',x.dataset.chip==String(cBet)));
+  document.querySelectorAll('[data-act=cspin]').forEach(x=>x.classList.toggle('dis',b<1||cBusy));}
+function casinoPay(bet,mult){const net=bet*mult-bet;S.money+=net;S.casinoNet=(S.casinoNet||0)+net;if(net>0)S.today.inc.casino=(S.today.inc.casino||0)+net;else if(net<0)S.today.exp.casino=(S.today.exp.casino||0)-net;bumpMoney();save();return net;}
+function cSpin(){if(cBusy)return;const bet=resolveBet();if(bet<1){toast('賭け金が足りません');return;}cBusy=true;$('#cResult').textContent='';updCasino();
+  if(cGame==='slot'){const tot=SLOTS.reduce((a,x)=>a+x.w,0);const roll=()=>{let r=rnd()*tot;for(const x of SLOTS){r-=x.w;if(r<=0)return x;}return SLOTS[0];};const res=[roll(),roll(),roll()];
+    const els=[0,1,2].map(i=>$('#r'+i));els.forEach(e=>e.classList.add('spin'));let t=0;const iv=setInterval(()=>{t++;els.forEach((e,i)=>{if(t<8+i*5)e.textContent=pick(SLOTS).s;else if(t===8+i*5){e.textContent=res[i].s;e.classList.remove('spin');tone(300+i*100,0.08,'square',0.05);}});if(t%2)SFX.reel();
+      if(t>=18){clearInterval(iv);let mult=0;if(res[0]===res[1]&&res[1]===res[2])mult=res[0].p;else if(res.filter(x=>x.s==='🍒').length===2)mult=2.5;finish(bet,mult,mult>=25);}},80);}
+  else{const n=Math.floor(rnd()*37);const w=$('#rw');let t=0;const iv=setInterval(()=>{t++;const k=t<26?Math.floor(rnd()*37):n;w.textContent=k;w.style.background=k===0?'#1b5e20':REDS.includes(k)?'#c1121f':'#222';tone(800,0.02,'square',0.02);
+      if(t>=26){clearInterval(iv);rHist.unshift(n);if(rHist.length>12)rHist.pop();renderRHist();let mult=0;const red=REDS.includes(n);
+        if(rBet==='red'&&n&&red)mult=2;else if(rBet==='black'&&n&&!red)mult=2;else if(rBet==='zero'&&n===0)mult=36;else if(rBet==='d1'&&n>=1&&n<=12)mult=3;else if(rBet==='d2'&&n>=13&&n<=24)mult=3;else if(rBet==='d3'&&n>=25)mult=3;finish(bet,mult,mult>=36);}},40+0);}
+  function finish(bet,mult,jack){const net=casinoPay(bet,mult);const r=$('#cResult');
+    if(mult>0){r.innerHTML=`<span style="color:#7fff9f">${jack?'💥 JACKPOT!! ':'🎉 勝ち！ '}+${fmt(net)}</span>`;if(jack){SFX.jackpot();}else SFX.big();coinsFrom3D(player.x,3,player.z,10);}
+    else{r.innerHTML=`<span style="color:#ff8080">😭 負け… -${fmt(bet)}</span>`;SFX.angry();}cBusy=false;updCasino();}}
+/* ===== foreclosure ===== */
+function refreshFacVisual(id){if(id==='branch'){while(branchG.length>(S.fac.branch||0)){const g=branchG.pop();scene.remove(g);}return;}
+  if(facColl[id]){colliders.splice(colliders.indexOf(facColl[id]),1);delete facColl[id];}if(facColl[id+'2']){colliders.splice(colliders.indexOf(facColl[id+'2']),1);delete facColl[id+'2'];}
+  if((S.fac[id]||0)>0)buildFacility(id,S.fac[id],false);else{if(facG[id]){scene.remove(facG[id]);delete facG[id];}delete CUT.ghosts['f'+id];if(plotSigns[id])plotSigns[id].visible=true;delete S.fac[id];}}
+const BANKRUPT_MAX=2;
+function gameOver(debt){SFX.err();modal(`<div class="big">💀</div><h2>倒産…</h2><p>借金 ${fmt(debt)} を返せず、自己破産の上限（${BANKRUPT_MAX}回）を超えてしまった。<br><b>トゥクトゥク幕府は解散です。</b></p><p style="font-size:12px">ボロボロのトゥクトゥク1台と$10からやり直し。<br>威光（転生ボーナス）だけは引き継がれます。</p><div class="btns"><button class="btn r" data-act="gameover">一からやり直す</button></div>`);}
+function doGameOver(){const meta=Object.assign({},S.meta);const keep={sound:S.sound,bgm:S.bgm,hq:S.hq};const N_=DEF();Object.assign(N_,keep);N_.meta=meta;N_.money=Math.round(10*cityDef(meta.city).m);N_.intro=true;
+  resetting=true;try{localStorage.setItem(KEY,JSON.stringify(N_));}catch(e){}location.reload();}
+function foreclose(){if(S.money>=0)return;const seized=[];const debt0=-S.money;const sellVeh=()=>{const p=Math.round(vehPrice(Math.max(0,S.vehicles-2))*0.4);S.vehicles--;S.money+=p;return p;};
+  let nv=0,sv=0;while(S.money<0&&freeVeh()>0){sv+=sellVeh();nv++;}if(nv)seized.push(`🛺 待機中のトゥクトゥク ${nv}台（+${fmt(sv)}）`);
+  while(S.money<0){const c=FAC.filter(f=>(S.fac[f.id]||0)>0).map(f=>({f,v:Math.round(facCost(f,S.fac[f.id]-1)*0.4)})).sort((a,b)=>b.v-a.v)[0];if(!c)break;S.fac[c.f.id]--;S.money+=c.v;seized.push(`${c.f.icon} ${c.f.name} Lv${S.fac[c.f.id]+1}（+${fmt(c.v)}）`);refreshFacVisual(c.f.id);}
+  let nd=0,sd=0;while(S.money<0){const ds=S.staff.filter(x=>x.role==='driver');if(!ds.length)break;const d=ds[ds.length-1];S.staff.splice(S.staff.indexOf(d),1);sd+=sellVeh();nd++;}if(nd){seized.push(`🧑‍✈️ ドライバー${nd}人を解雇＋車両売却（+${fmt(sd)}）`);}
+  if(S.money<0){const o=S.staff.filter(x=>x.role!=='driver');if(o.length){S.staff=S.staff.filter(x=>x.role==='driver');seized.push(`👥 事務スタッフ${o.length}人が給料未払いで退職`);}}
+  if(S.money<0){if(S.bankrupt>=BANKRUPT_MAX){setTimeout(()=>gameOver(-S.money),300);return;}S.bankrupt++;seized.push(`⚖️ 残りの借金 ${fmt(-S.money)} は<b>自己破産</b>で帳消し（評判ダウン）<br>⚠️ 自己破産 残り<b>${BANKRUPT_MAX-S.bankrupt}回</b>。次に超えると倒産（ゲームオーバー）`);S.money=0;S.rep=Math.max(1,S.rep-1);}
+  recalc();syncFleetVis();syncParked();syncWalkers();SFX.err();
+  setTimeout(()=>modal(`<div class="big">⚖️</div><h2>差し押さえ執行</h2><p>借金 ${fmt(debt0)} を返済できなかったため、以下が差し押さえられました…</p><ul>${seized.map(x=>'<li>'+x+'</li>').join('')}</ul><div class="btns"><button class="btn" data-act="closemodal">くっ…再起だ</button></div>`),600);}
+function toggleFoot(){initAudio();
+  if(player.onFoot&&walker.car){const c=walker.car;if(c.v>3){toast('🛑 停車してから降りよう');return;}abandoned.push({m:c.m,kind:c.kind,x:c.x,z:c.z,h:c.h});walker.car=null;walker.x=c.x+Math.cos(c.h)*2.6;walker.z=c.z-Math.sin(c.h)*2.6;const q={x:walker.x,z:walker.z};collideFoot(q,0.6);walker.x=q.x;walker.z=q.z;walker.m.visible=true;document.body.classList.remove('car');SFX.click();updateFootBtn();return;}
+  if(player.onFoot&&dist2(walker.x,walker.z,player.x,player.z)>5.5){const ab=abandoned.find(c=>dist2(c.x,c.z,walker.x,walker.z)<3.8);if(ab){abandoned.splice(abandoned.indexOf(ab),1);walker.car={m:ab.m,kind:ab.kind,v:0,h:ab.h,x:ab.x,z:ab.z};walker.m.visible=false;document.body.classList.add('car');SFX.click();updateFootBtn();return;}}
+  if(!player.onFoot){if(player.v>3){toast('🛑 停車してから降りよう');SFX.err();return;}
+    player.onFoot=true;player.v=0;if(!walker.m){walker.m=personAnim('#f4a261',4242);scene.add(walker.m);}walker.m.visible=true;
+    walker.x=player.x+Math.cos(player.h)*2.8;walker.z=player.z-Math.sin(player.h)*2.8;walker.h=player.h;const q={x:walker.x,z:walker.z};collideFoot(q,0.6);walker.x=q.x;walker.z=q.z;
+    if(player.mesh.userData.drv)player.mesh.userData.drv.visible=false;document.body.classList.add('foot');toast('🚶 徒歩モード。トゥクトゥクの近くで「乗る」');SFX.click();}
+  else{if(dist2(walker.x,walker.z,player.x,player.z)>5.5){toast('🛺 トゥクトゥクに近づいてから乗ろう');SFX.err();return;}
+    player.onFoot=false;walker.m.visible=false;if(player.mesh.userData.drv)player.mesh.userData.drv.visible=true;document.body.classList.remove('foot');SFX.click();}
+  updateFootBtn();}
+function updateFootBtn(){const b=$('#footBtn');if(player.onFoot&&walker.car){b.innerHTML=(walker.car.kind==='car'?'🚗':'🏍️')+'<small>降りる</small>';b.classList.toggle('dis',walker.car.v>3);return;}
+  if(player.onFoot&&dist2(walker.x,walker.z,player.x,player.z)>5.5&&abandoned.some(c=>dist2(c.x,c.z,walker.x,walker.z)<3.8)){b.innerHTML='🚗<small>乗る</small>';b.classList.remove('dis');return;}
+  if(!player.onFoot){b.innerHTML='🚶<small>降りる</small>';b.classList.toggle('dis',player.v>3);}else{const near=dist2(walker.x,walker.z,player.x,player.z)<=5.5;b.innerHTML='🛺<small>'+(near?'乗る':'遠い')+'</small>';b.classList.toggle('dis',!near);}}
+function updateSeats(){const sl=player.mesh.userData.slots;sl.forEach((s,i)=>s.visible=i<player.onboard.length);}
+function seatsCap(){return 1+S.upg.seats;}
+const arrow=new THREE.Mesh(new THREE.ConeGeometry(0.9,2.4,3).rotateX(Math.PI/2),new THREE.MeshBasicMaterial({color:'#ffd166'}));arrow.scale.set(1,0.5,1);scene.add(arrow);
+const arrowRing=new THREE.Mesh(new THREE.RingGeometry(3.6,4.1,32).rotateX(-Math.PI/2),new THREE.MeshBasicMaterial({color:'#ffffff',transparent:true,opacity:0.35}));scene.add(arrowRing);
+
+/* ================= passengers ================= */
+const waiting=[];const beams=[];
+const beamGeo=new THREE.CylinderGeometry(2.6,2.6,40,16,1,true);const ringGeo=new THREE.RingGeometry(3,4,32).rotateX(-Math.PI/2);
+function makeBeam(col){const g=new THREE.Group();const b=new THREE.Mesh(beamGeo,new THREE.MeshBasicMaterial({color:col,transparent:true,opacity:0.28,depthWrite:false,side:THREE.DoubleSide}));b.position.y=20;g.add(b);
+  const r=new THREE.Mesh(ringGeo,new THREE.MeshBasicMaterial({color:col,transparent:true,opacity:0.8,depthWrite:false}));r.position.y=0.12;g.add(r);g.userData.ring=r;scene.add(g);return g;}
+function pFareMult(){return (1+S.upg.exterior*0.1)*LM()*PB()*EV('fare');}
+function chooseType(){const r=rnd();if(S.divs.airport&&r<0.07)return'airport';if((S.divs.tour||EV('tourist',0))&&r<0.17)return'tour';if(rnd()<vipChanceOf(S.upg.ac))return'vip';const q=rnd();return q<0.45?'short':q<0.8?'mid':'long';}
+function makeTrip(pt,type){let dest;
+  if(type==='airport')dest={x:AIRPORT_PT.x,z:AIRPORT_PT.z};else if(type==='tour'){const l=pick(landmarkPts);dest={x:l.x,z:l.z,name:l.name};}
+  else{const rng=type==='short'?[35,110]:type==='mid'?[110,200]:type==='long'?[200,600]:[90,600];let c=[];for(let k=0;k<40;k++){const q=pick(roadPts);const d=dist2(pt.sx,pt.sz,q.rx,q.rz);if(d>=rng[0]&&d<=rng[1]){c.push(q);if(c.length>3)break;}}
+    let q=c.length?pick(c):pick(roadPts);dest={x:q.rx,z:q.rz};
+    if(type!=='vip'){const d=dist2(pt.sx,pt.sz,dest.x,dest.z);type=d<110?'short':d<200?'mid':'long';}}
+  return{dest,type};}
+function newPassenger(opts){opts=opts||{};let pt=opts.pt;
+  if(!pt){for(let k=0;k<30;k++){const q=pick(roadPts);const d=dist2(q.sx,q.sz,player.x,player.z);if(d>28&&d<150&&!waiting.some(w=>dist2(w.pt.sx,w.pt.sz,q.sx,q.sz)<8)){pt=q;break;}}}
+  if(!pt)return null;let type=opts.type||chooseType();let trip=opts.dest?{dest:opts.dest,type}:makeTrip(pt,type);type=trip.type;
+  const fare=opts.fare||PTYPE[type].f*pFareMult();const lug=S.upg.cargo>0&&rnd()<0.5?0.5*S.upg.cargo*(0.6+rnd()*0.8)*LM():0;
+  const col=PTYPE[type].c;const m=person(pick(['#e76f51','#8ecae6','#ffb703','#cdb4db','#90be6d','#f4f1de']));m.position.set(pt.sx,0.36,pt.sz);m.rotation.y=pt.ry;scene.add(m);
+  if(lug)bx(m,'#8d5a2b',0.7,0.8,0.4,0.6,0.4,0);
+  const mk=new THREE.Mesh(G.oct,new THREE.MeshBasicMaterial({color:col}));mk.scale.set(0.55,0.75,0.55);mk.position.set(0,3.3,0);m.add(mk);
+  const p={pt,dest:trip.dest,type,fare,lug,m,mk,app:opts.app||null,el:null,t:rnd()*6};
+  const el=document.createElement('div');el.className='ft small';el.style.animation='none';el.style.fontSize='13px';el.style.background=col;el.style.padding='1px 7px';el.style.borderRadius='9px';el.style.textShadow='none';
+  el.textContent=(p.app?'📱':'')+PTYPE[type].n+' '+fmtD(fare+(lug||0));floatsEl.appendChild(el);p.el=el;
+  if(p.app)p.pickDL=gameTime+Math.round(manh(pt.sx,pt.sz,player.x,player.z)/7+20);
+  if(p.app){p.beam=makeBeam(APPS.find(a=>a.id===p.app).color);p.beam.position.set(pt.rx,0.36,pt.rz);p.beam.scale.set(0.6,0.5,0.6);}
+  if(opts.special){p.special=true;mk.material.color.set('#ffd700');mk.scale.set(1,1.3,1);el.textContent='📸 インフルエンサー '+fmtD(fare);el.style.background='#d4a017';el.style.fontSize='14px';
+    p.beam=makeBeam('#ffd700');p.beam.position.set(pt.rx,0.36,pt.rz);p.pickDL=gameTime+75;}
+  waiting.push(p);return p;}
+function spawnInfluencer(){const p=newPassenger({type:'vip',fare:40*LM()*PB(),special:true});if(p){toast('📸 金色の柱にインフルエンサーが！75秒以内に迎えに行こう');}}
+function removeWaiting(p){scene.remove(p.m);if(p.el)p.el.remove();if(p.beam)scene.remove(p.beam);const i=waiting.indexOf(p);if(i>=0)waiting.splice(i,1);}
+function manh(ax,az,bx_,bz_){return Math.abs(ax-bx_)+Math.abs(az-bz_);}
+function board(p){removeWaiting(p);p.t0=gameTime;p.limit=Math.round(manh(p.pt.sx,p.pt.sz,p.dest.x,p.dest.z)/7.5+8);p.bumps=0;p.lastTick=99;p.beamD=makeBeam(PTYPE[p.type].c);p.beamD.position.set(p.dest.x,0.36,p.dest.z);player.onboard.push(p);updateSeats();SFX.click();
+  floatText('乗車！',player.x,4,player.z,'small');renderPax();if(!S.intro){showHint('⏱ 制限時間内に光の柱まで運ぼう！');}}
+function refuseChance(w){if(S.wanted>0)return 1;if(w.special)return S.cond<0.5?1:0;let c=Math.max(0,(3.6-S.rep)*0.35);if(S.cond<0.3)c+=0.3;else if(S.cond<0.55)c+=0.1;if(w.type==='vip'&&(S.rep<4||S.cond<0.6))c+=0.45;return Math.min(0.9,c);}
+function refuse(w){w.refused=true;w.refT=1.6;SFX.angry();const why=S.wanted>0?'ひっ！指名手配犯だ！':S.cond<0.3?'こんなボロ車イヤ！':S.rep<3?'評判悪いからパス！':w.type==='vip'?'VIPには相応しくない':'やっぱやめとく…';
+  floatText('😠 '+why,w.m.position.x,5,w.m.position.z,'small bad');w.el.textContent='😠 乗車拒否';w.el.style.background='#c1121f';w.mk.visible=false;}
+function applyRating(r){S.rep=clamp(S.rep*0.85+r*0.15,1,5);S.ratings.push(Math.round(r*10)/10);if(S.ratings.length>12)S.ratings.shift();recalc();}
+const STARW=['','最悪！','遅すぎ…','まあまあ','いいね！','最高！！'];
+function dropOff(p){scene.remove(p.beamD);player.onboard.splice(player.onboard.indexOf(p),1);updateSeats();
+  let cat=p.app?'app':(p.type==='vip'?'vip':p.type==='tour'?'tour':p.type==='airport'?'airport':'fare');
+  const late=(gameTime-p.t0)-p.limit;let r=5;if(late>0)r-=late/5;r-=p.bumps*0.7;if(S.cond<0.4)r-=0.6;r=clamp(r,1,5);
+  let mult=1;if(r>=4.5){S.streak++;S.bestStreak=Math.max(S.bestStreak,S.streak);mult=1+0.1*Math.min(S.streak,5);}else{S.streak=0;if(r<2.5)mult=0.7;}
+  applyRating(r);const sr=Math.round(r);
+  if(p.special){if(r>=4.5){S.rep=Math.min(5,S.rep+0.4);startEv('buzz');setTimeout(()=>{SFX.lvl();modal(`<div class="burst"><span>📈</span></div><h2>動画がバズった！</h2><p>「このトゥクトゥク最高！」の動画が100万再生突破！<br>評判アップ＆2分間 客が殺到します。</p><div class="btns"><button class="btn g" data-act="closemodal">やったー！</button></div>`);},700);}
+    else{S.rep=Math.max(1,S.rep-0.4);recalc();setTimeout(()=>toast('🔥 「最悪のトゥクトゥク」と配信されて炎上… 評判ダウン'),700);}}const stars='★'.repeat(sr)+'☆'.repeat(5-sr);
+  setTimeout(()=>floatText(stars+' '+STARW[sr],player.x,8,player.z,sr>=4?'gold':'small bad'),250);
+  if(mult>1)setTimeout(()=>floatText(`⏱ 定刻ボーナス ×${mult.toFixed(1)}（${S.streak}連続）`,player.x,2,player.z,'small'),500);
+  else if(mult<1)setTimeout(()=>floatText('遅延で運賃 -30%',player.x,2,player.z,'small bad'),500);
+  if(sr>=5)SFX.star();else if(sr<=2)SFX.angry();
+  let total=(p.fare+(p.lug||0))*mult;
+  addInc(cat,total);if(p.app){const a=APPS.find(x=>x.id===p.app);addExp('appfee',p.fare*a.fee);S.appTrips++;}
+  S.trips++;floatText('+'+fmtD(total),player.x,5,player.z,p.type==='vip'||p.type==='airport'?'gold':'');if(p.lug)floatText('荷物チップ +'+fmtD(p.lug),player.x,3,player.z,'small');
+  coinsFrom3D(player.x,3,player.z,Math.min(10,3+Math.floor(total)+S.streak));SFX.coin(1+Math.min(S.streak,8)*0.06);if(total>=10)SFX.big();renderPax();hideHint();}
+function renderPax(){const el=$('#pax');el.innerHTML=player.onboard.map(p=>`<div class="chip" style="border-left-color:${PTYPE[p.type].c}">${p.app?'📱':''}${PTYPE[p.type].n}客 ${fmtD(p.fare+(p.lug||0))} <span id="pd${player.onboard.indexOf(p)}"></span></div>`).join('')+
+  (player.onboard.length?`<div class="chip" style="border-left-color:#999">座席 ${player.onboard.length}/${seatsCap()}${S.streak?' ・ 🔥'+S.streak+'連続定刻':''}</div>`:'');}
+
+/* ================= app requests ================= */
+const requests=[];let reqTimer=0,reqId=1;
+function genRequest(){const apps=APPS.filter(a=>S.apps[a.id]);if(!apps.length)return;const a=pick(apps);let pt=null;
+  for(let k=0;k<40;k++){const q=pick(roadPts);const d=dist2(q.sx,q.sz,player.x,player.z);if(d>40&&d<190){pt=q;break;}}if(!pt)return;
+  let type=chooseType();if(a.id==='naga'&&(type==='short')&&rnd()<0.6)type='long';if(a.id==='angkor'&&rnd()<0.35)type='vip';if(type==='vip'&&S.rep<4)type='long';
+  const trip=makeTrip(pt,type);const fare=PTYPE[trip.type].f*pFareMult()*1.3;
+  requests.push({id:reqId++,app:a.id,type:trip.type,pt,dest:trip.dest,fare,exp:45,pick:dist2(pt.sx,pt.sz,player.x,player.z),len:dist2(pt.sx,pt.sz,trip.dest.x,trip.dest.z)});
+  updatePhoneBadge();if(phoneOpen&&ptab==='req')renderPhone();}
+function acceptReq(id){const r=requests.find(x=>x.id===id);if(!r)return;requests.splice(requests.indexOf(r),1);const p=newPassenger({pt:r.pt,type:r.type,dest:r.dest,fare:r.fare,app:r.app});
+  if(p){toast('📱 依頼を受けました！紫の柱へ迎えに行こう');SFX.click();}updatePhoneBadge();closePhone();}
+function updatePhoneBadge(){const b=$('#phoneBadge');b.textContent=requests.length;b.classList.toggle('hidden',!requests.length);}
+
+/* ================= economy actions ================= */
+const rateWin=[];let gameTime=0;
+let lastFrozenToast=-99;
+function addInc(cat,a){if(S.wanted>0){if(gameTime-lastFrozenToast>12){lastFrozenToast=gameTime;toast('🚨 指名手配中！会社の口座が凍結され収入が入りません');}return;}S.money+=a;S.earned+=a;S.today.inc[cat]=(S.today.inc[cat]||0)+a;rateWin.push([gameTime,a]);bumpMoney();}
+function addExp(cat,a){S.money-=a;S.today.exp[cat]=(S.today.exp[cat]||0)+a;}
+function spend(cat,a){if(S.money<a){toast('お金が足りません 💸');SFX.err();return false;}addExp(cat,a);SFX.coin();return true;}
+function bumpMoney(){const m=$('#money');m.classList.remove('pop');void m.offsetWidth;m.classList.add('pop');}
+function buyUpg(id){const u=UPG.find(x=>x.id===id);const l=S.upg[id];if(l>=u.max)return;const c=costUpg(u,l);if(!spend('invest',c))return;S.upg[id]++;
+  rebuildPlayer();sparkle(player.x,3,player.z,'#ffd166');floatText('UPGRADE!',player.x,6,player.z,'gold');SFX.big();renderPanel();save();}
+function buyVehicles(n){let bought=0,cost=0;for(let i=0;i<n;i++){if(S.vehicles>=D.mods.cap){if(!bought){toast('駐車枠が足りません！設備で駐車場を建設しよう 🅿️');SFX.err();}break;}
+    const p=vehPrice(S.vehicles-1);if(S.money<p){if(!bought){toast('お金が足りません 💸');SFX.err();}break;}addExp('vehicle',p);S.vehicles++;bought++;cost+=p;}
+  if(bought){SFX.coin();toast(`🛺 トゥクトゥクを${bought}台購入！（${fmt(cost)}）`);recalc();syncParked();renderPanel();save();checkLevel();}}
+function buyGrade(){if(S.grade>=20)return;const c=gradeCost(S.grade);if(!spend('invest',c))return;S.grade++;recalc();refreshFleetColors();syncParked();toast(`🚀 社用車グレード Lv${S.grade}！運賃アップ`);renderPanel();save();}
+function buildFac(id){const f=FACM[id];const l=S.fac[id]||0;if(l>=f.max)return;if(S.level<f.lv){toast(`Lv${f.lv}「${LEVELS[f.lv].name}」で解放`);return;}const c=facCost(f,l);if(!spend('invest',c))return;
+  S.fac[id]=l+1;recalc();if(facColl[id]){colliders.splice(colliders.indexOf(facColl[id]),1);delete facColl[id];}if(facColl[id+'2']){colliders.splice(colliders.indexOf(facColl[id+'2']),1);delete facColl[id+'2'];}
+  buildFacility(id,S.fac[id],true);if(lotSign)lotSign.visible=false;
+  let fx_=PLOT[id]?PLOT[id]:null;if(id==='branch'){const [a,b]=BRANCH_LOTS[S.fac.branch-1].split(',').map(Number);const r=bRect(a,b);fx_={x:r.cx,z:r.cz};}
+  camFocus={x:fx_.x,z:fx_.z,t:2.6};toast(`${f.icon} ${f.name}を${l?'Lv'+(l+1)+'に強化':'建設'}しました！`);closeSheet();syncParked();syncWalkers();save();checkLevel();}
+function genDriver(){const L=S.level;const st=()=>clamp(Math.round(1+rnd()*5+L*0.6+rnd()*rnd()*4),1,10);const d={role:'driver',name:pick(LN)+'・'+pick(FN),spd:st(),svc:st(),eff:st(),rel:st()};
+  d.salary=Math.round((1.5+(d.spd+d.svc+d.eff+d.rel)*0.2)*Math.pow(LM(),0.6)*10)/10;return d;}
+function genRole(role){const s=clamp(Math.round(1+rnd()*6+S.level*0.5),1,10);return{role,name:pick(LN)+'・'+pick(FN),skill:s,salary:Math.round((3+s*0.8)*Math.pow(LM(),0.5)*10)/10};}
+function refreshCands(){S.cand=[genDriver(),genDriver(),genDriver()];for(const r in ROLES)if(r!=='driver')S.candR[r]=genRole(r);}
+function hireLeft(){return Math.max(0,D.mods.hireCap-S.hiredToday);}
+function capCheck(){if(hireLeft()<1){toast('📋 本日の採用枠がいっぱい！明日また採用できます（受付・事務所・本社・マネージャーで枠が増える）');SFX.err();return false;}return true;}
+function hireDriver(i){const c=S.cand[i];if(!c)return;if(!capCheck())return;if(freeVeh()<1){toast('空き車両がありません。先にトゥクトゥクを購入しよう 🛺');SFX.err();return;}
+  if(!spend('hire',c.salary*2))return;const d=Object.assign({id:S.nid++,skill:Math.round((c.spd+c.svc+c.eff+c.rel)/4)},c);S.staff.push(d);S.hiredToday++;S.cand[i]=genDriver();
+  recalc();syncFleetVis();syncParked();syncWalkers();toast(`🧑‍✈️ ${d.name}さんを雇いました！自動で稼いでくれます`);if(!S.ins&&D.drivers.length===1)setTimeout(()=>toast('⚠️ 保険未加入！事故ると修理代＋賠償金で大損… 経営タブで加入を'),1600);renderPanel();save();checkLevel();}
+function hireBulk(){if(!capCheck())return;const n=Math.min(10,freeVeh(),hireLeft());if(n<1){toast('空き車両がありません 🛺');SFX.err();return;}const ds=[];for(let i=0;i<n;i++)ds.push(genDriver());const cost=ds.reduce((s,d)=>s+d.salary*2,0);
+  if(!spend('hire',cost))return;ds.forEach(d=>{d.id=S.nid++;d.skill=Math.round((d.spd+d.svc+d.eff+d.rel)/4);S.staff.push(d);});S.hiredToday+=n;recalc();syncFleetVis();syncParked();toast(`🧑‍✈️ ドライバーを${n}人まとめて採用！`);renderPanel();save();checkLevel();}
+function roleCap(r){const f=S.fac;switch(r){case'mechanic':return (f.garage||0)*2+(f.repair||0)*3;case'reception':return (f.reception||0)*2+(f.branch||0);case'manager':return (f.office||0)+(f.hq||0)*2+(f.branch||0);case'accountant':return (f.office||0)+(f.hq||0);case'sales':return (f.office||0)+(f.hq||0)*2+(f.branch||0);}return 0;}
+const ROLECAP_TXT={mechanic:'整備場Lv×2＋修理工場Lv×3',reception:'受付Lv×2＋営業所数',manager:'事務所Lv＋本社Lv×2＋営業所数',accountant:'事務所Lv＋本社Lv',sales:'事務所Lv＋本社Lv×2＋営業所数'};
+function hireRole(r){const R=ROLES[r];if(!S.fac[R.req]){toast(`${FACM[R.req].name}が必要です`);SFX.err();return;}if(D.cnt[r]>=roleCap(r)){toast(`${R.icon} ${R.name}は上限（${roleCap(r)}人）です。施設を強化すると枠が増えます`);SFX.err();return;}if(!capCheck())return;const c=S.candR[r]||genRole(r);if(!spend('hire',c.salary*2))return;
+  S.staff.push(Object.assign({id:S.nid++},c));S.hiredToday++;S.candR[r]=genRole(r);recalc();syncWalkers();toast(`${R.icon} ${c.name}さん（${R.name}）を雇いました！`);renderPanel();save();}
+function fire(id){const s=S.staff.find(x=>x.id===id);if(!s)return;confirmBox(`${s.name}さん（${ROLES[s.role].name}）を解雇しますか？`,()=>{S.staff.splice(S.staff.indexOf(s),1);recalc();syncFleetVis();syncParked();syncWalkers();toast('解雇しました');renderPanel();save();});}
+function regApp(id){const a=APPS.find(x=>x.id===id);if(S.apps[id])return;if(S.level<a.lv){toast(`Lv${a.lv}で解放`);return;}if(!spend('hire',aCost(a)))return;S.apps[id]=true;recalc();
+  $('#phoneBtn').classList.remove('hidden');genRequest();genRequest();modal(`<div class="burst"><span>📱</span></div><h2>${a.name} 登録完了！</h2><p>画面右の📱から依頼を受けられます。<br>社用車にも自動で配車依頼が届き、稼働率がアップ！</p><div class="btns"><button class="btn p" data-act="openphone">アプリを開く</button><button class="btn" data-act="closemodal">OK</button></div>`);renderPanel();save();checkLevel();}
+function buyDiv(id){const d=DIVS.find(x=>x.id===id);if(S.divs[id])return;if(S.level<d.lv){toast(`Lv${d.lv}で解放`);return;}if(!spend('invest',aCost(d)))return;S.divs[id]=true;recalc();toast(`${d.icon} ${d.name}を設立しました！`);sparkle(PLOT.hq.x,10,PLOT.hq.z);renderPanel();save();}
+
+/* ================= damage & repair ================= */
+function condSpeed(){return S.cond>=0.5?1:0.7+0.6*S.cond;}
+function repairUnit(){return 15*Math.sqrt(LM());}
+function damage(d){d*=Math.max(0.6,1-S.upg.tires*0.04)*EV('dmg');S.cond=Math.max(0,S.cond-d);SFX.crash();player.shake=0.3;
+  floatText(`ゴツン！ 車体 -${Math.max(1,Math.round(d*100))}%`,player.x,4,player.z,'small bad');
+  player.onboard.forEach(o=>o.bumps++);if(player.onboard.length)setTimeout(()=>floatText('😣 痛っ！安全運転して！',player.x,6.5,player.z,'small bad'),300);
+  if(condTier()!==player.tier){rebuildPlayer();const msg=['','車体に傷が…','ボロボロになってきた！客が嫌がるかも','⚠️ 煙が出ている！早く修理を！'][condTier()];if(msg)toast('🛺 '+msg);}
+  const $m=$('#money');$m.classList.remove('shake');void $m.offsetWidth;}
+function doRepair(){if(S.cond>=0.999){toast('車両は絶好調です ✨');return;}const unit=repairUnit()*(S.fac.garage?0.5:1);let amt=1-S.cond;let cost=amt*unit;
+  if(S.money<=0){toast('お金が足りません 💸');SFX.err();return;}if(S.money<cost){amt=S.money/unit;cost=S.money;}
+  addExp('repair',cost);S.cond=Math.min(1,S.cond+amt);SFX.repair();sparkle(player.x,2,player.z,'#8ecae6');floatText(`🔧 修理完了 ${Math.round(S.cond*100)}%`,player.x,5,player.z,'small');rebuildPlayer();if(sheetOpen)renderPanel();save();}
+
+/* ================= levels & goals ================= */
+function levelReqs(L){const v=S.vehicles,f=S.fac;switch(L){
+  case 2:return[['トゥクトゥク 2台',v>=2,v,2],['ドライバーを1人雇う',D.drivers.length>=1,D.drivers.length,1]];
+  case 3:return[['配車アプリに登録',D.mods.appCount>0,D.mods.appCount,1],['トゥクトゥク 10台',v>=10,v,10]];
+  case 4:return[['トゥクトゥク 30台',v>=30,v,30],['トゥクトゥク整備場',!!f.garage,f.garage?1:0,1]];
+  case 5:return[['トゥクトゥク 100台',v>=100,v,100],['大型駐車場',!!f.parkL,f.parkL?1:0,1],['本社ビル',!!f.hq,f.hq?1:0,1]];
+  case 6:return[['トゥクトゥク 300台',v>=300,v,300],['営業所 2拠点',(f.branch||0)>=2,f.branch||0,2]];}return[];}
+function checkLevel(){let up=false;while(S.level<6&&levelReqs(S.level+1).every(r=>r[1])){S.level++;up=true;}
+  if(up){recalc();SFX.lvl();const L=S.level;sparkle(player.x,4,player.z,'#ff9f1c');
+    modal(`<div class="burst"><span>${LEVELS[L].icon}</span></div><h2>LEVEL UP! Lv${L}</h2><p style="font-size:16px;font-weight:800">${LEVELS[L].name}</p><ul>${(LEVEL_UNLOCKS[L]||[]).map(x=>'<li>'+x+'</li>').join('')}</ul><p>運賃レートが ×${LMULT[L]} にアップ！</p><div class="btns"><button class="btn g" data-act="closemodal">天下統一へ進む！</button></div>`);
+    updateHUD(true);save();}}
+function getGoal(){const u=S.upg;
+  if(S.trips<1)return{t:'◆マークの人に近づいて乗せよう',p:player.onboard.length?0.5:0};
+  if(u.engine<1)return{t:'⬆️アップグレードでエンジンを強化',p:Math.min(1,S.money/costUpg(UPG[0],0))};
+  if(S.vehicles<2)return{t:'🛺 車両タブで2台目を購入しよう',p:Math.min(1,S.money/vehPrice(1))};
+  if(D.drivers.length<1)return{t:'👥 ドライバーを雇って自動で稼ごう',p:0};
+  if(!S.fac.parkS)return{t:'🏗️ 設備タブで小さな駐車場を建設',p:Math.min(1,S.money/FACM.parkS.cost)};
+  if(S.level<6){const rq=levelReqs(S.level+1);const r=rq.find(x=>!x[1]);if(r)return{t:`Lv${S.level+1}へ: ${r[0]}`,p:Math.min(1,r[2]/r[3])};}
+  return{t:'👑 プノンペン交通の天下を統一した！',p:1};}
+
+/* ================= UI: HUD ================= */
+const floatsEl=$('#floats');let dispMoney=10;let lastGoal='';
+function updateHUD(force){const g=getGoal();const gs=g.t+'|'+Math.round(g.p*20);if(force||gs!==lastGoal){lastGoal=gs;$('#goal').innerHTML=`<div class="gt">🎯 次の目標</div>${g.t}<div class="gp"><i style="width:${g.p*100}%"></i></div>`;}
+  $('#lvlNum').textContent='Lv'+S.level;$('#lvlName').textContent=LEVELS[S.level].name;
+  let sum=0;while(rateWin.length&&rateWin[0][0]<gameTime-60)rateWin.shift();rateWin.forEach(r=>sum+=r[1]);$('#rate').textContent='+'+fmt(sum)+' /分';
+  $('#dayTxt').textContent=S.day+'日目';const hm=6+S.dayT/DAY*16;$('#clock').textContent=String(Math.floor(hm)).padStart(2,'0')+':'+String(Math.floor((hm%1)*60/10)*10).padStart(2,'0');$('#dayBar i').style.width=(S.dayT/DAY*100)+'%';
+  $('#fuelFill').style.width=(S.fuel*100)+'%';$('#condFill').style.width=(S.cond*100)+'%';$('#condPct').textContent=Math.round(S.cond*100)+'%';
+  const re=$('#rep');re.textContent='★'+S.rep.toFixed(1);re.classList.toggle('bad',S.rep<3);
+  const rb=$('#repairBtn');rb.classList.toggle('hidden',S.cond>=0.9);$('#repairPct').textContent=Math.round(S.cond*100)+'%';$('#fuel').classList.toggle('low',S.fuel<0.2||S.cond<0.25);
+  const dot=$('#nav [data-tab=upg]');const canU=UPG.some(u=>S.upg[u.id]<u.max&&S.money>=costUpg(u,S.upg[u.id]));setDot(dot,canU);
+  setDot($('#nav [data-tab=fac]'),FAC.some(f=>S.level>=f.lv&&(S.fac[f.id]||0)<f.max&&S.money>=facCost(f,S.fac[f.id]||0)&&!(S.fac[f.id])));
+  const eb=$('#evBanner');if(S.ev){const e=EVM[S.ev.id];eb.textContent=`${e.icon} ${e.title.replace('！','')} 残り${Math.ceil(S.ev.t)}秒`;eb.classList.remove('hidden');}else eb.classList.add('hidden');
+  if(sheetOpen)refreshAfford();}
+function setDot(btn,on){let d=btn.querySelector('.dot');if(on&&!d){d=document.createElement('i');d.className='dot';btn.appendChild(d);}else if(!on&&d)d.remove();}
+function floatText(text,x,y,z,cls){const v=new THREE.Vector3(x,y,z).project(camera);if(v.z>1)return;const el=document.createElement('div');el.className='ft '+(cls||'');el.textContent=text;
+  el.style.left=((v.x*0.5+0.5)*innerWidth)+'px';el.style.top=((-v.y*0.5+0.5)*innerHeight)+'px';floatsEl.appendChild(el);setTimeout(()=>el.remove(),1300);}
+function coinsFrom3D(x,y,z,n){const v=new THREE.Vector3(x,y,z).project(camera);if(v.z>1)return;const sx=(v.x*0.5+0.5)*innerWidth,sy=(-v.y*0.5+0.5)*innerHeight;const tr=$('#money').getBoundingClientRect();
+  for(let i=0;i<n;i++){const c=document.createElement('div');c.className='coin';c.style.left=(sx-11+(rnd()-0.5)*40)+'px';c.style.top=(sy-11+(rnd()-0.5)*30)+'px';floatsEl.appendChild(c);
+    setTimeout(()=>{const r=c.getBoundingClientRect();c.style.transform=`translate(${tr.left+20-r.left}px,${tr.top+10-r.top}px) scale(.6)`;c.style.opacity='0.3';},30+i*45);setTimeout(()=>c.remove(),900+i*45);}}
+function toast(t){const el=document.createElement('div');el.className='toast';el.textContent=t;const box=$('#toasts');box.appendChild(el);while(box.children.length>3)box.firstChild.remove();setTimeout(()=>el.remove(),3100);}
+let hintT=0;function showHint(t,sec){const h=$('#hint');h.textContent=t;h.classList.remove('hidden');hintT=sec||6;}function hideHint(){$('#hint').classList.add('hidden');hintT=0;}
+function modal(html){$('#modalBox').innerHTML=html;$('#modal').classList.remove('hidden');}
+function closeModal(){$('#modal').classList.add('hidden');}
+let confirmCb=null;function confirmBox(text,cb){confirmCb=cb;modal(`<div class="big">🤔</div><p style="font-size:15px;font-weight:800">${text}</p><div class="btns"><button class="btn" data-act="closemodal">やめる</button><button class="btn r" data-act="confirmyes">はい</button></div>`);}
+
+/* ================= UI: panels ================= */
+let sheetOpen=null;
+const TITLES={veh:'🛺 車両',staff:'👥 スタッフ',fac:'🏗️ 設備',biz:'📊 経営',upg:'⬆️ マイ・トゥクトゥク強化'};
+function openSheet(tab){document.querySelectorAll('#nav button').forEach(b=>b.classList.toggle('on',b.dataset.tab===tab));
+  if(tab==='home'){closeSheet();camFocus=null;return;}sheetOpen=tab;$('#sheet').classList.remove('hidden');$('#sheetTitle').textContent=TITLES[tab];$('#sheetBody').scrollTop=0;renderPanel();
+  $('#joyZone').classList.add('hidden');$('#drive').classList.add('hidden');SFX.click();}
+function closeSheet(){sheetOpen=null;$('#sheet').classList.add('hidden');document.querySelectorAll('#nav button').forEach(b=>b.classList.toggle('on',b.dataset.tab==='home'));$('#joyZone').classList.remove('hidden');$('#drive').classList.remove('hidden');}
+function B(act,arg,cost,label,cls,extra){const dis=cost!=null&&S.money<cost;return `<button class="btn ${cls||''} ${dis?'dis':''}" data-act="${act}" data-arg="${arg}" ${cost!=null?`data-cost="${cost}"`:''}>${label}${cost!=null?`<small>${fmt(cost)}</small>`:''}${extra||''}</button>`;}
+function pips(l,max){let s='<div class="pips">';for(let i=0;i<max;i++)s+=`<i class="${i<l?'f':''}"></i>`;return s+'</div>';}
+function statBars(d){const row=(n,v,c)=>`<span>${n}</span><div class="bb"><i style="width:${v*10}%;background:${c}"></i></div>`;
+  return `<div class="bars">${row('運転速度',d.spd,'#3a86ff')}${row('接客能力',d.svc,'#ff9f1c')}${row('収益効率',d.eff,'#2a9d8f')}${row('故障しにくさ',d.rel,'#8338ec')}</div>`;}
+function renderPanel(){if(!sheetOpen)return;const b=$('#sheetBody');const st=b.scrollTop;let h='';const m=D.mods;
+  if(sheetOpen==='upg'){h+=`<div class="sec">🛺 あなたの愛車（${EXT[S.upg.exterior].name}）</div><div class="row" style="margin-bottom:6px"><div class="stat"><b>${Math.round(maxSpeedOf(S.upg.engine)*2.2)}</b><small>最高速度 km/h</small></div><div class="stat"><b>${seatsCap()}</b><small>座席</small></div><div class="stat"><b>×${pFareMult().toFixed(2)}</b><small>運賃倍率</small></div></div>`;
+    const rc=Math.round((1-S.cond)*repairUnit()*(S.fac.garage?0.5:1)*100)/100;
+    h+=`<div class="card"><div class="ic">🛺</div><div class="mid"><div class="nm">車両の状態 ${Math.round(S.cond*100)}%</div><div class="ds">ぶつかるとボロくなり、${S.cond<0.5?'<b style="color:#c1121f">速度低下・乗車拒否が増加中</b>':'50%未満で速度低下・乗車拒否が増えます'}。${S.fac.garage?'自社整備場に停めると半額で修理':'整備場を建てると修理が半額に'}</div><div class="bars"><span>耐久</span><div class="bb"><i style="width:${S.cond*100}%;background:${S.cond<0.3?'#e63946':S.cond<0.6?'#e9c46a':'#2a9d8f'}"></i></div></div></div>${S.cond>=0.999?'<span class="btn g dis">良好</span>':B('repair',0,rc,'修理')}</div>`;
+    h+=`<div class="card"><div class="ic">⭐</div><div class="mid"><div class="nm">ドライバー評判 ★${S.rep.toFixed(2)}</div><div class="ds">⏱時間内に届ける・ぶつけない・きれいな車で評判UP。評判が低いと乗車拒否・アプリ依頼減・VIP客が来ない。<br>最近の評価: ${S.ratings.slice(-8).map(r=>'★'+r).join(' ')||'まだなし'}<br>🔥定刻連続 ${S.streak}回（最高 ${S.bestStreak}）・乗車拒否率 ${Math.round(refuseChance({type:'short'})*100)}%</div></div></div>`;
+    UPG.forEach(u=>{const l=S.upg[u.id],mx=l>=u.max;h+=`<div class="card"><div class="ic">${u.icon}</div><div class="mid"><div class="nm">${u.name} <small>Lv${l}/${u.max}</small></div><div class="ds">${u.eff(l)}${mx?'':' → <b>'+u.eff(l+1)+'</b>'}</div>${pips(l,u.max)}</div>${mx?'<span class="btn g dis">MAX</span>':B('upg',u.id,costUpg(u,l),'強化')}</div>`;});
+    h+=`<p class="ds" style="font-size:11px;color:#7a6550">※外装・タイヤ・エンジン・座席・荷物台・エアコンは見た目にも反映されます</p>`;}
+  else if(sheetOpen==='veh'){const n=S.vehicles-1;const p=vehPrice(n);
+    h+=`<div class="row"><div class="stat"><b>${S.vehicles}</b><small>保有台数</small></div><div class="stat"><b>${S.vehicles}/${m.cap}</b><small>駐車枠</small></div><div class="stat"><b>${D.drivers.length}</b><small>稼働中</small></div><div class="stat"><b>${Math.max(0,freeVeh())}</b><small>空き車両</small></div></div>`;
+    h+=`<div class="sec">🛒 トゥクトゥクを購入</div><div class="card"><div class="ic">🛺</div><div class="mid"><div class="nm">中古トゥクトゥク</div><div class="ds">ドライバーを乗せると自動で稼ぎます。台数が増えるほど価格が上がります。</div></div><div style="display:flex;flex-direction:column;gap:6px">${B('buyveh',1,p,'1台購入')}${S.level>=3?B('buyveh',10,null,'10台まとめ買い'):''}</div></div>`;
+    if(S.vehicles>=m.cap)h+=`<div class="card" style="background:#ffe3e3"><div class="ic">🅿️</div><div class="mid"><div class="nm">駐車枠がいっぱい！</div><div class="ds">設備タブで駐車場を建設・拡張しよう</div></div><button class="btn r" data-act="tab" data-arg="fac">設備へ</button></div>`;
+    h+=`<div class="sec">🚀 社用車グレード</div><div class="card"><div class="ic" style="background:${fleetColor()}33">🚐</div><div class="mid"><div class="nm">社用車グレード Lv${S.grade}/20</div><div class="ds">全社用車の運賃 +12%／Lv（現在 +${S.grade*12}%）。車体カラーも進化</div>${pips(S.grade,20)}</div>${S.grade>=20?'<span class="btn g dis">MAX</span>':B('grade',0,gradeCost(S.grade),'強化')}</div>`;
+    h+=`<div class="sec">🧾 車両一覧</div><div class="card"><div class="ic">⭐</div><div class="mid"><div class="nm">マイ・トゥクトゥク</div><div class="ds">${EXT[S.upg.exterior].name} ・ 最高${Math.round(maxSpeedOf(S.upg.engine)*2.2)}km/h ・ 座席${seatsCap()} ・ 燃料${Math.round(S.fuel*100)}%</div></div><button class="btn b" data-act="tab" data-arg="upg">強化</button></div>
+      <div class="card"><div class="ic">🛺</div><div class="mid"><div class="nm">社用車 ×${n}</div><div class="ds">稼働 ${D.drivers.length}台 ／ 待機 ${Math.max(0,freeVeh())}台（駐車場に停車中）</div></div></div>`;}
+  else if(sheetOpen==='staff'){const sal=m.salary;
+    h+=`<div class="row"><div class="stat"><b>${S.staff.length+1}</b><small>総スタッフ（自分含む）</small></div><div class="stat"><b>${D.drivers.length}</b><small>ドライバー</small></div><div class="stat"><b>${fmtD(sal)}</b><small>給料／日</small></div><div class="stat"><b>${fmtD(D.drivers.reduce((a,d)=>a+DAY/tripDur(d),0)*fleetFuel())}</b><small>社用車ガソリン代／日（予測）</small></div></div>`;
+    if(!S.ins&&D.drivers.length)h+=`<div class="card" style="background:#ffe3e3"><div class="ic">⚠️</div><div class="mid"><div class="nm">保険未加入</div><div class="ds">事故の修理代・賠償金が全額自腹になります</div></div><button class="btn b" data-act="gotoins">保険へ</button></div>`;
+    {const nd=D.drivers.length,dem=m.demand*EV('req'),u=curUtil();const col=u<0.8?'#c1121f':'#1b8a3a';
+    h+=`<div class="sec">📊 需要と稼働状況</div><div class="card" style="display:block"><div class="row"><div class="stat"><b>${Math.floor(dem)}人分</b><small>街の配車需要</small></div><div class="stat"><b style="color:${col}">${Math.round(u*100)}%</b><small>ドライバー稼働率</small></div><div class="stat"><b style="color:${m.mgmt<1?'#c1121f':'#1b8a3a'}">${nd}/${m.mgmtCap}</b><small>管理できる人数</small></div></div>
+      <div class="ds" style="margin-top:6px">${u<1?`⚠️ ドライバーが需要より<b>${nd-Math.floor(dem)}人多い</b>ため、客待ちで稼働率が下がっています（給料だけかかる）。`:'✅ 需要に対してドライバーは足りています。'}${m.mgmt<1?`<br>⚠️ 管理が追いつかず、運賃 ×${m.mgmt.toFixed(2)}・事故率アップ。マネージャーを雇うか事務所/本社を強化。`:''}<br>需要を増やす: レベルアップ・配車アプリ・評判・受付・営業所・事業部門</div></div>`;}
+    h+=`<div class="sec">🧑‍✈️ ドライバー採用（空き車両 ${Math.max(0,freeVeh())}台 ・ 本日の採用枠 残り${hireLeft()}/${m.hireCap}）</div>`;
+    S.cand.forEach((c,i)=>{h+=`<div class="card"><div class="ic">🧑‍✈️</div><div class="mid"><div class="nm">${c.name}</div>${statBars(c)}<div class="ds">給料 ${fmtD(c.salary)}／日</div></div>${B('hire',i,c.salary*2,'雇用')}</div>`;});
+    h+=`<div class="row" style="margin-bottom:8px">${B('reroll',0,Math.round(5*LM()),'🔄 候補を入れ替え')}${S.level>=3?B('bulkhire',0,null,`一括採用（最大${Math.min(10,hireLeft(),Math.max(0,freeVeh()))}人）`):''}</div>`;
+    h+=`<div class="sec">🏢 その他の職種</div>`;
+    for(const r in ROLES){if(r==='driver')continue;const R=ROLES[r];const ok=!!S.fac[R.req];const c=S.candR[r]||(S.candR[r]=genRole(r));
+      h+=`<div class="card ${ok?'':'lock'}"><div class="ic">${R.icon}</div><div class="mid"><div class="nm">${R.name} <small style="color:${D.cnt[r]>=roleCap(r)?'#c1121f':'inherit'}">${D.cnt[r]}/${roleCap(r)}人</small></div><div class="ds">${R.desc}（現在 ${Math.round((m[{mechanic:'mech',reception:'recep',manager:'mgr',accountant:'acct',sales:'sales'}[r]])*100)}%）<br>${ok?`枠: ${ROLECAP_TXT[r]}<br>候補: ${c.name} 能力${c.skill}/10 ・ 給料${fmtD(c.salary)}/日`:'🔒 '+FACM[R.req].name+'が必要'}</div></div>${ok?(D.cnt[r]>=roleCap(r)?`<span class="btn dis" title="${ROLECAP_TXT[r]}">上限</span>`:B('hirerole',r,c.salary*2,'雇用')):''}</div>`;}
+    h+=`<div class="sec">📋 スタッフ名簿</div>`;const list=S.staff.slice().reverse();
+    if(!list.length)h+=`<div class="card"><div class="mid ds">まだスタッフはいません。あなた1人で頑張っています！</div></div>`;
+    list.slice(0,40).forEach(s=>{const rt=RT.get(s.id);h+=`<div class="card" style="padding:8px 10px"><div class="ic" style="width:36px;height:36px;font-size:22px">${ROLES[s.role].icon}</div><div class="mid"><div class="nm" style="font-size:13px">${s.name} <small>${ROLES[s.role].name}</small></div><div class="ds">${s.role==='driver'?`速${s.spd} 接${s.svc} 効${s.eff} 信${s.rel} ・ 本日${rt?rt.trips:0}回`:`能力 ${s.skill}/10`} ・ ${fmtD(s.salary)}/日</div></div><button class="btn r sm" data-act="fire" data-arg="${s.id}">解雇</button></div>`;});
+    if(list.length>40)h+=`<div class="ds" style="text-align:center">ほか ${list.length-40} 名</div>`;}
+  else if(sheetOpen==='fac'){h+=`<div class="ds" style="margin-bottom:6px">建設すると会社の敷地（売地だった場所）に建物が建ちます。</div>`;
+    FAC.forEach(f=>{const l=S.fac[f.id]||0,lock=S.level<f.lv,mx=l>=f.max;
+      h+=`<div class="card ${lock?'lock':''}"><div class="ic">${f.icon}</div><div class="mid"><div class="nm">${f.name} ${l?`<small>Lv${l}/${f.max}</small>`:''}</div><div class="ds">${f.desc}<br>維持費 ${fmtD(f.maint)}／日・Lv</div>${l?pips(l,f.max):''}</div>
+        ${lock?`<span class="btn dis">🔒Lv${f.lv}</span>`:mx?'<span class="btn g dis">MAX</span>':B('fac',f.id,facCost(f,l),l?'拡張':'建設',l?'b':'g')}</div>`;});}
+  else if(sheetOpen==='biz'){const L=S.level;const inc=S.today.inc,exp=S.today.exp;const ti=Object.values(inc).reduce((a,b)=>a+b,0),te=Object.values(exp).reduce((a,b)=>a+b,0);
+    h+=`<div class="lvlcard"><h3>${LEVELS[L].icon} Lv${L} ${LEVELS[L].name}</h3>`;
+    if(L<6){h+=`<div style="font-size:12px;margin-bottom:4px">次: Lv${L+1}「${LEVELS[L+1].name}」の条件</div>`;levelReqs(L+1).forEach(r=>h+=`<div class="req ${r[1]?'ok':''}">${r[1]?'✅':'⬜'} ${r[0]} （${Math.min(r[2],r[3])}/${r[3]}）</div>`);}else h+='<div class="req ok">👑 最高ランク到達！</div>';
+    h+=`</div><div class="row" style="margin-bottom:8px"><div class="stat"><b class="plus">${fmt(fleetNetPerSec()*60)}</b><small>社用車の純利益／分(予測)</small></div><div class="stat"><b>${fmt(S.earned)}</b><small>累計売上</small></div><div class="stat"><b>${S.trips+S.fleetTrips}</b><small>総送迎回数</small></div></div><div class="row" style="margin-bottom:8px"><div class="stat"><b style="color:#b8860b">★${S.rep.toFixed(2)}</b><small>評判（社用車の運賃 ×${D.mods.repF.toFixed(2)}）</small></div><div class="stat"><b>${Math.round(S.cond*100)}%</b><small>愛車の状態</small></div><div class="stat"><b style="font-size:14px">${gasPriceTxt()}</b><small>今日のガソリン価格</small></div></div>`;
+    h+=`<div class="sec">📅 ${S.day}日目の収支（決算まで ${Math.ceil(DAY-S.dayT)}秒）</div><table class="tb">`;
+    Object.keys(INC_L).forEach(k=>{if(inc[k])h+=`<tr><td>💰 ${INC_L[k]}</td><td class="plus">+${fmtD(inc[k])}</td></tr>`;});
+    Object.keys(EXP_L).forEach(k=>{if(exp[k])h+=`<tr><td>💸 ${EXP_L[k]}</td><td class="minus">-${fmtD(exp[k])}</td></tr>`;});
+    h+=`<tr><td>⏰ 決算時の給料（予定）</td><td class="minus">-${fmtD(m.salary)}</td></tr><tr><td>⏰ 決算時の設備維持費（予定）</td><td class="minus">-${fmtD(m.maint)}</td></tr>${m.ins>0?`<tr><td>⏰ 決算時の保険料（予定）</td><td class="minus">-${fmtD(m.ins)}</td></tr>`:''}`;
+    h+=`<tr class="tot"><td>本日の収支</td><td class="${ti-te>=0?'plus':'minus'}">${ti-te>=0?'+':''}${fmtD(ti-te)}</td></tr></table>`;
+    h+=`<div class="sec">📈 過去の収支（緑=収入 赤=支出）</div><canvas class="chart" id="chart" width="600" height="240"></canvas>`;
+    {const gn=prestigeGain(),nc=cityDef(S.meta.city+1),ok=S.level>=5&&gn>=1;h+=`<div class="sec">🔁 会社を売却して再起業（転生）</div><div class="card" style="background:linear-gradient(135deg,#fff,#f3e8ff)"><div class="ic">🏯</div><div class="mid"><div class="nm">📍 ${CITY.name}（${S.meta.runs+1}都市目）</div><div class="ds">威光 <b>${S.meta.pts}pt</b>（全運賃 +${S.meta.pts*5}%）<br>次: ${nc.name}（物価×${nc.m.toFixed(1)}）・売却で <b>+${gn}pt</b>${S.level<5?'<br>🔒 Lv5「大企業」で解放':gn<1?'<br>もっと稼ぐと威光が手に入る':''}</div></div>${ok?'<button class="btn p" data-act="prestige">進出</button>':'<span class="btn dis">🔒</span>'}</div>`;}
+    if(S.money<0)h+=`<div class="card" style="background:#ffe3e3"><div class="ic">⚖️</div><div class="mid"><div class="nm">借金 ${fmt(-S.money)}</div><div class="ds">決算（残り${Math.ceil(DAY-S.dayT)}秒）までに返済しないと、待機車両→設備→ドライバーの順に差し押さえ。足りなければ自己破産（残り${BANKRUPT_MAX-S.bankrupt}回・超えると倒産）</div></div></div>`;
+    h+=`<div class="sec">🛡️ 自動車保険（本日の事故 ${S.today.acc||0}件 ・ 累計 ${S.accidents}件）</div>`;
+    if(!S.ins&&D.drivers.length)h+=`<div class="card" style="background:#ffe3e3"><div class="ic">⚠️</div><div class="mid"><div class="nm">保険に未加入です！</div><div class="ds">ドライバーが事故を起こすと修理代＋賠償金で大きな出費に。重大事故は通常の3倍の賠償金。</div></div></div>`;
+    INS.forEach((P,i)=>{const prem=D.drivers.length*P.rate*LM()*(1-m.acct);h+=`<div class="card" ${S.ins===i?'style="box-shadow:0 0 0 3px #2a9d8f"':''}><div class="ic">${P.icon}</div><div class="mid"><div class="nm">${P.name}</div><div class="ds">${P.desc}<br>保険料 ${fmtD(P.rate*LM())}／ドライバー1人・日（現在 ${fmtD(prem)}／日）${P.ded?` ・ 免責 ${fmtD(P.ded*LM())}`:''}</div></div>${S.ins===i?`<span class="btn ${i?'g':'r'} dis">${i?'加入中':'未加入'}</span>`:`<button class="btn ${i?'g':'r'}" data-act="ins" data-arg="${i}">${i?'加入':'解約'}</button>`}</div>`;});
+    h+=`<div class="row" style="margin-bottom:8px"><div class="stat"><b class="minus">${fmt(S.accLoss)}</b><small>事故の自己負担（累計）</small></div><div class="stat"><b class="plus">${fmt(S.insSaved)}</b><small>保険がカバーした額（累計）</small></div></div>`;
+    h+=`<div class="sec">📱 配車アプリ</div>`;
+    APPS.forEach(a=>{const reg=S.apps[a.id],lock=L<a.lv;h+=`<div class="card ${lock?'lock':''}"><div class="applogo" style="background:${a.color}">${a.short}</div><div class="mid"><div class="nm">${a.name}</div><div class="ds">${a.desc}<br>手数料${a.fee*100}% ・ 社用車の依頼数+${a.boost*100}%</div></div>
+      ${reg?`<button class="btn p" data-act="openphone">開く</button>`:lock?`<span class="btn dis">🔒Lv${a.lv}</span>`:B('app',a.id,aCost(a),'登録','p')}</div>`;});
+    h+=`<div class="sec">🏛️ 事業部門</div>`;
+    DIVS.forEach(d=>{const own=S.divs[d.id],lock=L<d.lv;h+=`<div class="card ${lock?'lock':''}"><div class="ic">${d.icon}</div><div class="mid"><div class="nm">${d.name}</div><div class="ds">${d.desc}</div></div>${own?'<span class="btn g dis">運営中</span>':lock?`<span class="btn dis">🔒Lv${d.lv}</span>`:B('div',d.id,aCost(d),'設立')}</div>`;});
+    h+=`<div class="sec">⚙️ 設定</div><div class="row"><button class="btn b" data-act="bgm">${S.bgm?'🎵 BGM ON':'🔇 BGM OFF'}</button><button class="btn b" data-act="sound">${S.sound?'🔊 効果音ON':'🔇 効果音OFF'}</button><button class="btn b" data-act="quality">${S.hq?'✨ 画質: 高':'⚡ 画質: 軽量'}</button></div>
+      <div class="row" style="margin-top:8px"><button class="btn g" data-act="savenow">💾 今すぐ保存</button><button class="btn r" data-act="reset">🗑️ データ消去</button></div>`;}
+  b.innerHTML=h;b.scrollTop=st;if(sheetOpen==='biz')drawChart();}
+function refreshAfford(){document.querySelectorAll('#sheetBody [data-cost]').forEach(el=>el.classList.toggle('dis',S.money<+el.dataset.cost));}
+function drawChart(){const c=$('#chart');if(!c)return;const x=c.getContext('2d');const H=S.hist.slice(-7);const cur={day:S.day,inc:Object.values(S.today.inc).reduce((a,b)=>a+b,0),exp:Object.values(S.today.exp).reduce((a,b)=>a+b,0)};const all=H.concat([cur]);
+  const mx=Math.max(1,...all.map(d=>Math.max(d.inc,d.exp)));x.clearRect(0,0,600,240);x.font='bold 20px sans-serif';x.textAlign='center';const w=600/all.length;
+  all.forEach((d,i)=>{const h1=d.inc/mx*170,h2=d.exp/mx*170;x.fillStyle='#2a9d8f';x.fillRect(i*w+w*0.15,200-h1,w*0.32,h1);x.fillStyle='#e63946';x.fillRect(i*w+w*0.52,200-h2,w*0.32,h2);
+    x.fillStyle='#7a6550';x.fillText((i===all.length-1?'今日':d.day+'日'),i*w+w/2,228);});}
+
+/* ================= phone ================= */
+let phoneOpen=false,ptab='req';
+function openPhone(){if(!D.mods.appCount)return;phoneOpen=true;$('#phone').classList.remove('hidden');closeModal();renderPhone();SFX.click();}
+function closePhone(){phoneOpen=false;$('#phone').classList.add('hidden');}
+function renderPhone(){const apps=APPS.filter(a=>S.apps[a.id]);$('#pTitle').textContent=apps.length>1?'幕府ドライバー（'+apps.length+'アプリ連携）':apps[0].name+' ドライバー';
+  $('#pSub').textContent=`オンライン: あなた + ドライバー${D.drivers.length}人`;document.querySelectorAll('#ptabs button').forEach(b=>b.classList.toggle('on',b.dataset.pt===ptab));let h='';
+  if(ptab==='req'){if(!requests.length)h='<div class="empty">📡 依頼を待っています…<br>数秒ごとに新しい依頼が届きます</div>';
+    requests.forEach(r=>{const a=APPS.find(x=>x.id===r.app);const T=PTYPE[r.type];h+=`<div class="req-card"><div class="applogo" style="background:${a.color}">${a.short}</div><div class="mid"><span class="tag" style="background:${T.c}">${T.n}</span><b>${fmtD(r.fare)}</b><br>迎車 ${(r.pick/100).toFixed(1)}km ・ 乗車 ${(r.len/100).toFixed(1)}km${r.dest.name?' ・ '+r.dest.name:''}${r.type==='airport'?' ・ 空港':''}<div class="tbar"><i style="width:${r.exp/45*100}%"></i></div></div><button class="btn p sm" data-act="accept" data-arg="${r.id}">受ける</button></div>`;});
+    if(player.onboard.length>=seatsCap())h='<div class="empty" style="padding:8px">⚠️ 座席が満席です。降車させてから受けよう</div>'+h;}
+  else if(ptab==='drv'){if(!D.drivers.length)h='<div class="empty">ドライバーがいません<br>スタッフタブで雇用しよう</div>';
+    D.drivers.slice(0,40).forEach(d=>{const rt=RT.get(d.id)||{t:0,dur:1,broken:0,trips:0};h+=`<div class="req-card"><div class="applogo" style="background:${rt.broken>0?'#e63946':'#2a9d8f'}">${rt.broken>0?'🔧':'🛺'}</div><div class="mid"><b>${d.name}</b> <span class="tag" style="background:${rt.broken>0?'#e63946':curUtil()<1&&D.drivers.indexOf(d)%10>=curUtil()*10?'#999':'#2a9d8f'}">${rt.broken>0?'修理中':curUtil()<1&&D.drivers.indexOf(d)%10>=curUtil()*10?'客待ち':'送迎中'}</span><br>本日 ${rt.trips}回 ・ 運賃 約${fmtD(baseFleetFare(d))} ・ 燃料 -${fmtD(fleetFuel())}<div class="tbar"><i style="width:${rt.broken>0?0:Math.min(100,rt.t/rt.dur*100)}%"></i></div></div></div>`;});
+    if(D.drivers.length>40)h+=`<div class="empty">ほか ${D.drivers.length-40} 人がオンライン</div>`;}
+  else{const inc=S.today.inc,exp=S.today.exp;h=`<div class="req-card"><div class="mid"><b>本日のアプリ経由売上</b><br><span style="font-size:22px;font-weight:800;color:#7b2ff7">${fmtD(inc.app||0)}</span></div></div>
+    <div class="req-card"><div class="mid"><b>アプリ手数料</b><br><span style="font-size:18px;font-weight:800;color:#e63946">-${fmtD(exp.appfee||0)}</span></div></div>
+    <div class="req-card"><div class="mid"><b>自分のアプリ送迎回数（累計）</b><br><span style="font-size:18px;font-weight:800">${S.appTrips}回</span></div></div>
+    <div class="req-card"><div class="mid"><b>社用車のアプリ配車割合</b><br><span style="font-size:18px;font-weight:800">${Math.round(D.mods.appShare*100)}%</span> ・ 平均手数料 ${Math.round(D.mods.appFee*100)}%</div></div>`;}
+  $('#pbody').innerHTML=h;}
+
+/* ================= input ================= */
+const keys={};let joy={x:0,y:0,active:false,id:null,ox:0,oy:0};let brake=false;
+addEventListener('keydown',e=>{keys[e.code]=true;if(e.code==='KeyH')horn();{const m_=e.code.match(/^Digit([1-6])$/);if(m_)setGear(+m_[1]-1);}if(e.code==='KeyT')setAT(!player.at);if(e.code==='KeyG')punch();if(e.code==='KeyN'){mapOpen?closeMap():openMap();}if(e.code==='Escape'&&mapOpen)closeMap();if(e.code==='KeyC'&&nearCasino())openCasino();if(e.code==='KeyF')toggleFoot();if(e.code==='KeyQ')setGear(player.gear-1);if(e.code==='KeyE')setGear(player.gear+1);if(e.code==='KeyM')toggleBGM();if(['ArrowUp','ArrowDown','ArrowLeft','ArrowRight','Space'].includes(e.code))e.preventDefault();});
+addEventListener('keyup',e=>{keys[e.code]=false;});
+const jz=$('#joyZone'),jb=$('#joyBase'),jk=$('#joyKnob');
+jz.addEventListener('pointerdown',e=>{initAudio();joy.active=true;joy.id=e.pointerId;jz.setPointerCapture(e.pointerId);const r=jz.getBoundingClientRect();joy.ox=e.clientX;joy.oy=e.clientY;
+  jb.style.left=(e.clientX-r.left-60)+'px';jb.style.top=(e.clientY-r.top-60)+'px';jb.style.bottom='auto';jz.classList.add('on');moveJoy(e);});
+jz.addEventListener('pointermove',e=>{if(joy.active&&e.pointerId===joy.id)moveJoy(e);});
+const endJoy=e=>{if(e.pointerId!==joy.id)return;joy.active=false;joy.x=joy.y=0;jk.style.left='32px';jk.style.top='32px';jz.classList.remove('on');};
+jz.addEventListener('pointerup',endJoy);jz.addEventListener('pointercancel',endJoy);
+function moveJoy(e){let dx=e.clientX-joy.ox,dy=e.clientY-joy.oy;const d=Math.hypot(dx,dy),R=50;if(d>R){dx*=R/d;dy*=R/d;}joy.x=dx/R;joy.y=dy/R;jk.style.left=(32+dx)+'px';jk.style.top=(32+dy)+'px';}
+const bb=$('#brakeBtn');bb.addEventListener('pointerdown',e=>{brake=true;bb.classList.add('on');initAudio();});['pointerup','pointercancel','pointerleave'].forEach(t=>bb.addEventListener(t,()=>{brake=false;bb.classList.remove('on');}));
+$('#hornBtn').addEventListener('pointerdown',()=>{initAudio();horn();});
+function horn(){if(player.hornT>0.5)return;SFX.horn();player.hornT=3;waiting.forEach(p=>{if(dist2(p.m.position.x,p.m.position.z,player.x,player.z)<45)p.jump=0.6;});floatText('📯 呼び込み中！',player.x,6,player.z,'small');}
+$('#mini').addEventListener('click',()=>{initAudio();openMap();});$('#mapView').addEventListener('click',e=>{if(e.target.id==='mapView'||e.target.id==='bigMap')closeMap();});
+$('#punchBtn').addEventListener('pointerdown',e=>{e.stopPropagation();punch();});$('#casinoBtn').addEventListener('click',openCasino);
+document.querySelectorAll('.ctabs button').forEach(b=>b.addEventListener('click',()=>{if(cBusy)return;cGame=b.dataset.cg;renderCasino();}));
+$('#cChips').addEventListener('click',e=>{const b=e.target.closest('[data-chip]');if(!b||cBusy)return;cBet=isNaN(+b.dataset.chip)?b.dataset.chip:+b.dataset.chip;SFX.click();updCasino();});
+$('#cGame').addEventListener('click',e=>{const b=e.target.closest('[data-rb]');if(!b||cBusy)return;rBet=b.dataset.rb;document.querySelectorAll('[data-rb]').forEach(x=>x.classList.toggle('on',x===b));SFX.click();});
+$('#footBtn').addEventListener('pointerdown',e=>{e.stopPropagation();toggleFoot();});
+$('#repairBtn').addEventListener('click',()=>{initAudio();doRepair();});$('#bgmBtn').addEventListener('click',toggleBGM);
+function setGear(g){g=clamp(g,0,5);player.at=false;$('#gears [data-gc=at]').classList.remove('on');if(g===player.gear)return;player.gear=g;tone(360+g*45,0.06,'square',0.04);}
+function setAT(on){player.at=on;$('#gears [data-gc=at]').classList.toggle('on',on);tone(on?700:400,0.06,'square',0.04);}
+document.querySelectorAll('#gears button').forEach(b=>b.addEventListener('pointerdown',e=>{e.stopPropagation();initAudio();const c=b.dataset.gc;if(c==='at')setAT(!player.at);else setGear(player.gear+(c==='up'?1:-1));}));
+const spc=$('#speedo'),spx=spc.getContext('2d');let spFrame=0;
+function drawSpeedo(){const x=spx,W=176,cx=88,cy=94,R=74,MAX=Math.max(40,Math.ceil(maxSpeedOf(S.upg.engine)*2.2/10)*10+10);x.clearRect(0,0,W,W);const a0=Math.PI*0.75,sw=Math.PI*1.5;
+  x.beginPath();x.arc(cx,cy,R+8,0,Math.PI*2);x.fillStyle='rgba(20,20,30,.78)';x.fill();
+  x.lineWidth=10;x.lineCap='round';x.beginPath();x.arc(cx,cy,R-6,a0,a0+sw);x.strokeStyle='rgba(255,255,255,.18)';x.stroke();
+  const kmh=player.v*2.2,gm=maxSpeedOf(S.upg.engine)*(player.at?1:GEARS[player.gear].f)*2.2,fr=Math.min(1,kmh/MAX);
+  const grd=x.createLinearGradient(0,W,W,0);grd.addColorStop(0,'#2a9d8f');grd.addColorStop(0.6,'#ffd166');grd.addColorStop(1,'#e63946');
+  x.beginPath();x.arc(cx,cy,R-6,a0,a0+sw*fr);x.strokeStyle=grd;x.stroke();
+  const ga=a0+sw*Math.min(1,gm/MAX);x.lineWidth=4;x.beginPath();x.arc(cx,cy,R-6,ga-0.03,ga+0.03);x.strokeStyle='#ff4d4d';x.stroke();
+  x.fillStyle='#fff';x.font='bold 13px sans-serif';x.textAlign='center';x.textBaseline='middle';
+  for(let v=0;v<=MAX;v+=(MAX>60?20:10)){const a=a0+sw*v/MAX;x.fillText(v,cx+Math.cos(a)*(R-26),cy+Math.sin(a)*(R-26));}
+  const na=a0+sw*fr;x.strokeStyle='#ff6b35';x.lineWidth=4;x.beginPath();x.moveTo(cx,cy);x.lineTo(cx+Math.cos(na)*(R-12),cy+Math.sin(na)*(R-12));x.stroke();
+  x.beginPath();x.arc(cx,cy,7,0,Math.PI*2);x.fillStyle='#ff6b35';x.fill();
+  x.fillStyle='#fff';x.font='800 30px sans-serif';x.fillText(Math.round(kmh),cx,cy+34);x.font='bold 12px sans-serif';x.fillStyle='#ffd166';x.fillText('km/h '+(player.at?'AT ':'')+GEARS[player.gear].n,cx,cy+56);}
+let zoomLv=1;const ZOOMS=[0.7,1,1.4];$('#zoomBtn').addEventListener('click',()=>{zoomLv=(zoomLv+1)%3;SFX.click();});
+addEventListener('wheel',e=>{if(sheetOpen||phoneOpen)return;zoomLv=clamp(zoomLv+(e.deltaY>0?1:-1),0,2);},{passive:true});
+$('#homeBtn').addEventListener('click',()=>{camFocus={x:0,z:-25,t:3};SFX.click();});
+$('#phoneBtn').addEventListener('click',openPhone);$('#pclose').addEventListener('click',closePhone);
+document.querySelectorAll('#ptabs button').forEach(b=>b.addEventListener('click',()=>{ptab=b.dataset.pt;renderPhone();}));
+document.querySelectorAll('#nav button').forEach(b=>b.addEventListener('click',()=>{initAudio();openSheet(b.dataset.tab);}));
+$('#sheetClose').addEventListener('click',closeSheet);
+document.addEventListener('click',e=>{const t=e.target.closest('[data-act]');if(!t)return;const a=t.dataset.act,g=t.dataset.arg;initAudio();
+  switch(a){case'upg':buyUpg(g);break;case'cspin':cSpin();break;case'mapclose':closeMap();break;case'gameover':doGameOver();break;case'cexit':closeCasino();break;case'evc':chooseEv(+g);break;case'prestige':{const gn=prestigeGain(),nc=cityDef(S.meta.city+1);modal(`<div class="big">🗺️</div><h2>${nc.name}へ進出しますか？</h2><p>会社を売却して、新しい都市でゼロから再スタート。</p><table class="tb"><tr><td>獲得する威光</td><td class="plus">+${gn}pt</td></tr><tr><td>威光ボーナス（全運賃）</td><td>+${S.meta.pts*5}% → +${(S.meta.pts+gn)*5}%</td></tr><tr><td>新都市の物価・運賃</td><td>×${nc.m.toFixed(1)}</td></tr><tr><td>スタート資金</td><td>${fmt(Math.round(10*nc.m*(1+(S.meta.pts+gn)*0.5)))}</td></tr></table><p style="font-size:11px">※お金・車両・スタッフ・設備・強化・レベルはリセット。威光と設定は引き継ぎ。</p><div class="btns"><button class="btn" data-act="closemodal">まだ残る</button><button class="btn p" data-act="doprestige">進出する！</button></div>`);}break;case'doprestige':doPrestige();break;case'ins':setIns(+g);break;case'gotoins':closeModal();openSheet('biz');setTimeout(()=>{const e=[...document.querySelectorAll('#sheetBody .sec')].find(x=>x.textContent.includes('保険'));if(e)e.scrollIntoView({block:'start'});},50);break;case'repair':doRepair();break;case'bgm':toggleBGM();renderPanel();break;case'buyveh':buyVehicles(+g);break;case'grade':buyGrade();break;case'fac':buildFac(g);break;case'hire':hireDriver(+g);break;case'bulkhire':hireBulk();break;
+   case'reroll':if(spend('hire',Math.round(5*LM()))){S.cand=[genDriver(),genDriver(),genDriver()];renderPanel();}break;case'hirerole':hireRole(g);break;case'fire':fire(+g);break;
+   case'app':regApp(g);break;case'div':buyDiv(g);break;case'openphone':openPhone();break;case'accept':acceptReq(+g);break;case'tab':openSheet(g);break;
+   case'closemodal':closeModal();break;case'confirmyes':closeModal();if(confirmCb){const c=confirmCb;confirmCb=null;c();}break;
+   case'sound':S.sound=!S.sound;if(!S.sound&&engGain)engGain.gain.value=0;renderPanel();break;case'quality':S.hq=S.hq?0:1;resize();renderPanel();break;
+   case'savenow':save();toast('💾 保存しました');break;
+   case'reset':confirmBox('すべての進行状況を消去して最初から始めますか？',()=>{try{localStorage.removeItem(KEY);}catch(e){}resetting=true;location.reload();});break;
+   case'offok':closeModal();break;}});
+let resetting=false;
+
+/* ================= camera ================= */
+let camFocus=null;const camT=new THREE.Vector3(0,0,-25);
+function updateCamera(dt){let tx=player.x+Math.sin(player.h)*player.v*0.35,tz=player.z+Math.cos(player.h)*player.v*0.35;if(player.onFoot){tx=walker.x;tz=walker.z;}
+  if(camFocus){tx=camFocus.x;tz=camFocus.z;camFocus.t-=dt;if(camFocus.t<=0)camFocus=null;}
+  camT.x=lerp(camT.x,tx,Math.min(1,dt*(camFocus?2.5:5)));camT.z=lerp(camT.z,tz,Math.min(1,dt*(camFocus?2.5:5)));
+  const asp=innerWidth/innerHeight;const k=ZOOMS[zoomLv]*clamp(0.85/asp,0.9,1.75)*(player.onFoot?0.7:1);let sx_=0,sz_=0;if(player.shake>0){player.shake-=dt;sx_=(rnd()-0.5)*player.shake*3;sz_=(rnd()-0.5)*player.shake*3;}camera.position.set(camT.x+27*k+sx_,55*k,camT.z+27*k+sz_);camera.lookAt(camT.x,0,camT.z);}
+
+/* ================= main update ================= */
+let spawnT=0,saveT=0,hudT=0,miniT=0,lastWall=performance.now();
+function update(dt){gameTime+=dt;
+  // --- input
+  let ix=0,iy=0;if(keys.KeyW||keys.ArrowUp)iy-=1;if(keys.KeyS||keys.ArrowDown)iy+=1;if(keys.KeyA||keys.ArrowLeft)ix-=1;if(keys.KeyD||keys.ArrowRight)ix+=1;
+  if(joy.active){ix=joy.x;iy=joy.y;}const mag=Math.min(1,Math.hypot(ix,iy)*1.25);const brk=brake||keys.Space;
+  const inv=1/Math.SQRT2;const wx=ix*inv+(-iy)*(-inv),wz=ix*(-inv)+(-iy)*(-inv);// right=(1,-1)/√2, up=(-1,-1)/√2
+  const u=S.upg;const empty=S.fuel<=0;const fullSp=maxSpeedOf(u.engine)*(empty?0.35:1)*condSpeed()*EV('pSpeed');
+  if(player.at){let g=0;while(g<5&&player.v>fullSp*GEARS[g].f*0.9)g++;if(g!==player.gear){player.gear=g;}}
+  const GR=GEARS[player.gear];const maxSp=player.at?fullSp:fullSp*GR.f;const acc=(9+u.tires*1.4)*GR.a,turn=2.4+u.tires*0.22;
+  if(player.onFoot&&walker.car){driveCar(dt,wx,wz,mag,brk);}
+  else if(player.onFoot){if(mag>0.12&&!sheetOpen){const sp=6.5*mag;walker.h=Math.atan2(wx,wz);walker.x+=Math.sin(walker.h)*sp*dt;walker.z+=Math.cos(walker.h)*sp*dt;walker.walk+=dt*sp;}
+    walker.x=clamp(walker.x,-205,205);walker.z=clamp(walker.z,-205,205);const q={x:walker.x,z:walker.z};collideFoot(q,0.6);walker.x=q.x;walker.z=q.z;
+    for(const a of traffic){if(a.x===undefined)continue;const d=dist2(a.x,a.z,walker.x,walker.z);if(d<2.2){walker.x+=(walker.x-a.x)/(d||1)*(2.2-d);walker.z+=(walker.z-a.z)/(d||1)*(2.2-d);if(!walker.honk||gameTime-walker.honk>3){walker.honk=gameTime;SFX.horn();floatText('🚗 危ない！',walker.x,4,walker.z,'small bad');}}}
+    if(!walker.car){walker.m.position.set(walker.x,0.36,walker.z);walker.m.rotation.y=walker.h;animLimbs(walker.m,walker.walk*1.6,mag>0.12?0.7:0);if(walker.punchT>0){walker.punchT-=dt;walker.m.userData.limbs[3].rotation.x=-1.5;}}}
+  if(!player.onFoot&&mag>0.12&&!sheetOpen){const target=Math.atan2(wx,wz);const d=angDiff(player.h,target);player.h+=clamp(d,-turn*dt,turn*dt);const align=Math.max(0,Math.cos(d));
+    const ts=maxSp*mag*(0.35+0.65*align);player.v+=clamp(ts-player.v,-acc*1.6*dt,acc*dt);}else{player.v-=Math.min(player.v,6*dt);}
+  if(brk)player.v=Math.max(0,player.v-28*dt);
+  const ox=player.x,oz=player.z;player.x+=Math.sin(player.h)*player.v*dt;player.z+=Math.cos(player.h)*player.v*dt;
+  player.x=clamp(player.x,-205,205);player.z=clamp(player.z,-205,205);
+  const p={x:player.x,z:player.z};if(collide(p,1.9)){const cx=p.x-player.x,cz=p.z-player.z,cl=Math.hypot(cx,cz)||1;const impact=-(Math.sin(player.h)*player.v*cx+Math.cos(player.h)*player.v*cz)/cl;
+    if(impact>5.5&&player.bumpT<=0){damage((impact-4)*0.011);player.bumpT=0.7;player.v*=0.45;}else player.v*=0.9;}player.x=p.x;player.z=p.z;
+  const moved=dist2(ox,oz,player.x,player.z);if(!empty)S.fuel=Math.max(0,S.fuel-moved/rangeOf(u.tank));
+  if(S.fuel<=0&&!player.warnedFuel){player.warnedFuel=true;toast('⛽ ガス欠！ゆっくりしか走れません。ガソリンスタンドへ！');}if(S.fuel>0.05)player.warnedFuel=false;
+  // traffic bump
+  player.bumpT-=dt;if(!player.onFoot)for(const a of traffic){if(a.x===undefined)continue;const d=dist2(a.x,a.z,player.x,player.z);if(d<3.4){const nx=(player.x-a.x)/(d||1),nz=(player.z-a.z)/(d||1);player.x+=nx*(3.4-d);player.z+=nz*(3.4-d);
+      if(player.bumpT<=0&&player.v>4){const dm=0.03+player.v*0.004;player.v*=0.4;player.bumpT=1;damage(dm);}}}
+  player.mesh.position.set(player.x,0.36,player.z);player.mesh.rotation.y=player.h;player.mesh.rotation.z=Math.sin(gameTime*30)*0.01*Math.min(1,player.v/5);
+  // refuel
+  let inZone=null;for(const z of refuelZones){if(z.own&&!S.fac.gas)continue;if(dist2(z.x,z.z,player.x,player.z)<z.r){inZone=z;break;}}
+  if(inZone&&S.fuel<0.995&&player.v<6){const amt=Math.min(1-S.fuel,dt*0.5);const cost=amt*1.0*(1+u.tank*0.3)*Math.sqrt(LM())*S.gasP;
+    if(inZone.own){S.fuel+=amt;$('#refuel').textContent='⛽ 自社スタンドで無料給油中…';}else if(S.money>=cost||S.money>0){S.fuel+=amt;addExp('fuel',cost);$('#refuel').textContent=`⛽ 給油中… ${fmtD(cost/amt)}/満タン`;}
+    $('#refuel').classList.remove('hidden');}else $('#refuel').classList.add('hidden');
+  if(S.fac.garage&&S.cond<0.999&&player.v<6&&dist2(PLOT.garage.x,PLOT.garage.z,player.x,player.z)<11){const amt=Math.min(1-S.cond,dt*0.35);const c=amt*repairUnit()*0.5;
+    if(S.money>=c){S.cond+=amt;addExp('repair',c);$('#refuel').textContent='🔧 自社整備場で修理中（半額）…';$('#refuel').classList.remove('hidden');if(condTier()!==player.tier)rebuildPlayer();}}
+  if(S.cond<0.35){player.smokeT=(player.smokeT||0)-dt;if(player.smokeT<=0){player.smokeT=S.cond<0.15?0.08:0.18;const m=new THREE.Mesh(G.sph,new THREE.MeshBasicMaterial({color:S.cond<0.15?'#333':'#777',transparent:true,opacity:0.6,depthWrite:false}));
+    m.scale.setScalar(0.5);m.position.set(player.x+Math.sin(player.h)*1.2,1.2,player.z+Math.cos(player.h)*1.2);scene.add(m);fx.push({m,t:0,life:1.4,vx:(rnd()-0.5),vy:2.5,vz:(rnd()-0.5),type:'smoke'});}}
+  if(S.fuel<0.2&&!inZone&&hintT<=0&&player.onboard.length===0&&rnd()<0.002)showHint('⛽ 燃料が少ない！ミニマップの赤い点（GAS）へ',4);
+  // engine sound
+  if(AC&&engGain&&S.sound){const rpm=player.onFoot?0:player.v/Math.max(1,fullSp*GR.f);engOsc.frequency.value=42+rpm*95+player.gear*6;engGain.gain.value=0.012+Math.min(0.035,player.v*0.0022);}
+  player.hornT=Math.max(0,player.hornT-dt);
+  // --- passengers
+  spawnT-=dt;const nWaitNormal=waiting.filter(w=>!w.app&&!w.refused).length;if(spawnT<=0&&nWaitNormal<Math.min(10,Math.round((S.rep<2.5?4:6)*EV('spawn')))){spawnT=1.2/EV('spawn');newPassenger();}
+  const pr=player.hornT>0?13:7.5;
+  for(let i=waiting.length-1;i>=0;i--){const w=waiting[i];w.t+=dt;w.mk.rotation.y+=dt*2;w.mk.position.y=3.3+Math.sin(w.t*3)*0.25;
+    if(w.jump>0){w.jump-=dt;w.m.position.y=0.36+Math.abs(Math.sin(w.jump*10))*0.8;}else w.m.position.y=0.36;
+    if(w.refused){w.refT-=dt;w.m.rotation.y+=dt*2;w.m.position.y=0.36+Math.abs(Math.sin(w.refT*12))*0.4;if(w.refT<=0)removeWaiting(w);continue;}
+    if((w.app||w.special)&&gameTime>w.pickDL){toast(w.special?'📸 インフルエンサーが帰ってしまった… 評判ダウン':'📱 迎車が遅すぎてキャンセルされた… 評判ダウン ⭐');SFX.angry();applyRating(1);S.streak=0;removeWaiting(w);continue;}
+    const d=dist2(w.m.position.x,w.m.position.z,player.x,player.z);
+    if(d<pr&&!player.onFoot&&player.onboard.length<seatsCap()){if((!w.app||S.wanted>0)&&!w.checked){w.checked=true;if(rnd()<refuseChance(w)){refuse(w);continue;}}if(S.wanted>0)continue;board(w);continue;}
+    if(d>pr+6)w.checked=false;
+    if(!w.app&&!w.special&&d>240)removeWaiting(w);}
+  if(waiting.length&&player.onboard.length>=seatsCap()&&!S.intro){}
+  for(let i=player.onboard.length-1;i>=0;i--){const o=player.onboard[i];o.beamD.userData.ring.scale.setScalar(1+Math.sin(gameTime*4)*0.12);if(!player.onFoot&&dist2(o.dest.x,o.dest.z,player.x,player.z)<7.5){dropOff(o);if(!S.intro&&S.trips>=1){S.intro=true;}}}
+  // arrow
+  let tgt=null,best=1e9;if(player.onboard.length){player.onboard.forEach(o=>{const d=dist2(o.dest.x,o.dest.z,player.x,player.z);if(d<best){best=d;tgt={x:o.dest.x,z:o.dest.z,c:PTYPE[o.type].c};}});}
+  else{waiting.forEach(w=>{let d=dist2(w.m.position.x,w.m.position.z,player.x,player.z);if(w.special)d*=0.1;else if(w.app)d*=0.3;if(d<best){best=d;tgt={x:w.m.position.x,z:w.m.position.z,c:w.special?'#ffd700':w.app?'#7b2ff7':'#ffffff'};}});}
+  if(tgt&&best>9){arrow.visible=arrowRing.visible=true;const a=Math.atan2(tgt.x-player.x,tgt.z-player.z);arrow.position.set(player.x+Math.sin(a)*4.6,1.2,player.z+Math.cos(a)*4.6);arrow.rotation.y=a;arrow.material.color.set(tgt.c);arrowRing.position.set(player.x,0.45,player.z);}
+  else arrow.visible=arrowRing.visible=false;
+  if(player.onFoot){const dd=dist2(walker.x,walker.z,player.x,player.z);if(dd>6){const a=Math.atan2(player.x-walker.x,player.z-walker.z);arrow.visible=true;arrowRing.visible=false;arrow.position.set(walker.x+Math.sin(a)*2.6,1.0,walker.z+Math.cos(a)*2.6);arrow.rotation.y=a;arrow.material.color.set('#ff9f1c');}else arrow.visible=false;}
+  if((spFrame%6)===0)updateFootBtn();
+  player.onboard.forEach((o,i)=>{const el=document.getElementById('pd'+i);if(!el)return;const rem=Math.ceil(o.limit-(gameTime-o.t0));
+    el.textContent='あと'+Math.round(dist2(o.dest.x,o.dest.z,player.x,player.z))+'m ⏱'+(rem>=0?rem+'秒':'遅延'+(-rem)+'秒');const ch=el.parentNode;ch.classList.toggle('late',rem<0);ch.classList.toggle('warn',rem>=0&&rem<=5);
+    if(rem>=0&&rem<=5&&rem!==o.lastTick){o.lastTick=rem;SFX.tick();}});
+  const aw=waiting.find(w=>(w.app||w.special)&&!w.refused);const ac_=$('#appChip');if(aw){const rem=Math.ceil(aw.pickDL-gameTime);ac_.textContent=aw.special?`📸 インフルエンサー待機中 残り${rem}秒`:`📱 迎車まで 残り${rem}秒`;ac_.classList.remove('hidden');ac_.style.background=rem<=8?'#c1121f':'#7b2ff7';}else ac_.classList.add('hidden');
+  // --- app requests
+  if(D.mods.appCount){reqTimer-=dt;if(reqTimer<=0){reqTimer=(9/D.mods.appCount+rnd()*4)*clamp(1+(4-S.rep)*0.5,0.7,2.5);if(requests.length<5)genRequest();}
+    let ch=false;for(let i=requests.length-1;i>=0;i--){requests[i].exp-=dt;if(requests[i].exp<=0){requests.splice(i,1);ch=true;}}if(ch){updatePhoneBadge();if(phoneOpen&&ptab==='req')renderPhone();}}
+  // --- fleet sim
+  const evStop=EV('stop',0),evRate=curUtil()/EV('fleetDur');
+  for(const d of D.drivers){const rt=RT.get(d.id);if(!rt)continue;if(rt.broken>0){rt.broken-=dt;continue;}if(evStop)continue;rt.t+=dt*evRate;if(rt.t>=rt.dur){rt.t=0;rt.dur=tripDur(d)*(0.8+rnd()*0.4);fleetTrip(d,rt);}}
+  // --- events
+  if(S.ev){S.ev.t-=dt;if(S.ev.t<=0){toast(`${EVM[S.ev.id].icon} 「${EVM[S.ev.id].title.replace('！','')}」が終わりました`);S.ev=null;S.evT=150+rnd()*180;recalc();}}
+  else if(!pendingEv){S.evT-=dt;if(S.evT<=0){if($('#modal').classList.contains('hidden')&&!phoneOpen)triggerEvent();else S.evT=5;}}
+  const raining=EV('rain',0)>0;if(raining){ensureRain();rain.visible=true;updateRain(dt);}else if(rain)rain.visible=false;
+  const wk=Math.min(1,dt*1.5);hemi.intensity=lerp(hemi.intensity,raining?0.45:0.75,wk);sun.intensity=lerp(sun.intensity,raining?0.35:0.75,wk);scene.background.lerp(raining?RAINBG:SKYBG,wk);scene.fog.color.lerp(raining?RAINFOG:FOGC,wk);
+  if(EV('fw',0)){fwT-=dt;if(fwT<=0){fwT=0.5+rnd()*0.5;sparkle(camT.x+(rnd()-0.5)*70,24+rnd()*12,camT.z+(rnd()-0.5)*70,pick(['#ff4fa3','#ffd166','#3a86ff','#06d6a0','#ff6b6b']));tone(200+rnd()*100,0.3,'triangle',0.04,0,60);}}
+  // --- day
+  S.dayT+=dt;if(S.dayT>=DAY)endDay();
+  // --- agents
+  traffic.forEach(a=>updateAgent(a,dt,true));fleetVis.forEach(a=>updateAgent(a,dt,true));
+  peds.forEach(p=>{if(p.down>0){p.down-=dt;if(p.down<=0){p.m.rotation.x=0;p.m.position.y=0.36;p.flee=5;}return;}const fs=p.flee>0?3.5:1;if(p.flee>0)p.flee-=dt;
+    p.s=(p.s+p.v*fs*dt+BLK*4*10)%(BLK*4);const r=p.r,e=Math.floor(p.s/BLK),t=p.s%BLK;let x,z,ry;const i1=1.4;
+    if(e===0){x=r.x0+t;z=r.z0+i1;ry=Math.PI/2;}else if(e===1){x=r.x1-i1;z=r.z0+t;ry=0;}else if(e===2){x=r.x1-t;z=r.z1-i1;ry=-Math.PI/2;}else{x=r.x0+i1;z=r.z1-t;ry=Math.PI;}
+    p.x=x;p.z=z;p.m.position.set(x,0.36,z);p.m.rotation.y=p.v>0?ry:ry+Math.PI;animLimbs(p.m,p.s*2.4,p.flee>0?0.9:0.55);});
+  walkers.forEach(w=>{if(w.wait>0){w.wait-=dt;return;}const dx=w.tx-w.m.position.x,dz=w.tz-w.m.position.z,d=Math.hypot(dx,dz);
+    if(d<0.3){w.wait=1+rnd()*3;w.tx=w.p.x+(rnd()-0.5)*w.p.w*0.8;w.tz=w.p.z+(rnd()-0.5)*w.p.d*0.8;return;}
+    w.m.position.x+=dx/d*2*dt;w.m.position.z+=dz/d*2*dt;w.m.rotation.y=Math.atan2(dx,dz);w.ph=(w.ph||0)+dt*5;if(w.m.userData.limbs)animLimbs(w.m,w.ph,0.5);else w.m.position.y=0.36+Math.abs(Math.sin(gameTime*9))*0.1;});
+  if(boat){boat.position.z+=dt*4;if(boat.position.z>320)boat.position.z=-320;}
+  // fx
+  for(let i=fx.length-1;i>=0;i--){const f=fx[i];f.t+=dt;const k=f.t/f.life;
+    if(f.type==='dust'||f.type==='spark'){f.vy-=(f.type==='spark'?14:6)*dt;f.m.position.x+=f.vx*dt;f.m.position.y=Math.max(0.3,f.m.position.y+f.vy*dt);f.m.position.z+=f.vz*dt;f.m.scale.multiplyScalar(f.type==='dust'?1.01:0.97);}
+    else if(f.type==='smoke'){f.m.position.x+=f.vx*dt;f.m.position.y+=f.vy*dt;f.m.position.z+=f.vz*dt;f.m.scale.setScalar(0.5+k*1.8);f.m.material.opacity=0.6*(1-k);}
+    else if(f.type==='scaf'){f.m.material.opacity=1-k;f.m.scale.y=Math.min(1,f.t*2);}
+    if(k>=1){scene.remove(f.m);if(f.type==='smoke'||f.type==='spark')f.m.material.dispose();fx.splice(i,1);}}
+  for(let i=builds.length-1;i>=0;i--){const b=builds[i];b.t+=dt;const k=Math.min(1,b.t/1.4);const e=1+2.2*Math.pow(k-1,3)+1.2*Math.pow(k-1,2);b.g.scale.set(1,Math.max(0.01,k<1?e:1),1);if(k>=1)builds.splice(i,1);}
+  // timers
+  saveT+=dt;if(saveT>5){saveT=0;save();}
+  hudT+=dt;if(hudT>0.25){hudT=0;updateHUD();checkLevel();updatePile();}
+  if(hintT>0){hintT-=dt;if(hintT<=0)hideHint();}
+  dispMoney=lerp(dispMoney,S.money,Math.min(1,dt*8));if(Math.abs(dispMoney-S.money)<0.5)dispMoney=S.money;$('#money').textContent=fmt(dispMoney);
+  // labels for waiting
+  const v=new THREE.Vector3();waiting.forEach(w=>{v.set(w.m.position.x,5.2,w.m.position.z).project(camera);if(v.z>1||Math.abs(v.x)>1.1||Math.abs(v.y)>1.1){w.el.style.display='none';return;}
+    w.el.style.display='';w.el.style.left=((v.x*0.5+0.5)*innerWidth)+'px';w.el.style.top=((-v.y*0.5+0.5)*innerHeight)+'px';});
+  miniT+=dt;if(miniT>0.1){miniT=0;drawMini();if(mapOpen&&(spFrame%6)===0)drawBigMap();}
+  if((spFrame++)%2===0)drawSpeedo();
+  updateCutaway(dt);updatePolice(dt);updateVictims(dt);
+  if((spFrame%8)===1){const nc=nearCasino()&&!casinoOpen;$('#casinoBtn').classList.toggle('hidden',!nc);if(casinoRing)casinoRing.material.opacity=0.45+Math.sin(gameTime*4)*0.3;}
+  if(phoneOpen&&ptab==='drv'&&Math.floor(gameTime*2)!==Math.floor((gameTime-dt)*2))renderPhone();}
+let lastBreakToast=0,fwT=0,pendingEv=null,rain=null;
+function ensureRain(){if(rain)return;const n=420,a=new Float32Array(n*6),g=new THREE.BufferGeometry();g.setAttribute('position',new THREE.BufferAttribute(a,3));
+  rain=new THREE.LineSegments(g,new THREE.LineBasicMaterial({color:'#b8d4ee',transparent:true,opacity:0.55}));rain.frustumCulled=false;rain.userData.d=[];for(let i=0;i<n;i++)rain.userData.d.push({x:(rnd()-0.5)*170,y:rnd()*60,z:(rnd()-0.5)*170});scene.add(rain);}
+function updateRain(dt){const a=rain.geometry.attributes.position.array;rain.userData.d.forEach((d,i)=>{d.y-=70*dt;if(d.y<0)d.y+=60;const x=camT.x+d.x,z=camT.z+d.z;a[i*6]=x;a[i*6+1]=d.y;a[i*6+2]=z;a[i*6+3]=x-0.5;a[i*6+4]=d.y+2.4;a[i*6+5]=z-0.5;});rain.geometry.attributes.position.needsUpdate=true;}
+function triggerEvent(){const pool=EVENTS.filter(e=>!e.hidden&&e.cond());if(!pool.length){S.evT=60;return;}let tot=pool.reduce((a,e)=>a+e.w,0),r=rnd()*tot,e=pool[0];for(const x of pool){r-=x.w;if(r<=0){e=x;break;}}
+  pendingEv=e;SFX.big();modal(`<div class="big">${e.icon}</div><h2>${e.title}</h2><p>${e.desc}</p>${e.dur?`<p style="font-size:11px;color:#7a6550">効果時間 ${e.dur}秒</p>`:''}<div class="evch">${e.ch.map((c,i)=>{const cost=c.cost?Math.round(c.cost()*100)/100:null;
+    return `<button class="btn ${i===0?'':'b'} ${cost&&S.money<cost?'dis':''}" data-act="evc" data-arg="${i}">${c.t}${cost?' （'+fmtD(cost)+'）':''}${c.d?`<small>${c.d}</small>`:''}</button>`;}).join('')}</div>`);}
+function startEv(id,ci){const e=EVM[id],c=e.ch[ci||0]||{};const dur=c.dur!==undefined?c.dur:e.dur;if(dur>0){S.ev={id,t:dur,fx:Object.assign({},e.base||{},c.fx||{})};recalc();}}
+function chooseEv(i){const e=pendingEv;if(!e)return;const c=e.ch[i];if(c.cost){const cost=c.cost();if(!spend('invest',cost))return;}
+  pendingEv=null;closeModal();startEv(e.id,i);if(c.run)c.run();if(!S.ev)S.evT=150+rnd()*180;save();}
+function prestigeGain(){return Math.floor(Math.sqrt(S.earned/(20000*CM())));}
+function doPrestige(){const g=prestigeGain();if(S.level<5||g<1)return;const meta=Object.assign({},S.meta);meta.pts+=g;meta.city++;meta.runs++;meta.total+=S.earned;
+  const keep={sound:S.sound,bgm:S.bgm,hq:S.hq};const N_=DEF();Object.assign(N_,keep);N_.meta=meta;N_.justMoved=true;const nc=cityDef(meta.city);N_.money=Math.round(10*nc.m*(1+meta.pts*0.5));
+  resetting=true;try{localStorage.setItem(KEY,JSON.stringify(N_));}catch(e){}location.reload();}
+let lastFineToast=-99;
+function fleetTrip(d,rt){const m=D.mods;let fare=baseFleetFare(d)*EV('fleetFare');
+  if(EV('fine',0)&&rnd()<0.1){const f=10*LM();addExp('fine',f);if(gameTime-lastFineToast>15){lastFineToast=gameTime;toast(`👮 ${d.name}さんが違反で罰金 -${fmtD(f)}`);}}let cat='fleet';const r=rnd(),sp=m.special;
+  if(S.divs.logi&&r<0.12*sp){cat='logi';fare*=3;}else if(S.divs.airport&&r<0.20*sp){cat='airport';fare*=4;}else if(S.divs.tour&&r<0.30*sp){cat='tour';fare*=2.5;}
+  else if(S.divs.vip&&rnd()<m.vip){cat='vip';fare*=4;}else if(m.appShare>0&&rnd()<m.appShare){cat='app';fare*=1.15;addExp('appfee',fare*m.appFee);}
+  addInc(cat,fare);addExp('fuel',fleetFuel());rt.trips++;S.fleetTrips++;
+  if(rnd()<breakP(d)){rt.broken=15;const c=4*LM()*m.repairCost;addExp('repair',c);if(gameTime-lastBreakToast>20){lastBreakToast=gameTime;toast(`🔧 ${d.name}さんの車が故障（修理費 ${fmtD(c)}）`);}}
+  const accP=(0.004+(10-d.rel)*0.0012)*(1-(S.fac.rest||0)*0.1)*(1-m.mech*0.5)*(1+(1-m.mgmt)*2);
+  if(rt.broken<=0&&rnd()<accP){fleetAccident(d,rt);return;}
+  const idx=D.drivers.indexOf(d);if(idx<fleetVis.length){const a=fleetVis[idx];if(a.x!==undefined&&dist2(a.x,a.z,camT.x,camT.z)<90)floatText('+'+fmtD(fare),a.x,4,a.z,cat==='fleet'||cat==='app'?'small':'');}}
+let lastAccModal=-999;
+function fleetAccident(d,rt){const lm=LM(),P=INS[S.ins];const big=rnd()<0.12;rt.broken=big?45:25;S.accidents++;S.today.acc=(S.today.acc||0)+1;
+  const repair=(10+rnd()*15)*lm*D.mods.repairCost*(big?2:1);const comp=(25+rnd()*90)*lm*(big?3:1);
+  let payR=repair*(1-P.repair),payC=comp*(1-P.comp);const ded=P.ded*lm;if(P.repair||P.comp){payR=Math.min(payR+ded,repair+comp);}
+  const saved=repair+comp-payR-payC;S.insSaved+=saved;S.accLoss+=payR+payC;
+  if(payR>0)addExp('repair',payR);if(payC>0)addExp('accident',payC);SFX.crash();setTimeout(()=>SFX.angry(),200);
+  const idx=D.drivers.indexOf(d);if(idx<fleetVis.length){const a=fleetVis[idx];if(a.x!==undefined)floatText(big?'💥💥 重大事故！':'💥 事故！',a.x,5,a.z,'bad');}
+  const kind=big?'重大事故（人身）':pick(['追突事故','接触事故','バイクと衝突','電柱に衝突']);
+  if(!S.ins){if(gameTime-lastAccModal>45){lastAccModal=gameTime;
+      modal(`<div class="big">🚨</div><h2>事故発生！</h2><p><b>${d.name}</b>さんが<b>${kind}</b>を起こしました…</p><table class="tb"><tr><td>🔧 車両修理代</td><td class="minus">-${fmtD(repair)}</td></tr><tr><td>⚖️ 相手への賠償金</td><td class="minus">-${fmtD(comp)}</td></tr><tr class="tot"><td>合計（保険未加入）</td><td class="minus">-${fmtD(payR+payC)}</td></tr></table><p>保険に入っていれば ${fmtD(repair+comp-(repair+5*lm))}〜${fmtD(comp)} 守れました。</p><div class="btns"><button class="btn" data-act="closemodal">くっ…</button><button class="btn b" data-act="gotoins">保険を検討する</button></div>`);}
+    else toast(`🚨 ${d.name}さんが${kind}！ 修理+賠償で -${fmt(payR+payC)}（保険なし）`);}
+  else toast(`🛡️ ${d.name}さんが${kind}。保険が ${fmt(saved)} をカバー（自己負担 ${fmtD(payR+payC)}）`);
+  if(sheetOpen==='biz')renderPanel();}
+function setIns(i){if(S.ins===i)return;if(D.drivers.length===0&&i>0)toast('ドライバーを雇うと保険料がかかり始めます');S.ins=i;recalc();toast(`${INS[i].icon} 保険プラン「${INS[i].name}」に変更しました`);SFX.click();renderPanel();save();}
+function endDay(){const m=D.mods;S.dayT-=DAY;
+  S.gasPrev=S.gasP;S.gasP=clamp(S.gasP*(0.9+rnd()*0.22)+(1-S.gasP)*0.15+(rnd()<0.06?0.35:0),0.6,1.9);if(S.gasLock>0){S.gasLock--;S.gasP=0.8;}const gd=(S.gasP/S.gasPrev-1)*100;
+  if(Math.abs(gd)>=8)setTimeout(()=>toast(`⛽ ガソリン価格が${gd>0?'高騰':'値下がり'}！ ${gasPriceTxt()}`),3200);if(m.ins>0)addExp('insurance',m.ins);if(m.salary>0)addExp('salary',m.salary);if(m.maint>0)addExp('maint',m.maint);
+  const ti=Object.values(S.today.inc).reduce((a,b)=>a+b,0),te=Object.values(S.today.exp).reduce((a,b)=>a+b,0);S.casinoNet=0;
+  if(S.money<0)foreclose();
+  S.hist.push({day:S.day,inc:ti,exp:te});if(S.hist.length>14)S.hist.shift();toast(`📅 ${S.day}日目の決算: 収入 ${fmt(ti)} ／ 支出 ${fmt(te)} → ${ti-te>=0?'黒字':'赤字'} ${fmt(ti-te)}`);
+  S.day++;S.hiredToday=0;S.today={inc:{},exp:{}};RT.forEach(r=>r.trips=0);S.cand=[genDriver(),genDriver(),genDriver()];for(const r in ROLES)if(r!=='driver')S.candR[r]=genRole(r);
+  if(S.money<0)toast('⚠️ 資金がマイナスです！スタッフや設備を見直そう');if(sheetOpen)renderPanel();save();}
+function collide(p,r){return collideList(p,r,colliders);}
+function collideFoot(p,r){const a=collideList(p,r,footColliders),b=collideList(p,r,Object.values(facColl));return a||b;}
+function collideList(p,r,list){let hit=false;for(const c of list){if(p.x+r<c.x0||p.x-r>c.x1||p.z+r<c.z0||p.z-r>c.z1)continue;const nx=clamp(p.x,c.x0,c.x1),nz=clamp(p.z,c.z0,c.z1);const dx=p.x-nx,dz=p.z-nz;const d=Math.hypot(dx,dz);
+  if(d<1e-4){const l=p.x-c.x0,rr=c.x1-p.x,t=p.z-c.z0,b=c.z1-p.z,mn=Math.min(l,rr,t,b);if(mn===l)p.x=c.x0-r;else if(mn===rr)p.x=c.x1+r;else if(mn===t)p.z=c.z0-r;else p.z=c.z1+r;hit=true;}
+  else if(d<r){p.x=nx+dx/d*r;p.z=nz+dz/d*r;hit=true;}}return hit;}
+
+/* ================= minimap ================= */
+const mini=$('#mini'),mctx=mini.getContext('2d');let miniBg=null;
+function buildMiniBg(){miniBg=document.createElement('canvas');miniBg.width=miniBg.height=840;const x=miniBg.getContext('2d');const s=2;x.fillStyle='#a9c47f';x.fillRect(0,0,840,840);
+  x.save();x.scale(s,s);x.translate(210,210);x.fillStyle='#4f9dcc';x.fillRect(212,-210,10,420);x.fillStyle='#6b6e76';x.fillRect(-206,-206,412,412);
+  for(let bx_=0;bx_<N;bx_++)for(let bz_=0;bz_<N;bz_++){const r=bRect(bx_,bz_),k=bx_+','+bz_;x.fillStyle=k===CASINO_KEY?'#d4a017':COMPANY[k]?'#ff9f1c':LANDMARK[k]?'#7fc46a':GASB[k]?'#e63946':BRANCH_LOTS.includes(k)?'#d9c19a':'#efe6d6';x.fillRect(r.x0,r.z0,BLK,BLK);}
+  x.restore();}
+function drawMini(){if(!miniBg)return;const W=224,c=mctx;c.clearRect(0,0,W,W);c.save();c.beginPath();c.arc(W/2,W/2,W/2,0,Math.PI*2);c.clip();c.fillStyle='#a9c47f';c.fillRect(0,0,W,W);
+  const cp=ctrlPos();const k=0.75;c.translate(W/2,W/2);c.rotate(Math.PI/4);c.scale(k,k);c.translate(-cp.x,-cp.z);c.drawImage(miniBg,-210,-210,420,420);drawMapItems(c,1);c.restore();}
+function drawMapItems(c,sc){const dot=(x,z,r,col)=>{c.fillStyle=col;c.beginPath();c.arc(x,z,r*sc,0,Math.PI*2);c.fill();};
+  if(S.branches)0;BRANCH_LOTS.slice(0,S.fac.branch||0).forEach(k_=>{const [a,b]=k_.split(',').map(Number);const r=bRect(a,b);c.fillStyle='#c1121f';c.fillRect(r.x0+8,r.z0+8,BLK-16,BLK-16);});
+  fleetVis.forEach(a=>{if(a.x!==undefined)dot(a.x,a.z,3,'#ffd166');});
+  waiting.forEach(w=>dot(w.m.position.x,w.m.position.z,w.app?7:5,w.app?'#7b2ff7':PTYPE[w.type].c));
+  player.onboard.forEach(o=>{const q=6*sc;c.fillStyle=PTYPE[o.type].c;c.fillRect(o.dest.x-q,o.dest.z-q,q*2,q*2);c.strokeStyle='#fff';c.lineWidth=2.5*sc;c.strokeRect(o.dest.x-q,o.dest.z-q,q*2,q*2);});
+  abandoned.forEach(a=>dot(a.x,a.z,3,'#aaa'));const on=Math.floor(gameTime*4)%2;police.forEach(p_=>dot(p_.x,p_.z,6,on?'#ff0000':'#0044ff'));
+  dot(CASINO_PT.x,CASINO_PT.z,5,'#ffd700');
+  const arrowAt=(x,z,h,fill,stroke)=>{c.save();c.translate(x,z);c.rotate(-h);c.scale(sc,sc);c.fillStyle=fill;c.strokeStyle=stroke;c.lineWidth=3;c.beginPath();c.moveTo(0,10);c.lineTo(7,-7);c.lineTo(0,-3);c.lineTo(-7,-7);c.closePath();c.fill();c.stroke();c.restore();};
+  if(player.onFoot){c.fillStyle='#ff9f1c';c.strokeStyle='#fff';c.lineWidth=2*sc;c.fillRect(player.x-5*sc,player.z-5*sc,10*sc,10*sc);c.strokeRect(player.x-5*sc,player.z-5*sc,10*sc,10*sc);
+    if(walker.car)arrowAt(walker.x,walker.z,walker.h,'#ff6b6b','#fff');else{dot(walker.x,walker.z,6,'#e63946');dot(walker.x,walker.z,3.5,'#fff');}}
+  else arrowAt(player.x,player.z,player.h,'#fff','#e63946');}
+let mapOpen=false;
+function openMap(){mapOpen=true;$('#mapView').classList.remove('hidden');drawBigMap();SFX.click();}
+function closeMap(){mapOpen=false;$('#mapView').classList.add('hidden');}
+function drawBigMap(){const cv=$('#bigMap'),c=cv.getContext('2d'),W=1000;c.clearRect(0,0,W,W);const k=W*0.97/600;
+  c.save();c.translate(W/2,W/2);c.rotate(Math.PI/4);c.scale(k,k);c.drawImage(miniBg,-210,-210,420,420);drawMapItems(c,1.6);c.restore();
+  const tp=(x,z)=>{const a=Math.PI/4;return[W/2+(x*Math.cos(a)-z*Math.sin(a))*k,W/2+(x*Math.sin(a)+z*Math.cos(a))*k];};
+  const txt=(t,x,z,col,size,bg)=>{const [sx,sy]=tp(x,z);c.font=`800 ${size||22}px "M PLUS Rounded 1c",sans-serif`;c.textAlign='center';c.textBaseline='middle';const w=c.measureText(t).width+14;
+    c.fillStyle=bg||'rgba(0,0,0,.6)';c.beginPath();c.roundRect?c.roundRect(sx-w/2,sy-15,w,30,12):c.rect(sx-w/2,sy-15,w,30);c.fill();c.fillStyle=col||'#fff';c.fillText(t,sx,sy+1);};
+  for(const k_ in LANDMARK){const [a,b]=k_.split(',').map(Number);const r=bRect(a,b);const i=['monument','palace','market','watphnom','airport'].indexOf(LANDMARK[k_]);txt('🏛️ '+CITY.lm[i],r.cx,r.cz,'#fff',20,'rgba(27,94,32,.85)');}
+  for(const k_ in GASB){const [a,b]=k_.split(',').map(Number);const r=bRect(a,b);txt('⛽ GAS',r.cx,r.cz,'#fff',18,'rgba(193,18,31,.85)');}
+  {const [a,b]=CASINO_KEY.split(',').map(Number);const r=bRect(a,b);txt('🎰 カジノ',r.cx,r.cz,'#3a0d0d',22,'#ffd700');}
+  for(const id in PLOT){const p=PLOT[id],f=FACM[id];if(S.fac[id])txt(f.icon+' '+f.name.replace('トゥクトゥク',''),p.x,p.z,'#fff',15,'rgba(224,123,0,.9)');}
+  if(!Object.keys(S.fac).some(k_=>S.fac[k_]>0))txt('🏠 自社の土地（売地）',-25,-25,'#fff',17,'rgba(224,123,0,.9)');
+  BRANCH_LOTS.slice(0,S.fac.branch||0).forEach((k_,i)=>{const [a,b]=k_.split(',').map(Number);const r=bRect(a,b);txt(`🏬 第${i+1}営業所`,r.cx,r.cz,'#fff',16,'rgba(193,18,31,.85)');});
+  const me=ctrlPos();txt(player.onFoot?(walker.car?'🚗 あなた':'🚶 あなた'):'🛺 あなた',me.x,me.z-14,'#fff',18,'#e63946');if(player.onFoot)txt('🛺 愛車',player.x,player.z+14,'#3a2500',16,'#ffd166');}
+
+
+/* ================= offline ================= */
+function applyOffline(secs,show){if(secs<5||!D.drivers.length)return;secs=Math.min(secs,4*3600);const r=fleetNetPerSec();if(r<=0)return;const gain=r*secs*0.5;addInc('offline',gain);
+  const days=Math.floor(secs/DAY);if(show){const t=secs>=3600?(secs/3600).toFixed(1)+'時間':Math.round(secs/60)+'分';
+    modal(`<div class="burst"><span>💰</span></div><h2>おかえりなさい、社長！</h2><p>留守の${t}の間、ドライバーたちが働いてくれました。</p><p style="font-size:30px;font-weight:800;color:#1b8a3a">+${fmt(gain)}</p><p class="ds" style="font-size:11px">※留守中は通常の50%の効率です（最大4時間）</p><div class="btns"><button class="btn g" data-act="offok">受け取る</button></div>`);}
+  else if(gain>0)toast(`💰 バックグラウンド中の収益 +${fmt(gain)}`);}
+document.addEventListener('visibilitychange',()=>{if(AC){if(document.hidden)AC.suspend();else AC.resume();}if(document.hidden){if(started&&!resetting)save();}else if(started){const gap=(performance.now()-lastWall)/1000;if(gap>3)applyOffline(gap,gap>120);lastWall=performance.now();}});
+addEventListener('pagehide',()=>{if(started&&!resetting)save();});
+
+/* ================= loop & start ================= */
+let started=false;
+function loop(now){requestAnimationFrame(loop);let dt=(now-lastWall)/1000;lastWall=now;if(dt>0.25){if(dt>3)applyOffline(dt,false);dt=0.016;}dt=Math.min(dt,0.05);
+  if(!document.hidden){update(dt);updateCamera(dt);renderer.render(scene,camera);}}
+function start(fresh){$('#title').classList.add('hidden');initAudio();
+  if(fresh){S=DEF();try{localStorage.removeItem(KEY);}catch(e){}}const had=!fresh&&load();
+  S.wanted=0;CITY=cityDef(S.meta.city);resize();if(!S.cand.length)refreshCands();recalc();
+  buildCity();buildLot();buildMiniBg();spawnTraffic();
+  for(const id in S.fac){if(S.fac[id]>0)buildFacility(id,S.fac[id],false);}if(Object.keys(S.fac).some(k=>S.fac[k]>0))lotSign.visible=false;
+  player.x=S.px;player.z=S.pz;player.h=S.ph;camT.set(player.x,0,player.z);rebuildPlayer();syncFleetVis();syncParked();syncWalkers();updatePile();
+  if(D.mods.appCount)$('#phoneBtn').classList.remove('hidden');
+  started=true;lastWall=performance.now();requestAnimationFrame(loop);updateHUD(true);$('#bgmBtn').textContent=S.bgm?'🎵':'🔇';startBGM();
+  if(had&&S.justMoved){S.justMoved=false;S.lastSave=Date.now();SFX.lvl();modal(`<div class="burst"><span>🗺️</span></div><h2>📍 ${CITY.name}に進出！</h2><p>新天地でまた1台のトゥクトゥクから。<br>威光 <b>${S.meta.pts}pt</b> で全運賃 <b>+${S.meta.pts*5}%</b>！</p><p>物価・運賃 ×${CITY.m.toFixed(1)}</p><div class="btns"><button class="btn g" data-act="closemodal">天下統一、再び！</button></div>`);}
+  else if(had){const secs=(Date.now()-S.lastSave)/1000;if(secs>60&&D.drivers.length)applyOffline(secs,true);else toast('おかえりなさい！続きから再開します 🛺');}
+  else{modal(`<div class="big">🛺</div><h2>ようこそプノンペンへ！</h2><p>あなたは所持金$10、ボロボロのトゥクトゥク1台の個人ドライバー。</p>
+    <ul><li><b>左下をドラッグ</b>（PCはWASD/矢印）で運転</li><li>頭上に<b>◆</b>がある人に近づくと乗車</li><li><b>光の柱</b>まで⏱制限時間内に運ぶと評判UP＆定刻ボーナス！</li><li>ぶつけると車がボロくなり、評判が落ちると<b>乗車拒否</b>されます</li><li>稼いだお金で強化・車両購入・雇用・建設</li></ul>
+    <div class="btns"><button class="btn g" data-act="closemodal">出発する！</button></div>`);}
+  save();}
+function title(){const b=$('#titleBtns');const hs=hasSave();
+  if(hs){try{const o=JSON.parse(localStorage.getItem(KEY));if(o&&o.meta){$('#title .desc').innerHTML=`📍 ${cityDef(o.meta.city).name}編 ・ 威光 ${o.meta.pts}pt<br>交通の天下を取れ！`;}}catch(e){}}
+  b.innerHTML=hs?`<button class="btn g" id="tContinue">▶ つづきから</button><br><button class="btn" id="tNew" style="font-size:14px;padding:8px 20px">最初から</button>`:`<button class="btn g" id="tStart">▶ はじめる</button>`;
+  const go=f=>{const run=()=>start(f);(document.fonts&&document.fonts.ready?document.fonts.ready:Promise.resolve()).then(run,run);};
+  if(hs){$('#tContinue').onclick=()=>go(false);$('#tNew').onclick=()=>{b.innerHTML=`<p style="font-weight:800;color:#5a2200">本当にデータを消して最初から？</p><button class="btn r" id="tYes">はい</button><button class="btn" id="tNo">いいえ</button>`;$('#tYes').onclick=()=>go(true);$('#tNo').onclick=title;};}
+  else $('#tStart').onclick=()=>go(true);}
+resize();title();
+})();
+</script>
+</body>
+</html>
