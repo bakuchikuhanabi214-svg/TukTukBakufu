@@ -267,7 +267,7 @@ function mulberry(a){return function(){a|=0;a=a+0x6D2B79F5|0;let t=Math.imul(a^a
 function angDiff(a,b){let d=b-a;while(d>Math.PI)d-=Math.PI*2;while(d<-Math.PI)d+=Math.PI*2;return d;}
 
 /* ================= game data ================= */
-const KEY='tukbakufu_save_v1', DAY=120;const DEFAULT_CO='トゥクトゥク幕府';
+const KEY='tukbakufu_save_v1', DAY=300;const DAYK=2.5;const DEFAULT_CO='トゥクトゥク幕府';
 const LEVELS=[null,
  {name:'個人ドライバー',icon:'🛺'},
  {name:'小規模事業者',icon:'🏪'},
@@ -379,7 +379,7 @@ const aCost=a=>Math.round(a.cost*CM());
 /* ================= state ================= */
 function DEF(){return {v:1,money:10,earned:0,level:1,upg:{engine:0,tank:0,seats:0,exterior:0,tires:0,cargo:0,ac:0},fuel:1,vehicles:1,grade:0,
  staff:[],nid:1,fac:{},apps:{},divs:{},day:1,dayT:0,today:{inc:{},exp:{}},hist:[],cand:[],candR:{},trips:0,fleetTrips:0,appTrips:0,
- lastSave:Date.now(),sound:true,bgm:true,meta:{pts:0,city:0,runs:0,total:0},ev:null,evT:150,gasLock:0,justMoved:false,gasP:1,gasPrev:1,ins:0,hiredToday:0,bankrupt:0,company:'',wanted:0,crimes:0,arrests:0,casinoNet:0,accidents:0,insSaved:0,accLoss:0,cond:1,rep:4,ratings:[],streak:0,bestStreak:0,hq:1,px:0,pz:-25,ph:0,intro:false};}
+ lastSave:Date.now(),sound:true,bgm:true,meta:{pts:0,city:0,runs:0,total:0},ev:null,evT:150,gasLock:0,justMoved:false,gasP:1,gasPrev:1,ins:0,hiredToday:0,bankrupt:0,company:'',dayv2:false,wanted:0,crimes:0,arrests:0,casinoNet:0,accidents:0,insSaved:0,accLoss:0,cond:1,rep:4,ratings:[],streak:0,bestStreak:0,hq:1,px:0,pz:-25,ph:0,intro:false};}
 let S=DEF();
 function load(){try{const raw=localStorage.getItem(KEY);if(!raw)return false;const o=JSON.parse(raw);const d=DEF();
   for(const k in d){if(o[k]!==undefined){if(d[k]&&typeof d[k]==='object'&&!Array.isArray(d[k]))d[k]=Object.assign(d[k],o[k]);else d[k]=o[k];}}
@@ -406,7 +406,7 @@ function recalc(){
   const nd=S.staff.filter(x=>x.role==='driver').length;
   m.mgmtCap=4+D.cnt.manager*12+(f.office||0)*4+(f.hq||0)*15;m.mgmt=nd>m.mgmtCap?m.mgmtCap/nd:1;
   m.utilBase=nd?Math.min(1,m.demand/nd):1;
-  m.hireCap=3+(f.reception||0)*2+(f.office||0)*2+(f.hq||0)*4+D.cnt.manager+(f.branch||0)*3;
+  m.hireCap=2*(3)+(f.reception||0)*2+(f.office||0)*2+(f.hq||0)*4+D.cnt.manager+(f.branch||0)*3;
   m.speed=1+(f.rest||0)*0.06;
   m.breakRed=Math.min(0.85,(f.garage||0)*0.15+(f.repair||0)*0.1+m.mech);
   m.repairCost=Math.max(0.2,1-(f.repair||0)*0.25);
@@ -415,14 +415,23 @@ function recalc(){
   m.special=1+m.sales;
   m.cap=2+(f.parkS||0)*3+(f.parkL||0)*12+(f.hq||0)*40+(f.branch||0)*60;
   m.salary=S.staff.reduce((s,x)=>s+x.salary,0)*(1-m.acct);
-  m.ins=D.drivers.length*INS[S.ins].rate*LM()*(1-m.acct);
-  m.maint=FAC.reduce((s,x)=>s+(f[x.id]||0)*x.maint,0)*(1-m.acct);
+  m.ins=D.drivers.length*INS[S.ins].rate*DAYK*LM()*(1-m.acct);
+  m.maint=FAC.reduce((s,x)=>s+(f[x.id]||0)*x.maint,0)*DAYK*(1-m.acct);
   D.drivers.forEach(d=>{if(!RT.has(d.id))RT.set(d.id,{t:rnd()*20,dur:tripDur(d),broken:0,trips:0});});
   for(const id of RT.keys()){if(!D.drivers.find(d=>d.id===id))RT.delete(id);}
 }
 const LM=()=>LMULT[S.level]*CITY.m;
 function tripDur(d){return 22/(0.75+d.spd*0.05)/D.mods.speed/D.mods.req;}
-function curUtil(){const n=D.drivers.length;return n?Math.min(1,D.mods.demand*EV('req')/n):1;}
+function hourNow(){return (6+S.dayT/DAY*24)%24;}
+function rampK(h,pts){for(let i=0;i<pts.length-1;i++){const [h0,v0]=pts[i],[h1,v1]=pts[i+1];if(h>=h0&&h<=h1)return lerp(v0,v1,(h-h0)/Math.max(0.001,h1-h0));}return pts[pts.length-1][1];}
+const TRAF=[[0,0.3],[4.5,0.3],[6.5,0.9],[7.5,1.3],[9.5,1.3],[10.5,1],[16,1],[17,1.3],[19.5,1.3],[21,0.8],[23,0.4],[24,0.3]];
+const PEDK=[[0,0.15],[5,0.15],[7,0.8],[9,1],[16,1],[17.5,1.3],[21,1.2],[22.5,0.5],[24,0.15]];
+const PASK=[[0,0.45],[5,0.45],[6.5,1],[7.5,1.4],[9.5,1.4],[10.5,1],[16.5,1],[17.5,1.35],[20,1.3],[22,0.8],[23.5,0.5],[24,0.45]];
+function nightF(h){return rampK(h,[[0,1],[4.3,1],[6,0],[18.3,0],[20,1],[24,1]]);}
+function duskF(h){return rampK(h,[[0,0],[5.2,0],[6,0.5],[7,0],[16.3,0],[18,1],[19.6,0],[24,0]]);}
+function isNightFare(){const h=hourNow();return h>=22||h<5;}
+function phaseOf(h){return h>=5&&h<10?['☀️','朝']:h<16.5&&h>=10?['🌤️','昼']:h>=16.5&&h<19.5?['🌇','夕方']:['🌙','夜'];}
+function curUtil(){const n=D.drivers.length;return n?Math.min(1,D.mods.demand*EV('req')*rampK(hourNow(),PASK)/n):1;}
 function baseFleetFare(d){return 4*LM()*D.mods.mgmt*(0.7+d.eff*0.06)*(1+d.svc*0.025)*D.mods.fare;}
 function fleetFuel(){return 0.8*LM()*S.gasP*D.mods.fuel;}
 function gasPriceTxt(){const d=(S.gasP/S.gasPrev-1)*100;return `$${(1.1*S.gasP).toFixed(2)}/L（${d>=0?'▲':'▼'}${Math.abs(d).toFixed(0)}%）`;}
@@ -806,13 +815,16 @@ function updateAgent(a,dt,avoidPlayer){const f=nodePos(a.from.i,a.from.j),t=node
   const dx=(t.x-f.x)/len,dz=(t.z-f.z)/len;const rx=-dz,rz=dx;
   let x=lerp(f.x,t.x,a.t)+rx*a.lane,z=lerp(f.z,t.z,a.t)+rz*a.lane;let sp=a.speed;
   if(avoidPlayer){let blk=false;const chk=(ox_,oz_,lw)=>{const px=ox_-x,pz=oz_-z;const ahead=px*dx+pz*dz;const lat=Math.abs(px*rx+pz*rz);return ahead>0&&ahead<8&&lat<lw;};
-    blk=chk(player.x,player.z,2.6)||(player.onFoot&&chk(walker.x,walker.z,1.8));
+    blk=chk(player.x,player.z,2.6)||(player.onFoot&&chk(walker.x,walker.z,1.8))||(player.onFoot&&walker.car&&chk(walker.car.x,walker.car.z,2.4));
     if(blk){a.blockT=(a.blockT||0)+dt;if(a.blockT<(player.onFoot?4:30))sp=0;}else a.blockT=0;}
+  if(a.passT>0)a.passT-=dt;else if(sp>0){let hit=false;for(const b of AGENTS){if(b===a||b.x===undefined)continue;const px=b.x-x,pz=b.z-z;if(px>9||px<-9||pz>9||pz<-9)continue;const ahead=px*dx+pz*dz;if(ahead>0.4&&ahead<6.2&&Math.abs(px*rx+pz*rz)<2.6){hit=true;break;}const qx=px-dx*3.6,qz=pz-dz*3.6;if(qx*qx+qz*qz<7.3&&ahead>0){hit=true;break;}}
+    for(const c of police){if(hit)break;const px=c.x-x,pz=c.z-z;const ahead=px*dx+pz*dz;if(ahead>0.4&&ahead<6.2&&Math.abs(px*rx+pz*rz)<2.3)hit=true;}
+    if(hit){a.waitT=(a.waitT||0)+dt;if(a.waitT>3){a.passT=1.2;a.waitT=0;}else sp=0;}else a.waitT=0;}
   a.t+=sp*dt/len;if(a.t>=1){a.t-=1;const prev=a.from;a.from=a.to;a.to=nextNode(a.from,prev);}
   a.model.position.set(x,0.36,z);const target=Math.atan2(dx,dz);a.model.rotation.y+=angDiff(a.model.rotation.y,target)*Math.min(1,dt*8);a.x=x;a.z=z;}
-const traffic=[];const fleetVis=[];const peds=[];
-function spawnTraffic(){for(let i=0;i<13;i++)traffic.push(makeAgent(buildCar(),9+rnd()*4,3));for(let i=0;i<9;i++)traffic.push(makeAgent(buildMoto(),11+rnd()*4,4.6));
-  for(let i=0;i<22;i++){let bx_,bz_,k;do{bx_=Math.floor(rnd()*N);bz_=Math.floor(rnd()*N);k=bx_+','+bz_;}while(COMPANY[k]);
+const traffic=[];const fleetVis=[];const peds=[];let AGENTS=[];
+function spawnTraffic(){for(let i=0;i<40;i++){if(i%9<5)traffic.push(makeAgent(buildCar(),9+rnd()*4,3));else traffic.push(makeAgent(buildMoto(),11+rnd()*4,4.6));}
+  for(let i=0;i<54;i++){let bx_,bz_,k;do{bx_=Math.floor(rnd()*N);bz_=Math.floor(rnd()*N);k=bx_+','+bz_;}while(COMPANY[k]);
     const r=bRect(bx_,bz_);const p=personAnim(pick(['#e76f51','#2a9d8f','#e9c46a','#8ecae6','#ffafcc','#cdb4db','#fff','#6c757d']));scene.add(p);peds.push({m:p,r,s:rnd()*BLK*4,v:(rnd()<0.5?-1:1)*(1.2+rnd()*0.8),down:0,flee:0});}}
 function syncFleetVis(){const want=Math.min(D.drivers.length,16);while(fleetVis.length<want){const a=makeAgent(buildFleetTuk(fleetColor()),10+rnd()*3,3);a.from={i:3+Math.floor(rnd()*2),j:3};a.to=nextNode(a.from,null);fleetVis.push(a);}
   while(fleetVis.length>want){const a=fleetVis.pop();scene.remove(a.model);}}
@@ -838,8 +850,8 @@ const walker={x:0,z:0,h:0,walk:0,m:null,car:null,punchT:0};
 const victims=[],abandoned=[],police=[];let evadeT=0,sirenT=0,lightT=0;
 function ctrlPos(){if(player.onFoot)return{x:walker.x,z:walker.z};return{x:player.x,z:player.z};}
 function punch(){if(!player.onFoot||walker.car)return;initAudio();walker.punchT=0.25;const fx_=Math.sin(walker.h),fz_=Math.cos(walker.h);const inFront=(x,z,r)=>{const dx=x-walker.x,dz=z-walker.z,d=Math.hypot(dx,dz);return d<r&&(dx*fx_+dz*fz_)>-0.3*d;};
-  for(const a of traffic){if(a.x!==undefined&&inFront(a.x,a.z,3.6)){stealVehicle(a);return;}}
-  for(const p of peds){if(p.down<=0&&p.x!==undefined&&inFront(p.x,p.z,2.6)){SFX.punch();p.down=4.5;p.m.rotation.x=-Math.PI/2;p.m.position.y=0.55;floatText('ドカッ！💫',p.x,4,p.z,'bad');stars(p.x,p.z);crime('assault',p);return;}}
+  for(const a of traffic){if(!a.off&&a.x!==undefined&&inFront(a.x,a.z,3.6)){stealVehicle(a);return;}}
+  for(const p of peds){if(!p.off&&p.down<=0&&p.x!==undefined&&inFront(p.x,p.z,2.6)){SFX.punch();p.down=4.5;p.m.rotation.x=-Math.PI/2;p.m.position.y=0.55;floatText('ドカッ！💫',p.x,4,p.z,'bad');stars(p.x,p.z);crime('assault',p);return;}}
   for(const w of waiting){if(!w.refused&&inFront(w.m.position.x,w.m.position.z,2.6)){const x=w.m.position.x,z=w.m.position.z;removeWaiting(w);SFX.punch();floatText('ドカッ！💫',x,4,z,'bad');const v=spawnVictim(x,z,walker.h);crime('assault',v);return;}}
   tone(300,0.06,'triangle',0.03);floatText('スカッ',walker.x,3.5,walker.z,'small');}
 function stars(x,z){for(let i=0;i<6;i++){const m=new THREE.Mesh(G.oct,new THREE.MeshBasicMaterial({color:'#ffd700'}));m.scale.setScalar(0.25);m.position.set(x,2,z);scene.add(m);const a=rnd()*6.28;fx.push({m,t:0,life:0.8,vx:Math.cos(a)*3,vy:5,vz:Math.sin(a)*3,type:'spark'});}}
@@ -849,7 +861,7 @@ function stealVehicle(a){SFX.punch();traffic.splice(traffic.indexOf(a),1);const 
   walker.car={m:a.model,kind,v:0,h:a.model.rotation.y,x:a.x,z:a.z};walker.m.visible=false;document.body.classList.add('car');
   traffic.push(makeAgent(kind==='car'?buildCar():buildMoto(),kind==='car'?9+rnd()*4:11+rnd()*4,kind==='car'?3:4.6));crime('theft',v);updateFootBtn();}
 function crime(type,victim){S.crimes++;const pos=ctrlPos();let w=0;const R=34;
-  peds.forEach(p=>{if(p!==victim&&p.down<=0&&p.x!==undefined&&dist2(p.x,p.z,pos.x,pos.z)<R)w++;});traffic.forEach(a=>{if(a.x!==undefined&&dist2(a.x,a.z,pos.x,pos.z)<R)w++;});
+  peds.forEach(p=>{if(!p.off&&p!==victim&&p.down<=0&&p.x!==undefined&&dist2(p.x,p.z,pos.x,pos.z)<R)w++;});traffic.forEach(a=>{if(!a.off&&a.x!==undefined&&dist2(a.x,a.z,pos.x,pos.z)<R)w++;});
   waiting.forEach(q=>{if(dist2(q.m.position.x,q.m.position.z,pos.x,pos.z)<R)w++;});walkers.forEach(q=>{if(dist2(q.m.position.x,q.m.position.z,pos.x,pos.z)<R)w++;});
   const pRep=1-Math.pow(0.68,w)*(type==='theft'?0.45:0.8);
   floatText(w?`👀 目撃者 ${w}人…`:'👀 誰も見ていない…？',pos.x,7,pos.z,'small');
@@ -866,6 +878,7 @@ function updatePolice(dt){if(!S.wanted){if(police.length)clearPolice();$('#wante
     if(d<28){tx=pos.x;tz=pos.z;}else{const q=nodePos(c.node.i,c.node.j);if(dist2(c.x,c.z,q.x,q.z)<3){let bn=null,bd=1e9;[[1,0],[-1,0],[0,1],[0,-1]].forEach(o=>{const i=c.node.i+o[0],j=c.node.j+o[1];if(i<0||j<0||i>N||j>N)return;const qq=nodePos(i,j);const dd=dist2(qq.x,qq.z,pos.x,pos.z);if(dd<bd){bd=dd;bn={i,j};}});if(bn)c.node=bn;}
       const q2=nodePos(c.node.i,c.node.j);tx=q2.x;tz=q2.z;}
     const want_=Math.atan2(tx-c.x,tz-c.z);c.h+=clamp(angDiff(c.h,want_),-3.2*dt,3.2*dt);const ox=c.x,oz=c.z;c.x+=Math.sin(c.h)*sp*dt;c.z+=Math.cos(c.h)*sp*dt;
+    for(const a of AGENTS){if(a.x===undefined)continue;const dd=dist2(a.x,a.z,c.x,c.z);if(dd<3.3){c.x+=(c.x-a.x)/(dd||1)*(3.3-dd);c.z+=(c.z-a.z)/(dd||1)*(3.3-dd);}}for(const o of police){if(o===c)continue;const dd=dist2(o.x,o.z,c.x,c.z);if(dd<3.3){c.x+=(c.x-o.x)/(dd||1)*(3.3-dd)*0.5;c.z+=(c.z-o.z)/(dd||1)*(3.3-dd)*0.5;}}
     const q={x:c.x,z:c.z};if(collide(q,1.6)){c.stuck+=dt;}else c.stuck=Math.max(0,c.stuck-dt);c.x=q.x;c.z=q.z;
     if(c.stuck>1.5){let bn=null,bd=1e9;for(let i=0;i<=N;i++)for(let j=0;j<=N;j++){const qq=nodePos(i,j);const dd=dist2(qq.x,qq.z,c.x,c.z);if(dd<bd){bd=dd;bn={i,j};}}c.node=bn;c.stuck=0;c.x=lerp(c.x,nodePos(bn.i,bn.j).x,0.3);c.z=lerp(c.z,nodePos(bn.i,bn.j).z,0.3);}
     c.m.position.set(c.x,0.36,c.z);c.m.rotation.y=c.h;const on=Math.floor(lightT*6)%2;c.m.userData.lights.forEach((l,i)=>l.material.color.set((i+on)%2?'#ff0000':'#0044ff'));
@@ -882,11 +895,17 @@ function updateVictims(dt){for(let i=victims.length-1;i>=0;i--){const v=victims[
     v.t+=dt;const pos=ctrlPos();const a=Math.atan2(v.x-pos.x,v.z-pos.z);v.x+=Math.sin(a)*7*dt;v.z+=Math.cos(a)*7*dt;v.m.position.set(v.x,0.36,v.z);v.m.rotation.y=a;animLimbs(v.m,v.t*12,0.9);
     if(v.t>5){scene.remove(v.m);victims.splice(i,1);}}
   for(let i=abandoned.length-1;i>=0;i--){const c=abandoned[i];if(dist2(c.x,c.z,player.x,player.z)>160&&(!player.onFoot||dist2(c.x,c.z,walker.x,walker.z)>160)){scene.remove(c.m);abandoned.splice(i,1);}}}
+const KB={on:false,kf:0,ks:0};
+function kbVehicle(o,dt,maxSp,acc,turn,revMax){const tf=clamp(Math.abs(o.v)/4,0.35,1)*(o.v<-0.3?-1:1);o.h-=KB.ks*turn*tf*dt;
+  if(KB.kf>0)o.v+=clamp(maxSp-o.v,-acc*1.6*dt,acc*dt);
+  else if(KB.kf<0){if(o.v>0.3)o.v=Math.max(0,o.v-24*dt);else o.v=Math.max(-revMax,o.v-6*dt);}
+  else o.v-=Math.sign(o.v)*Math.min(Math.abs(o.v),5*dt);}
 function driveCar(dt,wx,wz,mag,brk){const c=walker.car;const cfg=c.kind==='car'?{max:22,acc:12,turn:2.6,r:1.8}:{max:19,acc:15,turn:3.4,r:0.9};
-  if(mag>0.12&&!sheetOpen){const t=Math.atan2(wx,wz);const d=angDiff(c.h,t);c.h+=clamp(d,-cfg.turn*dt,cfg.turn*dt);const al=Math.max(0,Math.cos(d));c.v+=clamp(cfg.max*mag*(0.35+0.65*al)-c.v,-cfg.acc*1.6*dt,cfg.acc*dt);}else c.v-=Math.min(c.v,6*dt);
-  if(brk)c.v=Math.max(0,c.v-30*dt);c.x+=Math.sin(c.h)*c.v*dt;c.z+=Math.cos(c.h)*c.v*dt;c.x=clamp(c.x,-205,205);c.z=clamp(c.z,-205,205);
+  if(KB.on&&!sheetOpen)kbVehicle(c,dt,cfg.max,cfg.acc,cfg.turn,6);
+  else if(mag>0.12&&!sheetOpen){const t=Math.atan2(wx,wz);const d=angDiff(c.h,t);c.h+=clamp(d,-cfg.turn*dt,cfg.turn*dt);const al=Math.max(0,Math.cos(d));c.v+=clamp(cfg.max*mag*(0.35+0.65*al)-c.v,-cfg.acc*1.6*dt,cfg.acc*dt);}else c.v-=Math.sign(c.v)*Math.min(Math.abs(c.v),6*dt);
+  if(brk)c.v-=Math.sign(c.v)*Math.min(Math.abs(c.v),30*dt);c.x+=Math.sin(c.h)*c.v*dt;c.z+=Math.cos(c.h)*c.v*dt;c.x=clamp(c.x,-205,205);c.z=clamp(c.z,-205,205);
   const q={x:c.x,z:c.z};if(collide(q,cfg.r)){if(c.v>8&&(!c.bt||gameTime-c.bt>0.6)){c.bt=gameTime;SFX.crash();player.shake=0.25;}c.v*=0.6;}c.x=q.x;c.z=q.z;
-  for(const a of traffic){if(a.x===undefined)continue;const d=dist2(a.x,a.z,c.x,c.z);if(d<3.4){c.x+=(c.x-a.x)/(d||1)*(3.4-d);c.z+=(c.z-a.z)/(d||1)*(3.4-d);if(c.v>6&&(!c.bt||gameTime-c.bt>0.6)){c.bt=gameTime;SFX.crash();c.v*=0.4;}}}
+  for(const a of AGENTS.concat(police)){if(a.x===undefined)continue;const d=dist2(a.x,a.z,c.x,c.z);if(d<3.4){c.x+=(c.x-a.x)/(d||1)*(3.4-d);c.z+=(c.z-a.z)/(d||1)*(3.4-d);if(c.v>6&&(!c.bt||gameTime-c.bt>0.6)){c.bt=gameTime;SFX.crash();c.v*=0.4;}}}
   c.m.position.set(c.x,0.36,c.z);c.m.rotation.y=c.h;walker.x=c.x;walker.z=c.z;walker.h=c.h;}
 /* ===== casino ===== */
 let casinoOpen=false,cGame='slot',cBet=10,cBusy=false,rBet='red';const rHist=[];
@@ -941,7 +960,7 @@ function foreclose(){if(S.money>=0)return;const seized=[];const debt0=-S.money;c
 function toggleFoot(){initAudio();
   if(player.onFoot&&walker.car){const c=walker.car;if(c.v>3){toast('🛑 停車してから降りよう');return;}abandoned.push({m:c.m,kind:c.kind,x:c.x,z:c.z,h:c.h});walker.car=null;walker.x=c.x+Math.cos(c.h)*2.6;walker.z=c.z-Math.sin(c.h)*2.6;const q={x:walker.x,z:walker.z};collideFoot(q,0.6);walker.x=q.x;walker.z=q.z;walker.m.visible=true;document.body.classList.remove('car');SFX.click();updateFootBtn();return;}
   if(player.onFoot&&dist2(walker.x,walker.z,player.x,player.z)>5.5){const ab=abandoned.find(c=>dist2(c.x,c.z,walker.x,walker.z)<3.8);if(ab){abandoned.splice(abandoned.indexOf(ab),1);walker.car={m:ab.m,kind:ab.kind,v:0,h:ab.h,x:ab.x,z:ab.z};walker.m.visible=false;document.body.classList.add('car');SFX.click();updateFootBtn();return;}}
-  if(!player.onFoot){if(player.v>3){toast('🛑 停車してから降りよう');SFX.err();return;}
+  if(!player.onFoot){if(Math.abs(player.v)>3){toast('🛑 停車してから降りよう');SFX.err();return;}
     player.onFoot=true;player.v=0;if(!walker.m){walker.m=personAnim('#f4a261',4242);scene.add(walker.m);}walker.m.visible=true;
     walker.x=player.x+Math.cos(player.h)*2.8;walker.z=player.z-Math.sin(player.h)*2.8;walker.h=player.h;const q={x:walker.x,z:walker.z};collideFoot(q,0.6);walker.x=q.x;walker.z=q.z;
     if(player.mesh.userData.drv)player.mesh.userData.drv.visible=false;document.body.classList.add('foot');toast('🚶 徒歩モード。トゥクトゥクの近くで「乗る」');SFX.click();}
@@ -950,7 +969,7 @@ function toggleFoot(){initAudio();
   updateFootBtn();}
 function updateFootBtn(){const b=$('#footBtn');if(player.onFoot&&walker.car){b.innerHTML=(walker.car.kind==='car'?'🚗':'🏍️')+'<small>降りる</small>';b.classList.toggle('dis',walker.car.v>3);return;}
   if(player.onFoot&&dist2(walker.x,walker.z,player.x,player.z)>5.5&&abandoned.some(c=>dist2(c.x,c.z,walker.x,walker.z)<3.8)){b.innerHTML='🚗<small>乗る</small>';b.classList.remove('dis');return;}
-  if(!player.onFoot){b.innerHTML='🚶<small>降りる</small>';b.classList.toggle('dis',player.v>3);}else{const near=dist2(walker.x,walker.z,player.x,player.z)<=5.5;b.innerHTML='🛺<small>'+(near?'乗る':'遠い')+'</small>';b.classList.toggle('dis',!near);}}
+  if(!player.onFoot){b.innerHTML='🚶<small>降りる</small>';b.classList.toggle('dis',Math.abs(player.v)>3);}else{const near=dist2(walker.x,walker.z,player.x,player.z)<=5.5;b.innerHTML='🛺<small>'+(near?'乗る':'遠い')+'</small>';b.classList.toggle('dis',!near);}}
 function updateSeats(){const sl=player.mesh.userData.slots;sl.forEach((s,i)=>s.visible=i<player.onboard.length);}
 function seatsCap(){return 1+S.upg.seats;}
 const arrow=new THREE.Mesh(new THREE.ConeGeometry(0.9,2.4,3).rotateX(Math.PI/2),new THREE.MeshBasicMaterial({color:'#ffd166'}));arrow.scale.set(1,0.5,1);scene.add(arrow);
@@ -961,7 +980,7 @@ const waiting=[];const beams=[];
 const beamGeo=new THREE.CylinderGeometry(2.6,2.6,40,16,1,true);const ringGeo=new THREE.RingGeometry(3,4,32).rotateX(-Math.PI/2);
 function makeBeam(col){const g=new THREE.Group();const b=new THREE.Mesh(beamGeo,new THREE.MeshBasicMaterial({color:col,transparent:true,opacity:0.28,depthWrite:false,side:THREE.DoubleSide}));b.position.y=20;g.add(b);
   const r=new THREE.Mesh(ringGeo,new THREE.MeshBasicMaterial({color:col,transparent:true,opacity:0.8,depthWrite:false}));r.position.y=0.12;g.add(r);g.userData.ring=r;scene.add(g);return g;}
-function pFareMult(){return (1+S.upg.exterior*0.1)*LM()*PB()*EV('fare');}
+function pFareMult(){return (1+S.upg.exterior*0.1)*LM()*PB()*EV('fare')*(isNightFare()?1.3:1);}
 function chooseType(){const r=rnd();if(S.divs.airport&&r<0.07)return'airport';if((S.divs.tour||EV('tourist',0))&&r<0.17)return'tour';if(rnd()<vipChanceOf(S.upg.ac))return'vip';const q=rnd();return q<0.45?'short':q<0.8?'mid':'long';}
 function makeTrip(pt,type){let dest;
   if(type==='airport')dest={x:AIRPORT_PT.x,z:AIRPORT_PT.z};else if(type==='tour'){const l=pick(landmarkPts);dest={x:l.x,z:l.z,name:l.name};}
@@ -1009,7 +1028,7 @@ function dropOff(p){scene.remove(p.beamD);player.onboard.splice(player.onboard.i
   addInc(cat,total);if(p.app){const a=APPS.find(x=>x.id===p.app);addExp('appfee',p.fare*a.fee);S.appTrips++;}
   S.trips++;floatText('+'+fmtD(total),player.x,5,player.z,p.type==='vip'||p.type==='airport'?'gold':'');if(p.lug)floatText('荷物チップ +'+fmtD(p.lug),player.x,3,player.z,'small');
   coinsFrom3D(player.x,3,player.z,Math.min(10,3+Math.floor(total)+S.streak));SFX.coin(1+Math.min(S.streak,8)*0.06);if(total>=10)SFX.big();renderPax();hideHint();}
-function renderPax(){const el=$('#pax');el.innerHTML=player.onboard.map(p=>`<div class="chip" style="border-left-color:${PTYPE[p.type].c}">${p.app?'📱':''}${PTYPE[p.type].n}客 ${fmtD(p.fare+(p.lug||0))} <span id="pd${player.onboard.indexOf(p)}"></span></div>`).join('')+
+function renderPax(){const el=$('#pax');el.innerHTML=player.onboard.map((p,i)=>`<div class="chip" style="border-left-color:${PTYPE[p.type].c}${i===0&&player.onboard.length>1?';box-shadow:0 0 0 2px #ffd166':''}">${player.onboard.length>1?(i===0?'▶次 ':'①②③④'[i]+' '):''}${p.app?'📱':''}${PTYPE[p.type].n}客 ${fmtD(p.fare+(p.lug||0))} <span id="pd${player.onboard.indexOf(p)}"></span></div>`).join('')+
   (player.onboard.length?`<div class="chip" style="border-left-color:#999">座席 ${player.onboard.length}/${seatsCap()}${S.streak?' ・ 🔥'+S.streak+'連続定刻':''}</div>`:'');}
 
 /* ================= app requests ================= */
@@ -1043,19 +1062,19 @@ function buildFac(id){const f=FACM[id];const l=S.fac[id]||0;if(l>=f.max)return;i
   let fx_=PLOT[id]?PLOT[id]:null;if(id==='branch'){const [a,b]=BRANCH_LOTS[S.fac.branch-1].split(',').map(Number);const r=bRect(a,b);fx_={x:r.cx,z:r.cz};}
   camFocus={x:fx_.x,z:fx_.z,t:2.6};toast(`${f.icon} ${f.name}を${l?'Lv'+(l+1)+'に強化':'建設'}しました！`);closeSheet();syncParked();syncWalkers();save();checkLevel();}
 function genDriver(){const L=S.level;const st=()=>clamp(Math.round(1+rnd()*5+L*0.6+rnd()*rnd()*4),1,10);const d={role:'driver',name:pick(LN)+'・'+pick(FN),spd:st(),svc:st(),eff:st(),rel:st()};
-  d.salary=Math.round((1.5+(d.spd+d.svc+d.eff+d.rel)*0.2)*Math.pow(LM(),0.6)*10)/10;return d;}
-function genRole(role){const s=clamp(Math.round(1+rnd()*6+S.level*0.5),1,10);return{role,name:pick(LN)+'・'+pick(FN),skill:s,salary:Math.round((3+s*0.8)*Math.pow(LM(),0.5)*10)/10};}
+  d.salary=Math.round((1.5+(d.spd+d.svc+d.eff+d.rel)*0.2)*Math.pow(LM(),0.6)*DAYK*10)/10;return d;}
+function genRole(role){const s=clamp(Math.round(1+rnd()*6+S.level*0.5),1,10);return{role,name:pick(LN)+'・'+pick(FN),skill:s,salary:Math.round((3+s*0.8)*Math.pow(LM(),0.5)*DAYK*10)/10};}
 function refreshCands(){S.cand=[genDriver(),genDriver(),genDriver()];for(const r in ROLES)if(r!=='driver')S.candR[r]=genRole(r);}
 function hireLeft(){return Math.max(0,D.mods.hireCap-S.hiredToday);}
 function capCheck(){if(hireLeft()<1){toast('📋 本日の採用枠がいっぱい！明日また採用できます（受付・事務所・本社・マネージャーで枠が増える）');SFX.err();return false;}return true;}
 function hireDriver(i){const c=S.cand[i];if(!c)return;if(!capCheck())return;if(freeVeh()<1){toast('空き車両がありません。先にトゥクトゥクを購入しよう 🛺');SFX.err();return;}
-  if(!spend('hire',c.salary*2))return;const d=Object.assign({id:S.nid++,skill:Math.round((c.spd+c.svc+c.eff+c.rel)/4)},c);S.staff.push(d);S.hiredToday++;S.cand[i]=genDriver();
+  if(!spend('hire',c.salary*0.8))return;const d=Object.assign({id:S.nid++,skill:Math.round((c.spd+c.svc+c.eff+c.rel)/4)},c);S.staff.push(d);S.hiredToday++;S.cand[i]=genDriver();
   recalc();syncFleetVis();syncParked();syncWalkers();toast(`🧑‍✈️ ${d.name}さんを雇いました！自動で稼いでくれます`);if(!S.ins&&D.drivers.length===1)setTimeout(()=>toast('⚠️ 保険未加入！事故ると修理代＋賠償金で大損… 経営タブで加入を'),1600);renderPanel();save();checkLevel();}
-function hireBulk(){if(!capCheck())return;const n=Math.min(10,freeVeh(),hireLeft());if(n<1){toast('空き車両がありません 🛺');SFX.err();return;}const ds=[];for(let i=0;i<n;i++)ds.push(genDriver());const cost=ds.reduce((s,d)=>s+d.salary*2,0);
+function hireBulk(){if(!capCheck())return;const n=Math.min(10,freeVeh(),hireLeft());if(n<1){toast('空き車両がありません 🛺');SFX.err();return;}const ds=[];for(let i=0;i<n;i++)ds.push(genDriver());const cost=ds.reduce((s,d)=>s+d.salary*0.8,0);
   if(!spend('hire',cost))return;ds.forEach(d=>{d.id=S.nid++;d.skill=Math.round((d.spd+d.svc+d.eff+d.rel)/4);S.staff.push(d);});S.hiredToday+=n;recalc();syncFleetVis();syncParked();toast(`🧑‍✈️ ドライバーを${n}人まとめて採用！`);renderPanel();save();checkLevel();}
 function roleCap(r){const f=S.fac;switch(r){case'mechanic':return (f.garage||0)*2+(f.repair||0)*3;case'reception':return (f.reception||0)*2+(f.branch||0);case'manager':return (f.office||0)+(f.hq||0)*2+(f.branch||0);case'accountant':return (f.office||0)+(f.hq||0);case'sales':return (f.office||0)+(f.hq||0)*2+(f.branch||0);}return 0;}
 const ROLECAP_TXT={mechanic:'整備場Lv×2＋修理工場Lv×3',reception:'受付Lv×2＋営業所数',manager:'事務所Lv＋本社Lv×2＋営業所数',accountant:'事務所Lv＋本社Lv',sales:'事務所Lv＋本社Lv×2＋営業所数'};
-function hireRole(r){const R=ROLES[r];if(!S.fac[R.req]){toast(`${FACM[R.req].name}が必要です`);SFX.err();return;}if(D.cnt[r]>=roleCap(r)){toast(`${R.icon} ${R.name}は上限（${roleCap(r)}人）です。施設を強化すると枠が増えます`);SFX.err();return;}if(!capCheck())return;const c=S.candR[r]||genRole(r);if(!spend('hire',c.salary*2))return;
+function hireRole(r){const R=ROLES[r];if(!S.fac[R.req]){toast(`${FACM[R.req].name}が必要です`);SFX.err();return;}if(D.cnt[r]>=roleCap(r)){toast(`${R.icon} ${R.name}は上限（${roleCap(r)}人）です。施設を強化すると枠が増えます`);SFX.err();return;}if(!capCheck())return;const c=S.candR[r]||genRole(r);if(!spend('hire',c.salary*0.8))return;
   S.staff.push(Object.assign({id:S.nid++},c));S.hiredToday++;S.candR[r]=genRole(r);recalc();syncWalkers();toast(`${R.icon} ${c.name}さん（${R.name}）を雇いました！`);renderPanel();save();}
 function fire(id){const s=S.staff.find(x=>x.id===id);if(!s)return;confirmBox(`${s.name}さん（${ROLES[s.role].name}）を解雇しますか？`,()=>{S.staff.splice(S.staff.indexOf(s),1);recalc();syncFleetVis();syncParked();syncWalkers();toast('解雇しました');renderPanel();save();});}
 function regApp(id){const a=APPS.find(x=>x.id===id);if(S.apps[id])return;if(S.level<a.lv){toast(`Lv${a.lv}で解放`);return;}if(!spend('hire',aCost(a)))return;S.apps[id]=true;recalc();
@@ -1112,7 +1131,7 @@ const floatsEl=$('#floats');let dispMoney=10;let lastGoal='';
 function updateHUD(force){const g=getGoal();const gs=g.t+'|'+Math.round(g.p*20);if(force||gs!==lastGoal){lastGoal=gs;$('#goal').innerHTML=`<div class="gt">🎯 次の目標</div>${g.t}<div class="gp"><i style="width:${g.p*100}%"></i></div>`;}
   $('#lvlNum').textContent='Lv'+S.level;$('#lvlName').textContent=LEVELS[S.level].name;
   let sum=0;while(rateWin.length&&rateWin[0][0]<gameTime-60)rateWin.shift();rateWin.forEach(r=>sum+=r[1]);$('#rate').textContent='+'+fmt(sum)+' /分';
-  $('#dayTxt').textContent=S.day+'日目';const hm=6+S.dayT/DAY*16;$('#clock').textContent=String(Math.floor(hm)).padStart(2,'0')+':'+String(Math.floor((hm%1)*60/10)*10).padStart(2,'0');$('#dayBar i').style.width=(S.dayT/DAY*100)+'%';
+  $('#dayTxt').textContent=S.day+'日目';const hm=hourNow();$('#clock').textContent=phaseOf(hm)[0]+' '+String(Math.floor(hm)).padStart(2,'0')+':'+String(Math.floor((hm%1)*60/10)*10).padStart(2,'0');$('#dayBar i').style.width=(S.dayT/DAY*100)+'%';
   $('#fuelFill').style.width=(S.fuel*100)+'%';$('#condFill').style.width=(S.cond*100)+'%';$('#condPct').textContent=Math.round(S.cond*100)+'%';
   const re=$('#rep');re.textContent='★'+S.rep.toFixed(1);re.classList.toggle('bad',S.rep<3);
   const rb=$('#repairBtn');rb.classList.toggle('hidden',S.cond>=0.9);$('#repairPct').textContent=Math.round(S.cond*100)+'%';$('#fuel').classList.toggle('low',S.fuel<0.2||S.cond<0.25);
@@ -1164,18 +1183,18 @@ function renderPanel(){if(!sheetOpen)return;const b=$('#sheetBody');const st=b.s
     h+=`<div class="sec">📊 需要と稼働状況</div><div class="card" style="display:block"><div class="row"><div class="stat"><b>${Math.floor(dem)}人分</b><small>街の配車需要</small></div><div class="stat"><b style="color:${col}">${Math.round(u*100)}%</b><small>ドライバー稼働率</small></div><div class="stat"><b style="color:${m.mgmt<1?'#c1121f':'#1b8a3a'}">${nd}/${m.mgmtCap}</b><small>管理できる人数</small></div></div>
       <div class="ds" style="margin-top:6px">${u<1?`⚠️ ドライバーが需要より<b>${nd-Math.floor(dem)}人多い</b>ため、客待ちで稼働率が下がっています（給料だけかかる）。`:'✅ 需要に対してドライバーは足りています。'}${m.mgmt<1?`<br>⚠️ 管理が追いつかず、運賃 ×${m.mgmt.toFixed(2)}・事故率アップ。マネージャーを雇うか事務所/本社を強化。`:''}<br>需要を増やす: レベルアップ・配車アプリ・評判・受付・営業所・事業部門</div></div>`;}
     h+=`<div class="sec">🧑‍✈️ ドライバー採用（空き車両 ${Math.max(0,freeVeh())}台 ・ 本日の採用枠 残り${hireLeft()}/${m.hireCap}）</div>`;
-    S.cand.forEach((c,i)=>{h+=`<div class="card"><div class="ic">🧑‍✈️</div><div class="mid"><div class="nm">${c.name}</div>${statBars(c)}<div class="ds">給料 ${fmtD(c.salary)}／日</div></div>${B('hire',i,c.salary*2,'雇用')}</div>`;});
+    S.cand.forEach((c,i)=>{h+=`<div class="card"><div class="ic">🧑‍✈️</div><div class="mid"><div class="nm">${c.name}</div>${statBars(c)}<div class="ds">給料 ${fmtD(c.salary)}／日</div></div>${B('hire',i,c.salary*0.8,'雇用')}</div>`;});
     h+=`<div class="row" style="margin-bottom:8px">${B('reroll',0,Math.round(5*LM()),'🔄 候補を入れ替え')}${S.level>=3?B('bulkhire',0,null,`一括採用（最大${Math.min(10,hireLeft(),Math.max(0,freeVeh()))}人）`):''}</div>`;
     h+=`<div class="sec">🏢 その他の職種</div>`;
     for(const r in ROLES){if(r==='driver')continue;const R=ROLES[r];const ok=!!S.fac[R.req];const c=S.candR[r]||(S.candR[r]=genRole(r));
-      h+=`<div class="card ${ok?'':'lock'}"><div class="ic">${R.icon}</div><div class="mid"><div class="nm">${R.name} <small style="color:${D.cnt[r]>=roleCap(r)?'#c1121f':'inherit'}">${D.cnt[r]}/${roleCap(r)}人</small></div><div class="ds">${R.desc}（現在 ${Math.round((m[{mechanic:'mech',reception:'recep',manager:'mgr',accountant:'acct',sales:'sales'}[r]])*100)}%）<br>${ok?`枠: ${ROLECAP_TXT[r]}<br>候補: ${c.name} 能力${c.skill}/10 ・ 給料${fmtD(c.salary)}/日`:'🔒 '+FACM[R.req].name+'が必要'}</div></div>${ok?(D.cnt[r]>=roleCap(r)?`<span class="btn dis" title="${ROLECAP_TXT[r]}">上限</span>`:B('hirerole',r,c.salary*2,'雇用')):''}</div>`;}
+      h+=`<div class="card ${ok?'':'lock'}"><div class="ic">${R.icon}</div><div class="mid"><div class="nm">${R.name} <small style="color:${D.cnt[r]>=roleCap(r)?'#c1121f':'inherit'}">${D.cnt[r]}/${roleCap(r)}人</small></div><div class="ds">${R.desc}（現在 ${Math.round((m[{mechanic:'mech',reception:'recep',manager:'mgr',accountant:'acct',sales:'sales'}[r]])*100)}%）<br>${ok?`枠: ${ROLECAP_TXT[r]}<br>候補: ${c.name} 能力${c.skill}/10 ・ 給料${fmtD(c.salary)}/日`:'🔒 '+FACM[R.req].name+'が必要'}</div></div>${ok?(D.cnt[r]>=roleCap(r)?`<span class="btn dis" title="${ROLECAP_TXT[r]}">上限</span>`:B('hirerole',r,c.salary*0.8,'雇用')):''}</div>`;}
     h+=`<div class="sec">📋 スタッフ名簿</div>`;const list=S.staff.slice().reverse();
     if(!list.length)h+=`<div class="card"><div class="mid ds">まだスタッフはいません。あなた1人で頑張っています！</div></div>`;
     list.slice(0,40).forEach(s=>{const rt=RT.get(s.id);h+=`<div class="card" style="padding:8px 10px"><div class="ic" style="width:36px;height:36px;font-size:22px">${ROLES[s.role].icon}</div><div class="mid"><div class="nm" style="font-size:13px">${s.name} <small>${ROLES[s.role].name}</small></div><div class="ds">${s.role==='driver'?`速${s.spd} 接${s.svc} 効${s.eff} 信${s.rel} ・ 本日${rt?rt.trips:0}回`:`能力 ${s.skill}/10`} ・ ${fmtD(s.salary)}/日</div></div><button class="btn r sm" data-act="fire" data-arg="${s.id}">解雇</button></div>`;});
     if(list.length>40)h+=`<div class="ds" style="text-align:center">ほか ${list.length-40} 名</div>`;}
   else if(sheetOpen==='fac'){h+=`<div class="ds" style="margin-bottom:6px">建設すると会社の敷地（売地だった場所）に建物が建ちます。</div>`;
     FAC.forEach(f=>{const l=S.fac[f.id]||0,lock=S.level<f.lv,mx=l>=f.max;
-      h+=`<div class="card ${lock?'lock':''}"><div class="ic">${f.icon}</div><div class="mid"><div class="nm">${f.name} ${l?`<small>Lv${l}/${f.max}</small>`:''}</div><div class="ds">${f.desc}<br>維持費 ${fmtD(f.maint)}／日・Lv</div>${l?pips(l,f.max):''}</div>
+      h+=`<div class="card ${lock?'lock':''}"><div class="ic">${f.icon}</div><div class="mid"><div class="nm">${f.name} ${l?`<small>Lv${l}/${f.max}</small>`:''}</div><div class="ds">${f.desc}<br>維持費 ${fmtD(f.maint*DAYK)}／日・Lv</div>${l?pips(l,f.max):''}</div>
         ${lock?`<span class="btn dis">🔒Lv${f.lv}</span>`:mx?'<span class="btn g dis">MAX</span>':B('fac',f.id,facCost(f,l),l?'拡張':'建設',l?'b':'g')}</div>`;});}
   else if(sheetOpen==='biz'){const L=S.level;const inc=S.today.inc,exp=S.today.exp;const ti=Object.values(inc).reduce((a,b)=>a+b,0),te=Object.values(exp).reduce((a,b)=>a+b,0);
     h+=`<div class="lvlcard"><div style="font-size:13px;font-weight:800;opacity:.9">🏢 ${escH(CN())}</div><h3>${LEVELS[L].icon} Lv${L} ${LEVELS[L].name}</h3>`;
@@ -1191,7 +1210,7 @@ function renderPanel(){if(!sheetOpen)return;const b=$('#sheetBody');const st=b.s
     if(S.money<0)h+=`<div class="card" style="background:#ffe3e3"><div class="ic">⚖️</div><div class="mid"><div class="nm">借金 ${fmt(-S.money)}</div><div class="ds">決算（残り${Math.ceil(DAY-S.dayT)}秒）までに返済しないと、待機車両→設備→ドライバーの順に差し押さえ。足りなければ自己破産（残り${BANKRUPT_MAX-S.bankrupt}回・超えると倒産）</div></div></div>`;
     h+=`<div class="sec">🛡️ 自動車保険（本日の事故 ${S.today.acc||0}件 ・ 累計 ${S.accidents}件）</div>`;
     if(!S.ins&&D.drivers.length)h+=`<div class="card" style="background:#ffe3e3"><div class="ic">⚠️</div><div class="mid"><div class="nm">保険に未加入です！</div><div class="ds">ドライバーが事故を起こすと修理代＋賠償金で大きな出費に。重大事故は通常の3倍の賠償金。</div></div></div>`;
-    INS.forEach((P,i)=>{const prem=D.drivers.length*P.rate*LM()*(1-m.acct);h+=`<div class="card" ${S.ins===i?'style="box-shadow:0 0 0 3px #2a9d8f"':''}><div class="ic">${P.icon}</div><div class="mid"><div class="nm">${P.name}</div><div class="ds">${P.desc}<br>保険料 ${fmtD(P.rate*LM())}／ドライバー1人・日（現在 ${fmtD(prem)}／日）${P.ded?` ・ 免責 ${fmtD(P.ded*LM())}`:''}</div></div>${S.ins===i?`<span class="btn ${i?'g':'r'} dis">${i?'加入中':'未加入'}</span>`:`<button class="btn ${i?'g':'r'}" data-act="ins" data-arg="${i}">${i?'加入':'解約'}</button>`}</div>`;});
+    INS.forEach((P,i)=>{const prem=D.drivers.length*P.rate*DAYK*LM()*(1-m.acct);h+=`<div class="card" ${S.ins===i?'style="box-shadow:0 0 0 3px #2a9d8f"':''}><div class="ic">${P.icon}</div><div class="mid"><div class="nm">${P.name}</div><div class="ds">${P.desc}<br>保険料 ${fmtD(P.rate*DAYK*LM())}／ドライバー1人・日（現在 ${fmtD(prem)}／日）${P.ded?` ・ 免責 ${fmtD(P.ded*LM())}`:''}</div></div>${S.ins===i?`<span class="btn ${i?'g':'r'} dis">${i?'加入中':'未加入'}</span>`:`<button class="btn ${i?'g':'r'}" data-act="ins" data-arg="${i}">${i?'加入':'解約'}</button>`}</div>`;});
     h+=`<div class="row" style="margin-bottom:8px"><div class="stat"><b class="minus">${fmt(S.accLoss)}</b><small>事故の自己負担（累計）</small></div><div class="stat"><b class="plus">${fmt(S.insSaved)}</b><small>保険がカバーした額（累計）</small></div></div>`;
     h+=`<div class="sec">📱 配車アプリ</div>`;
     APPS.forEach(a=>{const reg=S.apps[a.id],lock=L<a.lv;h+=`<div class="card ${lock?'lock':''}"><div class="applogo" style="background:${a.color}">${a.short}</div><div class="mid"><div class="nm">${a.name}</div><div class="ds">${a.desc}<br>手数料${a.fee*100}% ・ 社用車の依頼数+${a.boost*100}%</div></div>
@@ -1246,14 +1265,14 @@ $('#cChips').addEventListener('click',e=>{const b=e.target.closest('[data-chip]'
 $('#cGame').addEventListener('click',e=>{const b=e.target.closest('[data-rb]');if(!b||cBusy)return;rBet=b.dataset.rb;document.querySelectorAll('[data-rb]').forEach(x=>x.classList.toggle('on',x===b));SFX.click();});
 $('#footBtn').addEventListener('pointerdown',e=>{e.stopPropagation();toggleFoot();});
 $('#repairBtn').addEventListener('click',()=>{initAudio();doRepair();});$('#bgmBtn').addEventListener('click',toggleBGM);
-function setGear(g){g=clamp(g,0,5);player.at=false;$('#gears [data-gc=at]').classList.remove('on');if(g===player.gear)return;player.gear=g;tone(360+g*45,0.06,'square',0.04);}
-function setAT(on){player.at=on;$('#gears [data-gc=at]').classList.toggle('on',on);tone(on?700:400,0.06,'square',0.04);}
+let lastATToast=-99;function setGear(g){if(player.at){if(gameTime-lastATToast>3){lastATToast=gameTime;toast('AT中です。ギアを選ぶときは「AT」を押してマニュアルに');}return;}g=clamp(g,0,5);if(g===player.gear)return;player.gear=g;tone(360+g*45,0.06,'square',0.04);}
+function setAT(on){player.at=on;S.at=on;if(!on)player.gear=clamp(player.gear,0,5);$('#gears [data-gc=at]').classList.toggle('on',on);tone(on?700:400,0.06,'square',0.04);}
 document.querySelectorAll('#gears button').forEach(b=>b.addEventListener('pointerdown',e=>{e.stopPropagation();initAudio();const c=b.dataset.gc;if(c==='at')setAT(!player.at);else setGear(player.gear+(c==='up'?1:-1));}));
 const spc=$('#speedo'),spx=spc.getContext('2d');let spFrame=0;
 function drawSpeedo(){const x=spx,W=176,cx=88,cy=94,R=74,MAX=Math.max(40,Math.ceil(maxSpeedOf(S.upg.engine)*2.2/10)*10+10);x.clearRect(0,0,W,W);const a0=Math.PI*0.75,sw=Math.PI*1.5;
   x.beginPath();x.arc(cx,cy,R+8,0,Math.PI*2);x.fillStyle='rgba(20,20,30,.78)';x.fill();
   x.lineWidth=10;x.lineCap='round';x.beginPath();x.arc(cx,cy,R-6,a0,a0+sw);x.strokeStyle='rgba(255,255,255,.18)';x.stroke();
-  const kmh=player.v*2.2,gm=maxSpeedOf(S.upg.engine)*(player.at?1:GEARS[player.gear].f)*2.2,fr=Math.min(1,kmh/MAX);
+  const kmh=Math.abs(player.v)*2.2,gm=maxSpeedOf(S.upg.engine)*(player.at?1:GEARS[player.gear].f)*2.2,fr=Math.min(1,kmh/MAX);
   const grd=x.createLinearGradient(0,W,W,0);grd.addColorStop(0,'#2a9d8f');grd.addColorStop(0.6,'#ffd166');grd.addColorStop(1,'#e63946');
   x.beginPath();x.arc(cx,cy,R-6,a0,a0+sw*fr);x.strokeStyle=grd;x.stroke();
   const ga=a0+sw*Math.min(1,gm/MAX);x.lineWidth=4;x.beginPath();x.arc(cx,cy,R-6,ga-0.03,ga+0.03);x.strokeStyle='#ff4d4d';x.stroke();
@@ -1291,6 +1310,7 @@ function updateCamera(dt){let tx=player.x+Math.sin(player.h)*player.v*0.35,tz=pl
 let spawnT=0,saveT=0,hudT=0,miniT=0,lastWall=performance.now();
 function update(dt){gameTime+=dt;
   // --- input
+  KB.kf=(keys.KeyW||keys.ArrowUp?1:0)-(keys.KeyS||keys.ArrowDown?1:0);KB.ks=(keys.KeyD||keys.ArrowRight?1:0)-(keys.KeyA||keys.ArrowLeft?1:0);KB.on=!joy.active&&(KB.kf!==0||KB.ks!==0);
   let ix=0,iy=0;if(keys.KeyW||keys.ArrowUp)iy-=1;if(keys.KeyS||keys.ArrowDown)iy+=1;if(keys.KeyA||keys.ArrowLeft)ix-=1;if(keys.KeyD||keys.ArrowRight)ix+=1;
   if(joy.active){ix=joy.x;iy=joy.y;}const mag=Math.min(1,Math.hypot(ix,iy)*1.25);const brk=brake||keys.Space;
   const inv=1/Math.SQRT2;const wx=ix*inv+(-iy)*(-inv),wz=ix*(-inv)+(-iy)*(-inv);// right=(1,-1)/√2, up=(-1,-1)/√2
@@ -1300,11 +1320,12 @@ function update(dt){gameTime+=dt;
   if(player.onFoot&&walker.car){driveCar(dt,wx,wz,mag,brk);}
   else if(player.onFoot){if(mag>0.12&&!sheetOpen){const sp=6.5*mag;walker.h=Math.atan2(wx,wz);walker.x+=Math.sin(walker.h)*sp*dt;walker.z+=Math.cos(walker.h)*sp*dt;walker.walk+=dt*sp;}
     walker.x=clamp(walker.x,-205,205);walker.z=clamp(walker.z,-205,205);const q={x:walker.x,z:walker.z};collideFoot(q,0.6);walker.x=q.x;walker.z=q.z;
-    for(const a of traffic){if(a.x===undefined)continue;const d=dist2(a.x,a.z,walker.x,walker.z);if(d<2.2){walker.x+=(walker.x-a.x)/(d||1)*(2.2-d);walker.z+=(walker.z-a.z)/(d||1)*(2.2-d);if(!walker.honk||gameTime-walker.honk>3){walker.honk=gameTime;SFX.horn();floatText('🚗 危ない！',walker.x,4,walker.z,'small bad');}}}
+    for(const a of traffic){if(a.off||a.x===undefined)continue;const d=dist2(a.x,a.z,walker.x,walker.z);if(d<2.2){walker.x+=(walker.x-a.x)/(d||1)*(2.2-d);walker.z+=(walker.z-a.z)/(d||1)*(2.2-d);if(!walker.honk||gameTime-walker.honk>3){walker.honk=gameTime;SFX.horn();floatText('🚗 危ない！',walker.x,4,walker.z,'small bad');}}}
     if(!walker.car){walker.m.position.set(walker.x,0.36,walker.z);walker.m.rotation.y=walker.h;animLimbs(walker.m,walker.walk*1.6,mag>0.12?0.7:0);if(walker.punchT>0){walker.punchT-=dt;walker.m.userData.limbs[3].rotation.x=-1.5;}}}
-  if(!player.onFoot&&mag>0.12&&!sheetOpen){const target=Math.atan2(wx,wz);const d=angDiff(player.h,target);player.h+=clamp(d,-turn*dt,turn*dt);const align=Math.max(0,Math.cos(d));
-    const ts=maxSp*mag*(0.35+0.65*align);player.v+=clamp(ts-player.v,-acc*1.6*dt,acc*dt);}else{player.v-=Math.min(player.v,6*dt);}
-  if(brk)player.v=Math.max(0,player.v-28*dt);
+  if(!player.onFoot&&KB.on&&!sheetOpen){kbVehicle(player,dt,maxSp,acc,turn,4);}
+  else if(!player.onFoot&&mag>0.12&&!sheetOpen){const target=Math.atan2(wx,wz);const d=angDiff(player.h,target);player.h+=clamp(d,-turn*dt,turn*dt);const align=Math.max(0,Math.cos(d));
+    const ts=maxSp*mag*(0.35+0.65*align);player.v+=clamp(ts-player.v,-acc*1.6*dt,acc*dt);}else{player.v-=Math.sign(player.v)*Math.min(Math.abs(player.v),6*dt);}
+  if(brk)player.v-=Math.sign(player.v)*Math.min(Math.abs(player.v),28*dt);
   const ox=player.x,oz=player.z;player.x+=Math.sin(player.h)*player.v*dt;player.z+=Math.cos(player.h)*player.v*dt;
   player.x=clamp(player.x,-205,205);player.z=clamp(player.z,-205,205);
   const p={x:player.x,z:player.z};if(collide(p,1.9)){const cx=p.x-player.x,cz=p.z-player.z,cl=Math.hypot(cx,cz)||1;const impact=-(Math.sin(player.h)*player.v*cx+Math.cos(player.h)*player.v*cz)/cl;
@@ -1312,7 +1333,7 @@ function update(dt){gameTime+=dt;
   const moved=dist2(ox,oz,player.x,player.z);if(!empty)S.fuel=Math.max(0,S.fuel-moved/rangeOf(u.tank));
   if(S.fuel<=0&&!player.warnedFuel){player.warnedFuel=true;toast('⛽ ガス欠！ゆっくりしか走れません。ガソリンスタンドへ！');}if(S.fuel>0.05)player.warnedFuel=false;
   // traffic bump
-  player.bumpT-=dt;if(!player.onFoot)for(const a of traffic){if(a.x===undefined)continue;const d=dist2(a.x,a.z,player.x,player.z);if(d<3.4){const nx=(player.x-a.x)/(d||1),nz=(player.z-a.z)/(d||1);player.x+=nx*(3.4-d);player.z+=nz*(3.4-d);
+  player.bumpT-=dt;if(!player.onFoot)for(const a of AGENTS.concat(police)){if(a.x===undefined)continue;const d=dist2(a.x,a.z,player.x,player.z);if(d<3.4){const nx=(player.x-a.x)/(d||1),nz=(player.z-a.z)/(d||1);player.x+=nx*(3.4-d);player.z+=nz*(3.4-d);
       if(player.bumpT<=0&&player.v>4){const dm=0.03+player.v*0.004;player.v*=0.4;player.bumpT=1;damage(dm);}}}
   player.mesh.position.set(player.x,0.36,player.z);player.mesh.rotation.y=player.h;player.mesh.rotation.z=Math.sin(gameTime*30)*0.01*Math.min(1,player.v/5);
   // refuel
@@ -1326,10 +1347,10 @@ function update(dt){gameTime+=dt;
     m.scale.setScalar(0.5);m.position.set(player.x+Math.sin(player.h)*1.2,1.2,player.z+Math.cos(player.h)*1.2);scene.add(m);fx.push({m,t:0,life:1.4,vx:(rnd()-0.5),vy:2.5,vz:(rnd()-0.5),type:'smoke'});}}
   if(S.fuel<0.2&&!inZone&&hintT<=0&&player.onboard.length===0&&rnd()<0.002)showHint('⛽ 燃料が少ない！ミニマップの赤い点（GAS）へ',4);
   // engine sound
-  if(AC&&engGain&&S.sound){const rpm=player.onFoot?0:player.v/Math.max(1,fullSp*GR.f);engOsc.frequency.value=42+rpm*95+player.gear*6;engGain.gain.value=0.012+Math.min(0.035,player.v*0.0022);}
+  if(AC&&engGain&&S.sound){const rpm=player.onFoot?0:Math.abs(player.v)/Math.max(1,fullSp*GR.f);engOsc.frequency.value=42+rpm*95+player.gear*6;engGain.gain.value=0.012+Math.min(0.035,player.v*0.0022);}
   player.hornT=Math.max(0,player.hornT-dt);
   // --- passengers
-  spawnT-=dt;const nWaitNormal=waiting.filter(w=>!w.app&&!w.refused).length;if(spawnT<=0&&nWaitNormal<Math.min(10,Math.round((S.rep<2.5?4:6)*EV('spawn')))){spawnT=1.2/EV('spawn');newPassenger();}
+  spawnT-=dt;const nWaitNormal=waiting.filter(w=>!w.app&&!w.refused).length;if(spawnT<=0&&nWaitNormal<Math.min(11,Math.round((S.rep<2.5?4:7)*EV('spawn')*rampK(hourNow(),PASK)))){spawnT=1.1/EV('spawn')/rampK(hourNow(),PASK);newPassenger();}
   const pr=player.hornT>0?13:7.5;
   for(let i=waiting.length-1;i>=0;i--){const w=waiting[i];w.t+=dt;w.mk.rotation.y+=dt*2;w.mk.position.y=3.3+Math.sin(w.t*3)*0.25;
     if(w.jump>0){w.jump-=dt;w.m.position.y=0.36+Math.abs(Math.sin(w.jump*10))*0.8;}else w.m.position.y=0.36;
@@ -1340,9 +1361,9 @@ function update(dt){gameTime+=dt;
     if(d>pr+6)w.checked=false;
     if(!w.app&&!w.special&&d>240)removeWaiting(w);}
   if(waiting.length&&player.onboard.length>=seatsCap()&&!S.intro){}
-  for(let i=player.onboard.length-1;i>=0;i--){const o=player.onboard[i];o.beamD.userData.ring.scale.setScalar(1+Math.sin(gameTime*4)*0.12);if(!player.onFoot&&dist2(o.dest.x,o.dest.z,player.x,player.z)<7.5){dropOff(o);if(!S.intro&&S.trips>=1){S.intro=true;}}}
+  for(let i=player.onboard.length-1;i>=0;i--){const o=player.onboard[i];o.beamD.userData.ring.scale.setScalar(i===0?1+Math.sin(gameTime*4)*0.12:0.8);o.beamD.children[0].material.opacity=i===0?0.32:0.1;if(!player.onFoot&&dist2(o.dest.x,o.dest.z,player.x,player.z)<7.5){dropOff(o);if(!S.intro&&S.trips>=1){S.intro=true;}}}
   // arrow
-  let tgt=null,best=1e9;if(player.onboard.length){player.onboard.forEach(o=>{const d=dist2(o.dest.x,o.dest.z,player.x,player.z);if(d<best){best=d;tgt={x:o.dest.x,z:o.dest.z,c:PTYPE[o.type].c};}});}
+  let tgt=null,best=1e9;if(player.onboard.length){const o=player.onboard[0];best=dist2(o.dest.x,o.dest.z,player.x,player.z);tgt={x:o.dest.x,z:o.dest.z,c:PTYPE[o.type].c};}
   else{waiting.forEach(w=>{let d=dist2(w.m.position.x,w.m.position.z,player.x,player.z);if(w.special)d*=0.1;else if(w.app)d*=0.3;if(d<best){best=d;tgt={x:w.m.position.x,z:w.m.position.z,c:w.special?'#ffd700':w.app?'#7b2ff7':'#ffffff'};}});}
   if(tgt&&best>9){arrow.visible=arrowRing.visible=true;const a=Math.atan2(tgt.x-player.x,tgt.z-player.z);arrow.position.set(player.x+Math.sin(a)*4.6,1.2,player.z+Math.cos(a)*4.6);arrow.rotation.y=a;arrow.material.color.set(tgt.c);arrowRing.position.set(player.x,0.45,player.z);}
   else arrow.visible=arrowRing.visible=false;
@@ -1362,13 +1383,13 @@ function update(dt){gameTime+=dt;
   if(S.ev){S.ev.t-=dt;if(S.ev.t<=0){toast(`${EVM[S.ev.id].icon} 「${EVM[S.ev.id].title.replace('！','')}」が終わりました`);S.ev=null;S.evT=150+rnd()*180;recalc();}}
   else if(!pendingEv){S.evT-=dt;if(S.evT<=0){if($('#modal').classList.contains('hidden')&&!phoneOpen)triggerEvent();else S.evT=5;}}
   const raining=EV('rain',0)>0;if(raining){ensureRain();rain.visible=true;updateRain(dt);}else if(rain)rain.visible=false;
-  const wk=Math.min(1,dt*1.5);hemi.intensity=lerp(hemi.intensity,raining?0.45:0.75,wk);sun.intensity=lerp(sun.intensity,raining?0.35:0.75,wk);scene.background.lerp(raining?RAINBG:SKYBG,wk);scene.fog.color.lerp(raining?RAINFOG:FOGC,wk);
+  applySky(dt,raining);
   if(EV('fw',0)){fwT-=dt;if(fwT<=0){fwT=0.5+rnd()*0.5;sparkle(camT.x+(rnd()-0.5)*70,24+rnd()*12,camT.z+(rnd()-0.5)*70,pick(['#ff4fa3','#ffd166','#3a86ff','#06d6a0','#ff6b6b']));tone(200+rnd()*100,0.3,'triangle',0.04,0,60);}}
   // --- day
   S.dayT+=dt;if(S.dayT>=DAY)endDay();
   // --- agents
-  traffic.forEach(a=>updateAgent(a,dt,true));fleetVis.forEach(a=>updateAgent(a,dt,true));
-  peds.forEach(p=>{if(p.down>0){p.down-=dt;if(p.down<=0){p.m.rotation.x=0;p.m.position.y=0.36;p.flee=5;}return;}const fs=p.flee>0?3.5:1;if(p.flee>0)p.flee-=dt;
+  AGENTS=traffic.filter(a=>!a.off).concat(fleetVis);traffic.forEach(a=>{if(!a.off)updateAgent(a,dt,true);});fleetVis.forEach(a=>updateAgent(a,dt,true));
+  peds.forEach(p=>{if(p.off)return;if(p.down>0){p.down-=dt;if(p.down<=0){p.m.rotation.x=0;p.m.position.y=0.36;p.flee=5;}return;}const fs=p.flee>0?3.5:1;if(p.flee>0)p.flee-=dt;
     p.s=(p.s+p.v*fs*dt+BLK*4*10)%(BLK*4);const r=p.r,e=Math.floor(p.s/BLK),t=p.s%BLK;let x,z,ry;const i1=1.4;
     if(e===0){x=r.x0+t;z=r.z0+i1;ry=Math.PI/2;}else if(e===1){x=r.x1-i1;z=r.z0+t;ry=0;}else if(e===2){x=r.x1-t;z=r.z1-i1;ry=-Math.PI/2;}else{x=r.x0+i1;z=r.z1-t;ry=Math.PI;}
     p.x=x;p.z=z;p.m.position.set(x,0.36,z);p.m.rotation.y=p.v>0?ry:ry+Math.PI;animLimbs(p.m,p.s*2.4,p.flee>0?0.9:0.55);});
@@ -1397,6 +1418,29 @@ function update(dt){gameTime+=dt;
   if((spFrame%8)===1){const nc=nearCasino()&&!casinoOpen;$('#casinoBtn').classList.toggle('hidden',!nc);if(casinoRing)casinoRing.material.opacity=0.45+Math.sin(gameTime*4)*0.3;}
   if(phoneOpen&&ptab==='drv'&&Math.floor(gameTime*2)!==Math.floor((gameTime-dt)*2))renderPhone();}
 let lastBreakToast=0,fwT=0,pendingEv=null,rain=null;
+const NIGHTBG=new THREE.Color('#0d1733'),NIGHTFOG=new THREE.Color('#121c38'),DUSKBG=new THREE.Color('#f59e62'),DUSKFOG=new THREE.Color('#f0b07e');
+const SUNDAY=new THREE.Color('#fff1d6'),SUNDUSK=new THREE.Color('#ff8f4a'),SUNNIGHT=new THREE.Color('#8fa2ff'),HEMIDAY=new THREE.Color('#fff6e0'),HEMINIGHT=new THREE.Color('#6d7fd1');
+const _c1=new THREE.Color(),_c2=new THREE.Color();let lampPts=null,headLight=null,lastPhase='',densT=0;
+function applySky(dt,raining){const h=hourNow(),n=nightF(h),du=duskF(h)*(1-n*0.6),rf=raining?0.62:1,wk=Math.min(1,dt*2);
+  _c1.copy(SKYBG).lerp(DUSKBG,du).lerp(NIGHTBG,n);if(raining)_c1.lerp(RAINBG,0.55*(1-n*0.5));scene.background.lerp(_c1,wk);
+  _c2.copy(FOGC).lerp(DUSKFOG,du).lerp(NIGHTFOG,n);if(raining)_c2.lerp(RAINFOG,0.55*(1-n*0.5));scene.fog.color.lerp(_c2,wk);
+  hemi.intensity=lerp(hemi.intensity,lerp(0.75,0.34,n)*rf,wk);hemi.color.copy(HEMIDAY).lerp(DUSKFOG,du*0.7).lerp(HEMINIGHT,n);
+  sun.intensity=lerp(sun.intensity,lerp(0.75,0.12,n)*rf*(1-du*0.15),wk);sun.color.copy(SUNDAY).lerp(SUNDUSK,du).lerp(SUNNIGHT,n);
+  if(CUT.im){const e=n*0.95;CUT.im.win.material.emissive.setRGB(e,e*0.78,e*0.42);if(CUT.gim)CUT.gim.win.material.emissive.setRGB(e,e*0.78,e*0.42);}
+  if(lampPts)lampPts.material.opacity=Math.min(1,n*1.2);
+  if(headLight){headLight.intensity=n*1.5;const px=player.onFoot?(walker.car?walker.car.x:walker.x):player.x,pz=player.onFoot?(walker.car?walker.car.z:walker.z):player.z,ph=player.onFoot?(walker.car?walker.car.h:walker.h):player.h;headLight.position.set(px+Math.sin(ph)*7,3.5,pz+Math.cos(ph)*7);}
+  const ph=phaseOf(h)[1];if(ph!==lastPhase){if(lastPhase){const msg={朝:'☀️ 朝になりました。通勤ラッシュで客が増加！',昼:'🌤️ 昼です。',夕方:'🌇 夕方ラッシュ！客と車が増えています',夜:'🌙 夜になりました。22時〜5時は深夜料金+30%（客は少なめ）'}[ph];if(ph!=='昼')toast(msg);}lastPhase=ph;}
+  densT-=dt;if(densT<=0){densT=1;updateDensity(h);}}
+function updateDensity(h){const tk=rampK(h,TRAF)/1.3,pk=rampK(h,PEDK)/1.3;const cnt={car:0,moto:0},tot={car:0,moto:0};traffic.forEach(a=>tot[a.model.userData.kind||'car']++);
+  traffic.forEach(a=>{const k=a.model.userData.kind||'car';const idx=cnt[k]++;const off=idx>=Math.round(tot[k]*tk*(k==='moto'&&(h>=22||h<5)?0.6:1));
+    if(!!a.off===off)return;a.off=off;a.model.visible=!off;if(!off&&a.x!==undefined&&dist2(a.x,a.z,camT.x,camT.z)<90){let i,j;do{i=Math.floor(rnd()*(N+1));j=Math.floor(rnd()*(N+1));}while(dist2(nX(i),nX(j),camT.x,camT.z)<90);a.from={i,j};a.to=nextNode(a.from,null);a.t=0;}});
+  const wp=Math.round(peds.length*pk);peds.forEach((p,i)=>{const off=i>=wp;if(!!p.off===off)return;p.off=off;p.m.visible=!off;});}
+function buildLamps(){const pts=[],poles=[];for(let i=0;i<=N;i++)for(let j=0;j<=N;j++){const x=nX(i)+6.8,z=nX(j)+6.8;if(x>205||z>205)continue;pts.push(x-1.2,6.1,z-1.2);poles.push({x,y:3,z,sx:0.18,sy:6,sz:0.18,c:'#555b66'});poles.push({x:x-0.6,y:6.05,z:z-0.6,sx:1.6,sy:0.15,sz:0.15,c:'#555b66'});}
+  inst(G.cyl6,poles.filter(p=>p.sy>1));inst(G.box,poles.filter(p=>p.sy<1));
+  const c=document.createElement('canvas');c.width=c.height=64;const x=c.getContext('2d');const g=x.createRadialGradient(32,32,2,32,32,32);g.addColorStop(0,'rgba(255,240,200,1)');g.addColorStop(0.25,'rgba(255,200,110,.8)');g.addColorStop(1,'rgba(255,170,60,0)');x.fillStyle=g;x.fillRect(0,0,64,64);
+  const geo=new THREE.BufferGeometry();geo.setAttribute('position',new THREE.Float32BufferAttribute(pts,3));
+  lampPts=new THREE.Points(geo,new THREE.PointsMaterial({map:new THREE.CanvasTexture(c),size:9,transparent:true,depthWrite:false,blending:THREE.AdditiveBlending,opacity:0,color:'#ffd27a'}));lampPts.frustumCulled=false;scene.add(lampPts);
+  headLight=new THREE.PointLight('#ffe7a8',0,34,1.6);scene.add(headLight);}
 function ensureRain(){if(rain)return;const n=420,a=new Float32Array(n*6),g=new THREE.BufferGeometry();g.setAttribute('position',new THREE.BufferAttribute(a,3));
   rain=new THREE.LineSegments(g,new THREE.LineBasicMaterial({color:'#b8d4ee',transparent:true,opacity:0.55}));rain.frustumCulled=false;rain.userData.d=[];for(let i=0;i<n;i++)rain.userData.d.push({x:(rnd()-0.5)*170,y:rnd()*60,z:(rnd()-0.5)*170});scene.add(rain);}
 function updateRain(dt){const a=rain.geometry.attributes.position.array;rain.userData.d.forEach((d,i)=>{d.y-=70*dt;if(d.y<0)d.y+=60;const x=camT.x+d.x,z=camT.z+d.z;a[i*6]=x;a[i*6+1]=d.y;a[i*6+2]=z;a[i*6+3]=x-0.5;a[i*6+4]=d.y+2.4;a[i*6+5]=z-0.5;});rain.geometry.attributes.position.needsUpdate=true;}
@@ -1498,16 +1542,16 @@ function loop(now){requestAnimationFrame(loop);let dt=(now-lastWall)/1000;lastWa
   if(!document.hidden){update(dt);updateCamera(dt);renderer.render(scene,camera);}}
 function start(fresh){$('#title').classList.add('hidden');initAudio();
   if(fresh){S=DEF();try{localStorage.removeItem(KEY);}catch(e){}}const had=!fresh&&load();
-  S.wanted=0;CITY=cityDef(S.meta.city);resize();if(!S.cand.length)refreshCands();recalc();
-  buildCity();buildLot();buildMiniBg();spawnTraffic();
+  S.wanted=0;player.at=S.at!==false;if(!S.dayv2){S.staff.forEach(x=>x.salary=Math.round(x.salary*DAYK*10)/10);S.dayv2=true;}CITY=cityDef(S.meta.city);resize();if(!S.cand.length)refreshCands();recalc();
+  buildCity();buildLot();buildMiniBg();spawnTraffic();buildLamps();
   for(const id in S.fac){if(S.fac[id]>0)buildFacility(id,S.fac[id],false);}if(Object.keys(S.fac).some(k=>S.fac[k]>0))lotSign.visible=false;
   player.x=S.px;player.z=S.pz;player.h=S.ph;camT.set(player.x,0,player.z);rebuildPlayer();syncFleetVis();syncParked();syncWalkers();updatePile();
   if(D.mods.appCount)$('#phoneBtn').classList.remove('hidden');
-  started=true;lastWall=performance.now();requestAnimationFrame(loop);updateHUD(true);$('#bgmBtn').textContent=S.bgm?'🎵':'🔇';startBGM();
+  started=true;lastWall=performance.now();requestAnimationFrame(loop);updateHUD(true);$('#bgmBtn').textContent=S.bgm?'🎵':'🔇';$('#gears [data-gc=at]').classList.toggle('on',player.at);startBGM();
   if(had&&S.justMoved){S.justMoved=false;S.lastSave=Date.now();SFX.lvl();modal(`<div class="burst"><span>🗺️</span></div><h2>📍 ${CITY.name}に進出！</h2><p>新天地でまた1台のトゥクトゥクから。<br>威光 <b>${S.meta.pts}pt</b> で全運賃 <b>+${S.meta.pts*5}%</b>！</p><p>物価・運賃 ×${CITY.m.toFixed(1)}</p><div class="btns"><button class="btn g" data-act="closemodal">天下統一、再び！</button></div>`);}
   else if(had){const secs=(Date.now()-S.lastSave)/1000;if(secs>60&&D.drivers.length)applyOffline(secs,true);else toast('おかえりなさい！続きから再開します 🛺');}
   else{nameModal(true,()=>modal(`<div class="big">🛺</div><h2>${escH(CN())}、プノンペンで創業！</h2><p>あなたは所持金$10、ボロボロのトゥクトゥク1台の個人ドライバー。</p>
-    <ul><li><b>左下をドラッグ</b>（PCはWASD/矢印）で運転</li><li>頭上に<b>◆</b>がある人に近づくと乗車</li><li><b>光の柱</b>まで⏱制限時間内に運ぶと評判UP＆定刻ボーナス！</li><li>ぶつけると車がボロくなり、評判が落ちると<b>乗車拒否</b>されます</li><li>稼いだお金で強化・車両購入・雇用・建設</li></ul>
+    <ul><li><b>左下をドラッグ</b>（PCは <b>↑/W</b>で前進・<b>↓/S</b>でバック・<b>←→/A D</b>でハンドル）で運転</li><li>頭上に<b>◆</b>がある人に近づくと乗車</li><li><b>光の柱</b>まで⏱制限時間内に運ぶと評判UP＆定刻ボーナス！</li><li>ぶつけると車がボロくなり、評判が落ちると<b>乗車拒否</b>されます</li><li>稼いだお金で強化・車両購入・雇用・建設</li></ul>
     <div class="btns"><button class="btn g" data-act="closemodal">出発する！</button></div>`));}
   if(had&&!S.company)setTimeout(()=>toast('🏢 経営タブ → 設定で「会社名」を付けられるようになりました'),3500);
   save();}
