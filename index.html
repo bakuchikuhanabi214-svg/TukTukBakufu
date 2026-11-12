@@ -347,7 +347,7 @@ const DIVS=[
  {id:'airport',name:'空港送迎事業部',icon:'✈️',lv:5,cost:20000,desc:'空港送迎（運賃×4）。空港行きの客が出現'},
  {id:'logi',name:'物流事業部',icon:'📦',lv:6,cost:80000,desc:'荷物配送（運賃×3）で社用車の稼ぎが増加'}];
 const INC_L={casino:'カジノの勝ち',fare:'乗客の運賃（自分）',app:'アプリ経由の配車',vip:'VIP送迎',tour:'観光ツアー',airport:'空港送迎',logi:'物流',fleet:'スタッフによる自動収益',offline:'留守中の収益'};
-const EXP_L={buyout:'ライバル買収',tax_corp:'法人税（累進）',tax_wealth:'資産税（累進）',signal:'信号無視の罰金',sabotage:'妨害被害の修理',ad:'広告キャンペーン',fuel:'ガソリン代',salary:'スタッフの給料',repair:'車両修理費',maint:'設備維持費',appfee:'アプリ手数料',fine:'罰金・違反金',casino:'カジノの負け',accident:'事故の賠償金',insurance:'自動車保険料',vehicle:'車両購入費',invest:'設備・強化投資',hire:'採用費・登録費'};
+const EXP_L={fx_audit:'外資の税務調査',fx_bribe:'役人への手続き費',fx_infl:'物価高騰',buyout:'ライバル買収',tax_corp:'法人税（累進）',tax_wealth:'資産税（累進）',signal:'信号無視の罰金',sabotage:'妨害被害の修理',ad:'広告キャンペーン',fuel:'ガソリン代',salary:'スタッフの給料',repair:'車両修理費',maint:'設備維持費',appfee:'アプリ手数料',fine:'罰金・違反金',casino:'カジノの負け',accident:'事故の賠償金',insurance:'自動車保険料',vehicle:'車両購入費',invest:'設備・強化投資',hire:'採用費・登録費'};
 const EVENTS=[
  {id:'rain',w:3,cond:()=>true,icon:'🌧️',title:'雨季のスコール！',desc:'突然の大雨で道路が冠水！走りにくく、ぶつかると壊れやすい。でも雨の日はトゥクトゥクの需要が増える！',dur:100,base:{pSpeed:0.75,dmg:1.6,fleetDur:1.35,fare:1.3,spawn:1.4,rain:1},
   ch:[{t:'そのまま営業',d:'社用車の稼働が35%遅くなる'},{t:'全車に防水カバーを配る',cost:()=>8*LM()*Math.max(1,D.drivers.length),d:'社用車の遅れなし',fx:{fleetDur:1}}]},
@@ -385,11 +385,11 @@ const aCost=a=>Math.round(a.cost*CM());
 /* ================= state ================= */
 function DEF(){return {v:1,money:10,earned:0,level:1,upg:{engine:0,tank:0,seats:0,exterior:0,tires:0,cargo:0,ac:0},fuel:1,vehicles:1,grade:0,
  staff:[],nid:1,fac:{},apps:{},divs:{},day:1,dayT:0,today:{inc:{},exp:{}},hist:[],cand:[],candR:{},trips:0,fleetTrips:0,appTrips:0,
- lastSave:Date.now(),sound:true,bgm:true,meta:{pts:0,city:0,vcity:0,runs:0,total:0,ppDone:false},ev:null,evT:150,gasLock:0,justMoved:false,gasP:1,gasPrev:1,ins:0,hiredToday:0,bankrupt:0,company:'',dayv2:false,wanted:0,crimes:0,arrests:0,casinoNet:0,accidents:0,insSaved:0,accLoss:0,cond:1,rep:4,ratings:[],streak:0,bestStreak:0,hq:1,px:0,pz:-25,ph:0,intro:false,chapter:'pp',rivals:[],sigV:0,sigTot:0,taxY:{corp:0,wealth:0},taxTot:0,adT:0,pw:0,lobby:0,justVN:false,rivLog:[]};}
+ lastSave:Date.now(),sound:true,bgm:true,meta:{pts:0,city:0,vcity:0,runs:0,total:0,ppDone:false},ev:null,evT:150,gasLock:0,justMoved:false,gasP:1,gasPrev:1,ins:0,hiredToday:0,bankrupt:0,company:'',dayv2:false,wanted:0,crimes:0,arrests:0,casinoNet:0,accidents:0,insSaved:0,accLoss:0,cond:1,rep:4,ratings:[],streak:0,bestStreak:0,hq:1,px:0,pz:-25,ph:0,intro:false,chapter:'pp',rivals:[],sigV:0,sigTot:0,taxY:{corp:0,wealth:0},taxTot:0,adT:0,pw:0,lobby:0,justVN:false,rivLog:[],fxHeat:0,inflT:0,arrive:null};}
 let S=DEF();
-function load(){try{const raw=localStorage.getItem(KEY);if(!raw)return false;const o=JSON.parse(raw);const d=DEF();
-  for(const k in d){if(o[k]!==undefined){if(d[k]&&typeof d[k]==='object'&&!Array.isArray(d[k]))d[k]=Object.assign(d[k],o[k]);else d[k]=o[k];}}
-  S=d;return true;}catch(e){return false;}}
+function mergeDef(o){const d=DEF();for(const k in d){if(o[k]!==undefined){if(d[k]&&typeof d[k]==='object'&&!Array.isArray(d[k]))d[k]=Object.assign(d[k],o[k]);else d[k]=o[k];}}return d;}
+function load(){try{const raw=localStorage.getItem(KEY);if(!raw)return false;S=mergeDef(JSON.parse(raw));return true;}catch(e){return false;}}
+const KEYC=c=>KEY+'_'+c;
 function save(){if(resetting)return;S.lastSave=Date.now();S.px=player.x;S.pz=player.z;S.ph=player.h;try{localStorage.setItem(KEY,JSON.stringify(S));}catch(e){}}
 function hasSave(){try{return !!localStorage.getItem(KEY);}catch(e){return false;}}
 
@@ -400,7 +400,7 @@ const RT=new Map(); // runtime per driver
 function defRivals(){return [{n:'サイゴン・ライド',c:'#00a651',p:80,own:false},{n:'ドラゴン交通',c:'#e30613',p:150,own:false},{n:'ロータス・モビリティ',c:'#7b2ff7',p:260,own:false}];}
 function myPower(){const f=S.fac;return Math.round(10+(D.drivers?D.drivers.length:0)*5+S.rep*6+S.grade*8+(f.branch||0)*25+(f.hq||0)*30+(f.office||0)*6+S.level*8+(S.adT>0?50:0)+S.rivals.filter(r=>r.own).reduce((a,r)=>a+r.p*0.7,0));}
 function vnShare(){if(!isVN())return 1;const mp=myPower();const tot=mp+S.rivals.filter(r=>!r.own).reduce((a,r)=>a+r.p,0);return mp/tot;}
-function buyCost(i){const r=S.rivals[i];const owned=S.rivals.filter(x=>x.own).length;return Math.round(r.p*6000*CM()*(1+owned*0.7));}
+function buyCost(i){const r=S.rivals[i];const owned=S.rivals.filter(x=>x.own).length;return Math.round(r.p*6000*CM()*(1+owned*0.7)*(1+(S.fxHeat||0)*0.05));}
 function taxBr(v,br){let t=0,lo=0;for(const [hi,r] of br){if(v>lo)t+=(Math.min(v,hi)-lo)*r;lo=hi;}return t;}
 function corpTax(p){const k=CM(),l=S.lobby>0?0.05:0;return p<=0?0:taxBr(p,[[3000*k,0.1+l],[30000*k,0.2+l],[300000*k,0.3+l],[3e6*k,0.4+l],[Infinity,0.5+l]]);}
 function wealthTax(c){const k=CM()/3;return c<=0?0:taxBr(c,[[60000*k,0],[600000*k,0.01],[6e6*k,0.025],[Infinity,0.04]]);}
@@ -448,9 +448,36 @@ function buyRival(i){const r=S.rivals[i];if(!r||r.own)return;const c=buyCost(i);
   if(S.rivals.every(x=>x.own)){S.meta.vnWin=(S.meta.vnWin||0)+1;modal(`<div class="burst"><span>👑</span></div><h2>ホーチミン完全制覇！</h2><p>ライバル3社をすべて買収し、ホーチミンの交通を手中に収めた！<br>${escH(CN())}は東南アジア最強の交通グループだ。</p><div class="btns"><button class="btn p" data-act="closemodal">天下統一！</button></div>`);}
   else toast(`🤝 ${r.n} を買収！勢力が吸収された`);recalc();renderPanel();save();}
 function vnAd(){const c=Math.round(1500*LM());if(S.adT>0)return;if(!spend('ad',c))return;S.adT=2;SFX.coin();toast('📣 広告キャンペーン開始！2日間 勢力 +50');recalc();renderPanel();}
-function startVN(){const meta=Object.assign({},S.meta);meta.ppDone=true;const N_=DEF();Object.assign(N_,{sound:S.sound,bgm:S.bgm,hq:S.hq,at:S.at});N_.company=S.company||'';N_.meta=meta;N_.chapter='vn';N_.rivals=defRivals();
-  N_.money=Math.max(300,Math.floor(Math.max(0,S.money)*0.5));N_.justVN=true;N_.intro=true;resetting=true;try{localStorage.setItem(KEY,JSON.stringify(N_));}catch(e){}location.reload();}
+/* ---- travel between chapters (each city keeps its own save) ---- */
+function importDuty(v){return Math.round(taxBr(v,[[10000,0.1],[100000,0.25],[1e6,0.4],[1e7,0.55],[Infinity,0.7]]));}
+function carryPreview(target,amt){if(target==='vn'){const duty=importDuty(amt),net=amt-duty,lg=Math.log10(1+net/10000);return {duty,net,boost:Math.round(lg*25),heat:Math.round(lg*3)};}
+  const fee=Math.round(amt*0.3);return {duty:fee,net:amt-fee,boost:0,heat:0};}
+function travelModal(target){const toVN=target==='vn',cash=Math.max(0,Math.floor(S.money));const pcts=[0,10,25,50,100];
+  const rows=pcts.map(pc=>{const a=Math.floor(cash*pc/100),c=carryPreview(target,a);return `<button class="btn ${pc?'g':'p'}" style="display:block;width:100%;margin:5px 0;text-align:left;font-size:12px" data-act="travel" data-arg="${target}:${pc}"><b>${pc?pc+'%（'+fmt(a)+'）持っていく':'お金は持っていかない'}</b>${pc?`<br>${toVN?'関税':'送金手数料・税'} -${fmt(c.duty)} → 到着 <b>${fmt(c.net)}</b>${toVN?`<br>⚠️ ライバル勢力 +${c.boost}%・外資監視 ${c.heat}日`:''}`:''}</button>`;}).join('');
+  modal(`<div class="big">${toVN?'🇻🇳':'🇰🇭'}</div><h2>${toVN?'ホーチミンへ渡る':'プノンペンへ戻る'}</h2><p style="font-size:12px">${toVN?'プノンペンの会社はそのまま残ります（いつでも戻れます）。':'ホーチミンの会社はそのまま残ります（いつでも戻れます）。'}<br>持っていくお金を選んでください（手持ち ${fmt(cash)}）。</p>
+   ${toVN?'<p style="font-size:11px;text-align:left;background:#fff4f4;padding:6px;border-radius:8px">🧾 関税は累進課税（10%→25%→40%→55%→最大70%）<br>📈 大金を持ち込むほどライバルが警戒して勢力アップ<br>🕵️ 外資監視期間中は税務調査・賄賂要求・物価高騰などのイベントが起きる</p>':'<p style="font-size:11px">ベトナムからの送金は一律30%の手数料・税がかかります。</p>'}
+   ${rows}<div class="btns"><button class="btn" data-act="closemodal">やめる</button></div>`);}
+function switchChapter(target,carry){carry=Math.max(0,Math.min(Math.floor(S.money),Math.floor(carry||0)));save();const from=S.chapter||'pp';
+  const cur=JSON.parse(JSON.stringify(S));cur.money-=carry;cur.lastSave=Date.now();
+  let T=null;try{const raw=localStorage.getItem(KEYC(target));if(raw)T=mergeDef(JSON.parse(raw));}catch(e){}
+  const first=!T;if(first){T=DEF();T.chapter=target;T.intro=true;if(target==='vn'){T.rivals=defRivals();T.justVN=true;}}
+  const meta=Object.assign({},S.meta);if(from==='pp')meta.ppDone=true;meta.vnOpen=true;cur.meta=meta;T.meta=meta;
+  Object.assign(T,{company:S.company||'',sound:S.sound,bgm:S.bgm,hq:S.hq,at:S.at,lastSave:Date.now()});
+  const c=carryPreview(target,carry);T.money+=c.net;
+  if(target==='vn'&&c.net>0){T.rivals.forEach(r=>{if(!r.own)r.p=Math.round(r.p*(1+c.boost/100));});T.fxHeat=(T.fxHeat||0)+c.heat;}
+  T.arrive={from,carry,duty:c.duty,net:c.net,boost:c.boost,heat:c.heat,first};
+  resetting=true;try{localStorage.setItem(KEYC(from),JSON.stringify(cur));localStorage.setItem(KEY,JSON.stringify(T));}catch(e){}location.reload();}
+function startVN(){switchChapter('vn',Math.floor(Math.max(0,S.money)*0.5));}
+/* foreign-capital surveillance events (VN) */
+function fxHeatDay(){if(!isVN()||!(S.fxHeat>0))return;S.fxHeat--;if(S.inflT>0)S.inflT--;const r=rnd();
+  if(r<0.3&&S.money>0){const c=Math.round(S.money*0.08);addExp('fx_audit',c);rivalLog(`🕵️ 外資の税務調査！追徴課税 ${fmt(c)}（手元資金の8%）`);}
+  else if(r<0.55){const c=Math.round(Math.max(0,S.money)*0.03+200*LM());addExp('fx_bribe',c);rivalLog(`🤝 役人が「手続きの迅速化」を要求… ${fmt(c)} 支払った`);}
+  else if(r<0.75){S.inflT=3;rivalLog('📈 外資流入で物価高騰！3日間 経費 +25%');}
+  else if(r<0.9){S.rep=Math.max(1,S.rep-0.2);rivalLog('📰 「外資が地元を荒らす」と報道され評判 -0.2');}
+  else{const live=S.rivals.filter(x=>!x.own);if(live.length){const x=live[Math.floor(rnd()*live.length)];x.p=Math.round(x.p*1.15);rivalLog(`📈 ${x.n}が「外資に対抗」と地元資本から出資を受けた！勢力 +15%`);}}}
 function vnBizHtml(){let h='';const sh=vnShare(),mp=myPower();
+  h+=`<div class="card" style="background:linear-gradient(135deg,#fff,#eef6ff)"><div class="ic">🇰🇭</div><div class="mid"><div class="nm">プノンペンに戻る</div><div class="ds">ホーチミンの会社はそのまま残ります。持ち帰るお金には30%の手数料・税。</div></div><button class="btn p" data-act="gopp">戻る</button></div>`;
+  if(S.fxHeat>0||S.inflT>0)h+=`<div class="card" style="display:block;background:#fff8e1;font-size:12px"><b>🕵️ 外資監視中（残り${S.fxHeat}日）</b><br>毎日、税務調査・賄賂要求・物価高騰・悪評・ライバルへの出資のどれかが起きます。ライバル買収額も +${(S.fxHeat||0)*5}%。${S.inflT>0?`<br><b style="color:#c1121f">物価高騰中：経費 +25%（残り${S.inflT}日）</b>`:''}</div>`;
   h+=`<div class="sec">🇻🇳 ホーチミン市場シェア</div><div class="card" style="display:block"><div style="display:flex;justify-content:space-between;font-size:13px"><b>${escH(CN())}</b><b>${(sh*100).toFixed(1)}%（勢力 ${mp}）</b></div>
    <div style="height:14px;background:#eee;border-radius:7px;overflow:hidden;display:flex;margin:6px 0"><div style="width:${sh*100}%;background:#ff9f1c"></div>${S.rivals.filter(r=>!r.own).map(r=>`<div style="flex:${r.p};background:${r.c}"></div>`).join('')}</div>
    <div class="ds" style="font-size:12px">社用車への依頼数 ×${(sh*3).toFixed(2)}（シェアに比例）。ライバルのトゥクトゥクは待ち客を横取りする。ドライバー・評判・支店・本社・広告・買収で勢力UP。${S.pw>0?'<br><b style="color:#c1121f">値下げ攻勢中：運賃 -20%</b>':''}${S.lobby>0?'<br><b style="color:#c1121f">ロビー活動中：法人税 +5%</b>':''}</div></div>`;
@@ -1352,7 +1379,7 @@ function renderPanel(){if(!sheetOpen)return;const b=$('#sheetBody');const st=b.s
     h+=`<tr class="tot"><td>本日の収支</td><td class="${ti-te>=0?'plus':'minus'}">${ti-te>=0?'+':''}${fmtD(ti-te)}</td></tr></table>`;
     h+=`<div class="sec">📈 過去の収支（緑=収入 赤=支出）</div><canvas class="chart" id="chart" width="600" height="240"></canvas>`;
     if(isVN())h+=vnBizHtml();
-    else h+=`<div class="sec">🇻🇳 次の章：ホーチミン編</div><div class="card" style="background:linear-gradient(135deg,#fff,#ffe9e9)"><div class="ic">🇻🇳</div><div class="mid"><div class="nm">ホーチミンへ進出${S.meta.ppDone?'（挑戦済み）':''}</div><div class="ds">プノンペン編クリア後に解放。資金の<b>半分</b>を持って新天地へ。<br>強力なライバル3社・信号と罰金/財産没収・累進課税…超高難度！${S.level<6?'<br>🔒 Lv6 到達で解放':''}</div></div>${S.level>=6?'<button class="btn r" data-act="govn">挑戦</button>':'<span class="btn dis">🔒</span>'}</div>`;
+    else h+=`<div class="sec">🇻🇳 次の章：ホーチミン編</div><div class="card" style="background:linear-gradient(135deg,#fff,#ffe9e9)"><div class="ic">🇻🇳</div><div class="mid"><div class="nm">ホーチミンへ${S.meta.vnOpen?'渡る':'進出'}</div><div class="ds">プノンペンの会社は残したまま、いつでも行き来できます。お金は持ち込めるが関税（最大70%）・ライバル強化・外資監視イベントあり。<br>強力なライバル3社・信号と罰金/財産没収・累進課税…超高難度！${S.level<6&&!S.meta.vnOpen?'<br>🔒 Lv6 到達で解放':''}</div></div>${S.level>=6||S.meta.vnOpen?`<button class="btn r" data-act="govn">${S.meta.vnOpen?'渡る':'挑戦'}</button>`:'<span class="btn dis">🔒</span>'}</div>`;
     if(isVN()){const gn=prestigeGain(),nc=cityDef(curIdx()+1),ok=S.level>=5&&gn>=1;h+=`<div class="sec">🔁 会社を売却して再起業（転生）</div><div class="card" style="background:linear-gradient(135deg,#fff,#f3e8ff)"><div class="ic">🏯</div><div class="mid"><div class="nm">📍 ${CITY.name}（${S.meta.runs+1}都市目）</div><div class="ds">威光 <b>${S.meta.pts}pt</b>（全運賃 +${S.meta.pts*5}%）<br>次: ${nc.name}（物価×${nc.m.toFixed(1)}）・売却で <b>+${gn}pt</b>${S.level<5?'<br>🔒 Lv5「大企業」で解放':gn<1?'<br>もっと稼ぐと威光が手に入る':''}</div></div>${ok?'<button class="btn p" data-act="prestige">進出</button>':'<span class="btn dis">🔒</span>'}</div>`;}
     if(S.money<0)h+=`<div class="card" style="background:#ffe3e3"><div class="ic">⚖️</div><div class="mid"><div class="nm">借金 ${fmt(-S.money)}</div><div class="ds">決算（残り${Math.ceil(DAY-S.dayT)}秒）までに返済しないと、待機車両→設備→ドライバーの順に差し押さえ。足りなければ自己破産（残り${BANKRUPT_MAX-S.bankrupt}回・超えると倒産）</div></div></div>`;
     h+=`<div class="sec">🛡️ 自動車保険（本日の事故 ${S.today.acc||0}件 ・ 累計 ${S.accidents}件）</div>`;
@@ -1439,7 +1466,7 @@ document.addEventListener('click',e=>{const t=e.target.closest('[data-act]');if(
   switch(a){case'upg':buyUpg(g);break;case'coname':{const i=$('#coName');if(i)i.value=g;SFX.click();}break;case'setname':setCompanyName();break;case'rename':nameModal(false);break;case'cspin':cSpin();break;case'mapclose':closeMap();break;case'gameover':doGameOver();break;case'cexit':closeCasino();break;case'evc':chooseEv(+g);break;case'prestige':{const gn=prestigeGain(),nc=cityDef(curIdx()+1);modal(`<div class="big">🗺️</div><h2>${nc.name}へ進出しますか？</h2><p>会社を売却して、新しい都市でゼロから再スタート。</p><table class="tb"><tr><td>獲得する威光</td><td class="plus">+${gn}pt</td></tr><tr><td>威光ボーナス（全運賃）</td><td>+${S.meta.pts*5}% → +${(S.meta.pts+gn)*5}%</td></tr><tr><td>新都市の物価・運賃</td><td>×${nc.m.toFixed(1)}</td></tr><tr><td>スタート資金</td><td>${fmt(Math.round(10*nc.m*(1+(S.meta.pts+gn)*0.5)))}</td></tr></table><p style="font-size:11px">※お金・車両・スタッフ・設備・強化・レベルはリセット。威光と設定は引き継ぎ。</p><div class="btns"><button class="btn" data-act="closemodal">まだ残る</button><button class="btn p" data-act="doprestige">進出する！</button></div>`);}break;case'doprestige':doPrestige();break;case'ins':setIns(+g);break;case'gotoins':closeModal();openSheet('biz');setTimeout(()=>{const e=[...document.querySelectorAll('#sheetBody .sec')].find(x=>x.textContent.includes('保険'));if(e)e.scrollIntoView({block:'start'});},50);break;case'repair':doRepair();break;case'bgm':toggleBGM();renderPanel();break;case'buyveh':buyVehicles(+g);break;case'grade':buyGrade();break;case'fac':buildFac(g);break;case'hire':hireDriver(+g);break;case'bulkhire':hireBulk();break;
    case'reroll':if(spend('hire',Math.round(5*LM()))){S.cand=[genDriver(),genDriver(),genDriver()];renderPanel();}break;case'hirerole':hireRole(g);break;case'fire':fire(+g);break;
    case'app':regApp(g);break;case'div':buyDiv(g);break;case'openphone':openPhone();break;case'accept':acceptReq(+g);break;case'tab':openSheet(g);break;
-   case'closemodal':closeModal();break;case'buyriv':buyRival(+g);break;case'vnad':vnAd();break;case'govn':confirmBox(`🇻🇳 ホーチミン編へ進みますか？</p><p style="font-size:13px">プノンペンの会社は売却され、資金の<b>半分（${fmt(Math.floor(Math.max(0,S.money)*0.5))}）</b>だけを持ってホーチミンでLv1から再スタートします。</p><p style="font-size:12px;text-align:left">⚠️ ライバル3社が市場を支配<br>⚠️ 信号無視は罰金・3回で財産没収<br>⚠️ 法人税・資産税の累進課税<br>⚠️ 警察も厳しい`,startVN);break;case'confirmyes':closeModal();if(confirmCb){const c=confirmCb;confirmCb=null;c();}break;
+   case'closemodal':closeModal();break;case'buyriv':buyRival(+g);break;case'vnad':vnAd();break;case'govn':travelModal('vn');break;case'gopp':travelModal('pp');break;case'travel':{const [tg,pc]=g.split(':');closeModal();switchChapter(tg,Math.floor(Math.max(0,S.money)*(+pc)/100));}break;case'confirmyes':closeModal();if(confirmCb){const c=confirmCb;confirmCb=null;c();}break;
    case'sound':S.sound=!S.sound;if(!S.sound&&engGain)engGain.gain.value=0;renderPanel();break;case'quality':S.hq=S.hq?0:1;resize();renderPanel();break;
    case'savenow':save();toast('💾 保存しました');break;
    case'reset':confirmBox('すべての進行状況を消去して最初から始めますか？',()=>{try{localStorage.removeItem(KEY);}catch(e){}resetting=true;location.reload();});break;
@@ -1630,8 +1657,9 @@ function setIns(i){if(S.ins===i)return;if(D.drivers.length===0&&i>0)toast('ド�
 function endDay(){const m=D.mods;S.dayT-=DAY;
   S.gasPrev=S.gasP;S.gasP=clamp(S.gasP*(0.9+rnd()*0.22)+(1-S.gasP)*0.15+(rnd()<0.06?0.35:0),0.6,1.9);if(S.gasLock>0){S.gasLock--;S.gasP=0.8;}const gd=(S.gasP/S.gasPrev-1)*100;
   if(Math.abs(gd)>=8)setTimeout(()=>toast(`⛽ ガソリン価格が${gd>0?'高騰':'値下がり'}！ ${gasPriceTxt()}`),3200);if(m.ins>0)addExp('insurance',m.ins);if(m.salary>0)addExp('salary',m.salary);if(m.maint>0)addExp('maint',m.maint);
+  if(isVN()&&S.inflT>0){const te0=Object.values(S.today.exp).reduce((a,b)=>a+b,0);addExp('fx_infl',Math.round(te0*0.25));}
   vnTaxes();const ti=Object.values(S.today.inc).reduce((a,b)=>a+b,0),te=Object.values(S.today.exp).reduce((a,b)=>a+b,0);S.casinoNet=0;
-  if(S.money<0)foreclose();rivalsDay();S.sigV=0;
+  if(S.money<0)foreclose();rivalsDay();fxHeatDay();S.sigV=0;
   S.hist.push({day:S.day,inc:ti,exp:te});if(S.hist.length>14)S.hist.shift();toast(`📅 ${S.day}日目の決算: 収入 ${fmt(ti)} ／ 支出 ${fmt(te)} → ${ti-te>=0?'黒字':'赤字'} ${fmt(ti-te)}`);
   S.day++;S.hiredToday=0;S.today={inc:{},exp:{}};RT.forEach(r=>r.trips=0);S.cand=[genDriver(),genDriver(),genDriver()];for(const r in ROLES)if(r!=='driver')S.candR[r]=genRole(r);
   if(S.money<0)toast('⚠️ 資金がマイナスです！スタッフや設備を見直そう');if(sheetOpen)renderPanel();save();}
@@ -1697,7 +1725,8 @@ function start(fresh){$('#title').classList.add('hidden');initAudio();
   if(S.px===0&&S.pz===-25&&(HX!==0||HZ!==-25)){S.px=HX;S.pz=HZ;}player.x=S.px;player.z=S.pz;player.h=S.ph;camT.set(player.x,0,player.z);rebuildPlayer();syncFleetVis();syncParked();syncWalkers();updatePile();
   if(D.mods.appCount)$('#phoneBtn').classList.remove('hidden');
   started=true;lastWall=performance.now();requestAnimationFrame(loop);updateHUD(true);$('#bgmBtn').textContent=S.bgm?'🎵':'🔇';$('#gears [data-gc=at]').classList.toggle('on',player.at);startBGM();
-  if(had&&S.justVN){S.justVN=false;S.lastSave=Date.now();setTimeout(()=>{SFX.lvl();modal(`<div class="burst"><span>🇻🇳</span></div><h2>ホーチミン編 開幕！</h2><p>${escH(CN())}はベトナムに上陸した。だがここは甘くない。</p><div style="text-align:left;font-size:13px;line-height:1.7">🚦 <b>信号</b>：赤で交差点に入ると罰金。3回ごとに<b>財産没収</b><br>🧾 <b>累進課税</b>：利益に最大50%の法人税＋手元資金に資産税（毎日）<br>⚔️ <b>ライバル3社</b>：毎日成長し、引き抜き・妨害・値下げで攻撃してくる。客も横取りされる<br>📊 <b>市場シェア</b>：勢力を上げるか、ライバルを<b>買収</b>しよう<br>🚔 警察も手加減なし</div><p><small>経営タブ → 🇻🇳 で状況を確認。全社買収で完全制覇！</small></p><div class="btns"><button class="btn p" data-act="closemodal">受けて立つ！</button></div>`);},600);}
+  if(had&&S.arrive&&!S.arrive.first){const a=S.arrive;S.arrive=null;S.lastSave=Date.now();setTimeout(()=>{SFX.lvl();modal(`<div class="big">${isVN()?'🇻🇳':'🇰🇭'}</div><h2>${CITY.name}に到着</h2><p>${escH(CN())}の${isVN()?'ホーチミン支社':'プノンペン本社'}に戻ってきた。</p>${a.carry?`<table class="tb" style="font-size:12px"><tr><td>持ち出した額</td><td>${fmt(a.carry)}</td></tr><tr><td>${isVN()?'関税':'手数料・税'}</td><td class="minus">-${fmt(a.duty)}</td></tr><tr><td><b>到着した額</b></td><td><b>${fmt(a.net)}</b></td></tr>${a.boost?`<tr><td>ライバル勢力</td><td class="minus">+${a.boost}%</td></tr><tr><td>外資監視</td><td class="minus">${a.heat}日</td></tr>`:''}</table>`:'<p>お金は持ってこなかった。</p>'}<div class="btns"><button class="btn p" data-act="closemodal">再開する</button></div>`);},600);}
+  else if(had&&S.justVN){S.justVN=false;const a0=S.arrive;S.arrive=null;S.lastSave=Date.now();setTimeout(()=>{SFX.lvl();modal(`<div class="burst"><span>🇻🇳</span></div><h2>ホーチミン編 開幕！</h2><p>${escH(CN())}はベトナムに上陸した。だがここは甘くない。</p>${a0&&a0.carry?`<p style="font-size:12px">持ち込み ${fmt(a0.carry)} → 関税 -${fmt(a0.duty)} → 到着 <b>${fmt(a0.net)}</b><br>ライバル勢力 +${a0.boost}%・外資監視 ${a0.heat}日</p>`:''}<div style="text-align:left;font-size:13px;line-height:1.7">🚦 <b>信号</b>：赤で交差点に入ると罰金。3回ごとに<b>財産没収</b><br>🧾 <b>累進課税</b>：利益に最大50%の法人税＋手元資金に資産税（毎日）<br>⚔️ <b>ライバル3社</b>：毎日成長し、引き抜き・妨害・値下げで攻撃してくる。客も横取りされる<br>📊 <b>市場シェア</b>：勢力を上げるか、ライバルを<b>買収</b>しよう<br>🚔 警察も手加減なし</div><p><small>経営タブ → 🇻🇳 で状況を確認。全社買収で完全制覇！</small></p><div class="btns"><button class="btn p" data-act="closemodal">受けて立つ！</button></div>`);},600);}
   else if(S.justMoved){S.justMoved=false;S.lastSave=Date.now();SFX.lvl();modal(`<div class="burst"><span>🗺️</span></div><h2>📍 ${CITY.name}に進出！</h2><p>新天地でまた1台のトゥクトゥクから。<br>威光 <b>${S.meta.pts}pt</b> で全運賃 <b>+${S.meta.pts*5}%</b>！</p><p>物価・運賃 ×${CITY.m.toFixed(1)}</p><div class="btns"><button class="btn g" data-act="closemodal">天下統一、再び！</button></div>`);}
   else if(had){const secs=(Date.now()-S.lastSave)/1000;if(secs>60&&D.drivers.length)applyOffline(secs,true);else toast('おかえりなさい！続きから再開します 🛺');}
   else{nameModal(true,()=>modal(`<div class="big">🛺</div><h2>${escH(CN())}、プノンペンで創業！</h2><p>あなたは所持金$10、ボロボロのトゥクトゥク1台の個人ドライバー。</p>
