@@ -33,26 +33,26 @@ button{font-family:inherit;cursor:pointer}
 @keyframes pop{50%{transform:scale(1.12)}}
 #evBanner{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(var(--navh) + var(--sb) + 8px);z-index:11;pointer-events:none;background:linear-gradient(90deg,#7b2ff7,#e63946);color:#fff;font-size:11px;font-weight:800;padding:2px 10px;border-radius:10px;box-shadow:0 2px 6px rgba(0,0,0,.25);max-width:58vw;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .evch{display:flex;flex-direction:column;gap:8px;margin-top:12px}.evch .btn{width:100%;text-align:left;padding:10px 12px}.evch .btn small{font-weight:500}
-#rate{font-size:12px;font-weight:800;color:#1b5e20;background:rgba(255,255,255,.85);display:inline-block;padding:1px 10px;border-radius:10px;margin-top:4px}
-#dayBox{background:rgba(38,70,83,.88);color:#fff;border-radius:14px;padding:4px 10px;text-align:center;min-width:64px}
-#dayBox b{display:block;font-size:13px}#dayBox small{font-size:11px}
-#dayBar{height:4px;background:rgba(255,255,255,.25);border-radius:2px;margin-top:2px;overflow:hidden}#dayBar i{display:block;height:100%;background:var(--y);width:0}
-#fuel{position:fixed;left:10px;top:calc(var(--st) + 66px);display:flex;align-items:center;gap:4px;max-width:calc(100vw - 140px);background:rgba(255,255,255,.88);padding:3px 8px;border-radius:12px;font-size:12px;font-weight:800;z-index:10;pointer-events:none}
+#rate{font-size:13px;font-weight:800;color:#1b5e20;background:rgba(255,255,255,.95);display:inline-block;padding:2px 12px;border-radius:12px;margin-top:5px;box-shadow:0 2px 4px rgba(0,0,0,.15);white-space:nowrap}#rate.neg{color:#c1121f}
+#dayBox{background:rgba(38,70,83,.92);color:#fff;border-radius:14px;padding:5px 10px 6px;text-align:center;min-width:86px;box-shadow:0 3px 6px rgba(0,0,0,.2)}
+#dayBox b{display:block;font-size:15px;line-height:1.15}#dayBox small{display:block;font-size:14px;font-weight:800;color:#ffe08a;white-space:nowrap;line-height:1.2}
+#dayBar{height:5px;background:rgba(255,255,255,.25);border-radius:2px;margin-top:2px;overflow:hidden}#dayBar i{display:block;height:100%;background:var(--y);width:0}
+#fuel{position:fixed;left:10px;top:calc(var(--st) + 88px);display:flex;align-items:center;gap:4px;max-width:calc(100vw - 140px);background:rgba(255,255,255,.88);padding:3px 8px;border-radius:12px;font-size:12px;font-weight:800;z-index:10;pointer-events:none}
 #fuel .bar{width:42px;height:8px;background:#ddd;border-radius:4px;overflow:hidden}#fuel .bar i{display:block;height:100%;background:linear-gradient(90deg,#e63946,#ffd166 40%,#4caf50);width:100%}
 #fuel.low{animation:blink 1s infinite}#fuel .cb i{background:linear-gradient(90deg,#8b5a2b,#e9c46a 50%,#3a86ff)!important}#rep{color:#b8860b;margin-left:2px}#rep.bad{color:#c1121f}
 #repairBtn{background:linear-gradient(#ffe0b3,#ff9f1c);font-size:20px}#repairBtn small{position:absolute;bottom:-6px;left:50%;transform:translateX(-50%);background:#264653;color:#fff;font-size:9px;border-radius:6px;padding:0 4px;font-weight:800}
-#appChip{position:fixed;left:50%;top:calc(var(--st) + 128px);transform:translateX(-50%);background:#7b2ff7;color:#fff;font-weight:800;font-size:12px;padding:4px 12px;border-radius:12px;z-index:11;pointer-events:none}
+#appChip{position:fixed;left:50%;top:calc(var(--st) + 150px);transform:translateX(-50%);background:#7b2ff7;color:#fff;font-weight:800;font-size:12px;padding:4px 12px;border-radius:12px;z-index:11;pointer-events:none}
 .chip.late{background:#ffe3e3;color:#c1121f}.chip.warn{background:#fff3c4}
 .shake{animation:shk .3s}@keyframes shk{25%{transform:translate(4px,-2px)}50%{transform:translate(-4px,2px)}75%{transform:translate(2px,1px)}}@keyframes blink{50%{background:#ffb3b3}}
-#goal{position:fixed;left:10px;top:calc(var(--st) + 96px);max-width:min(58vw,260px);background:rgba(255,248,236,.95);border:2px solid var(--o);border-radius:14px;padding:6px 10px;font-size:12px;font-weight:800;z-index:10;box-shadow:0 3px 8px rgba(0,0,0,.15);pointer-events:none}
+#goal{position:fixed;left:10px;top:calc(var(--st) + 118px);max-width:min(58vw,260px);background:rgba(255,248,236,.95);border:2px solid var(--o);border-radius:14px;padding:6px 10px;font-size:12px;font-weight:800;z-index:10;box-shadow:0 3px 8px rgba(0,0,0,.15);pointer-events:none}
 #goal .gt{font-size:10px;color:var(--o2)}
 #goal .gp{height:6px;background:#eee;border-radius:3px;margin-top:4px;overflow:hidden}#goal .gp i{display:block;height:100%;background:var(--t)}
-#pax{position:fixed;left:10px;top:calc(var(--st) + 162px);display:flex;flex-direction:column;gap:4px;z-index:10;pointer-events:none}
+#pax{position:fixed;left:10px;top:calc(var(--st) + 184px);display:flex;flex-direction:column;gap:4px;z-index:10;pointer-events:none}
 .chip{background:#fff;border-radius:10px;padding:3px 8px;font-size:11px;font-weight:800;box-shadow:0 2px 4px rgba(0,0,0,.15);border-left:6px solid #999}
 #hint{position:fixed;left:50%;top:36%;transform:translateX(-50%);background:rgba(38,70,83,.9);color:#fff;padding:6px 14px;border-radius:16px;font-size:13px;font-weight:800;z-index:11;pointer-events:none;white-space:nowrap}
 #mini{position:fixed;right:10px;top:calc(var(--st) + 66px);width:112px;height:112px;border-radius:50%;border:3px solid #fff;box-shadow:0 3px 10px rgba(0,0,0,.25);z-index:10;background:#9fbf7a;pointer-events:auto;cursor:pointer}
 #mapView{position:fixed;inset:0;z-index:58;background:rgba(10,20,30,.92);display:flex;flex-direction:column;align-items:center;justify-content:center}#mapView canvas{width:min(96vw,96vh);height:min(96vw,96vh);touch-action:none}#mapView .mclose{position:absolute;top:calc(var(--st) + 12px);right:14px}#mapView .mtitle{position:absolute;top:calc(var(--st) + 16px);left:16px;color:#fff;font-weight:800;font-size:18px}#mapView .mleg{position:absolute;bottom:calc(var(--sb) + 14px);left:10px;right:10px;color:#fff;font-size:11px;text-align:center;line-height:1.7}
-#side{position:fixed;right:10px;top:calc(var(--st) + 186px);display:flex;flex-direction:column;gap:8px;z-index:10}
+#side{position:fixed;right:10px;top:calc(var(--st) + 200px);display:flex;flex-direction:column;gap:8px;z-index:10}
 .rb{width:48px;height:48px;border-radius:50%;border:0;background:#fff;box-shadow:0 3px 0 #bbb,0 4px 8px rgba(0,0,0,.2);font-size:22px;position:relative}
 .rb:active{transform:translateY(2px);box-shadow:0 1px 0 #bbb}
 .rb .badge{position:absolute;top:-4px;right:-4px;background:var(--r);color:#fff;font-size:11px;border-radius:9px;min-width:18px;height:18px;line-height:18px;font-weight:800}
@@ -189,6 +189,8 @@ canvas.chart{width:100%;height:120px;background:#fff;border-radius:14px;display:
 @media (min-width:900px){#sheet{border-radius:22px;bottom:calc(var(--navh) + 10px)}}
 #sigHud{position:fixed;left:50%;top:150px;transform:translateX(-50%);z-index:40;align-items:center;gap:8px;background:rgba(20,20,20,.82);color:#fff;padding:6px 14px 6px 8px;border-radius:20px;font-size:14px;pointer-events:none}#sigHud i{width:20px;height:20px;border-radius:50%;display:block}.sh_g i{background:#22e06a;box-shadow:0 0 10px #22e06a}.sh_y i{background:#ffc400;box-shadow:0 0 10px #ffc400}.sh_r i{background:#ff2a2a;box-shadow:0 0 12px #ff2a2a}.sh_r{animation:shp .5s infinite alternate}@keyframes shp{to{background:rgba(160,0,0,.9)}}
 #flash{position:fixed;inset:0;background:#fff;opacity:0;pointer-events:none;z-index:999}#flash.on{animation:fl .5s ease-out}@keyframes fl{0%{opacity:.9}100%{opacity:0}}
+@media (max-width:420px){#money{font-size:26px;padding:2px 12px 2px 38px}#money:before{font-size:20px;left:8px}#lvl b{font-size:16px}}
+#rejBtn{width:auto;height:44px;border-radius:22px;padding:0 12px;background:linear-gradient(#ff8a8a,#e63946);color:#fff;font-size:13px;font-weight:800;box-shadow:0 3px 0 #9b1c25,0 4px 8px rgba(0,0,0,.25);white-space:nowrap}
 </style>
 </head>
 <body>
@@ -206,7 +208,7 @@ canvas.chart{width:100%;height:120px;background:#fff;border-radius:14px;display:
 <canvas id="mini" width="224" height="224"></canvas>
 <div id="side">
   <button class="rb hidden" id="phoneBtn" title="配車アプリ">📱<span class="badge hidden" id="phoneBadge">0</span></button>
-  <button class="rb hidden" id="repairBtn" title="修理">🔧<small id="repairPct"></small></button><button class="rb hidden" id="casinoBtn" title="カジノに入る">🎰</button><button class="rb" id="bgmBtn" title="BGM">🎵</button><button class="rb" id="zoomBtn" title="ズーム">🔍</button>
+  <button class="rb hidden" id="repairBtn" title="修理">🔧<small id="repairPct"></small></button><button class="rb hidden" id="casinoBtn" title="カジノに入る">🎰</button><button class="rb hidden" id="rejBtn" title="乗車拒否">🙅 乗車拒否</button><button class="rb" id="bgmBtn" title="BGM">🎵</button><button class="rb" id="zoomBtn" title="ズーム">🔍</button>
   <button class="rb" id="homeBtn" title="本拠地へカメラ">🏠</button>
 </div>
 <div id="joyZone"><div id="joyBase"><div id="joyKnob"></div></div></div>
@@ -449,13 +451,13 @@ function buyRival(i){const r=S.rivals[i];if(!r||r.own)return;const c=buyCost(i);
   else toast(`🤝 ${r.n} を買収！勢力が吸収された`);recalc();renderPanel();save();}
 function vnAd(){const c=Math.round(1500*LM());if(S.adT>0)return;if(!spend('ad',c))return;S.adT=2;SFX.coin();toast('📣 広告キャンペーン開始！2日間 勢力 +50');recalc();renderPanel();}
 /* ---- travel between chapters (each city keeps its own save) ---- */
-function importDuty(v){return Math.round(taxBr(v,[[10000,0.1],[100000,0.25],[1e6,0.4],[1e7,0.55],[Infinity,0.7]]));}
+function importDuty(v){return Math.round(taxBr(v,[[10000,0.2],[100000,0.4],[1e6,0.6],[1e7,0.75],[Infinity,0.85]]));}
 function carryPreview(target,amt){if(target==='vn'){const duty=importDuty(amt),net=amt-duty,lg=Math.log10(1+net/10000);return {duty,net,boost:Math.round(lg*25),heat:Math.round(lg*3)};}
   const fee=Math.round(amt*0.3);return {duty:fee,net:amt-fee,boost:0,heat:0};}
 function travelModal(target){const toVN=target==='vn',cash=Math.max(0,Math.floor(S.money));const pcts=[0,10,25,50,100];
   const rows=pcts.map(pc=>{const a=Math.floor(cash*pc/100),c=carryPreview(target,a);return `<button class="btn ${pc?'g':'p'}" style="display:block;width:100%;margin:5px 0;text-align:left;font-size:12px" data-act="travel" data-arg="${target}:${pc}"><b>${pc?pc+'%（'+fmt(a)+'）持っていく':'お金は持っていかない'}</b>${pc?`<br>${toVN?'関税':'送金手数料・税'} -${fmt(c.duty)} → 到着 <b>${fmt(c.net)}</b>${toVN?`<br>⚠️ ライバル勢力 +${c.boost}%・外資監視 ${c.heat}日`:''}`:''}</button>`;}).join('');
   modal(`<div class="big">${toVN?'🇻🇳':'🇰🇭'}</div><h2>${toVN?'ホーチミンへ渡る':'プノンペンへ戻る'}</h2><p style="font-size:12px">${toVN?'プノンペンの会社はそのまま残ります（いつでも戻れます）。':'ホーチミンの会社はそのまま残ります（いつでも戻れます）。'}<br>持っていくお金を選んでください（手持ち ${fmt(cash)}）。</p>
-   ${toVN?'<p style="font-size:11px;text-align:left;background:#fff4f4;padding:6px;border-radius:8px">🧾 関税は累進課税（10%→25%→40%→55%→最大70%）<br>📈 大金を持ち込むほどライバルが警戒して勢力アップ<br>🕵️ 外資監視期間中は税務調査・賄賂要求・物価高騰などのイベントが起きる</p>':'<p style="font-size:11px">ベトナムからの送金は一律30%の手数料・税がかかります。</p>'}
+   ${toVN?'<p style="font-size:11px;text-align:left;background:#fff4f4;padding:6px;border-radius:8px">🧾 関税は累進課税（20%→40%→60%→75%→最大85%）<br>📈 大金を持ち込むほどライバルが警戒して勢力アップ<br>🕵️ 外資監視期間中は税務調査・賄賂要求・物価高騰などのイベントが起きる</p>':'<p style="font-size:11px">ベトナムからの送金は一律30%の手数料・税がかかります。</p>'}
    ${rows}<div class="btns"><button class="btn" data-act="closemodal">やめる</button></div>`);}
 function switchChapter(target,carry){carry=Math.max(0,Math.min(Math.floor(S.money),Math.floor(carry||0)));save();const from=S.chapter||'pp';
   const cur=JSON.parse(JSON.stringify(S));cur.money-=carry;cur.lastSave=Date.now();
@@ -1180,6 +1182,11 @@ function removeWaiting(p){scene.remove(p.m);if(p.el)p.el.remove();if(p.beam)scen
 function manh(ax,az,bx_,bz_){return Math.abs(ax-bx_)+Math.abs(az-bz_);}
 function board(p){removeWaiting(p);p.t0=gameTime;p.limit=Math.round(manh(p.pt.sx,p.pt.sz,p.dest.x,p.dest.z)/7.5+8);p.bumps=0;p.lastTick=99;p.beamD=makeBeam(PTYPE[p.type].c);p.beamD.position.set(p.dest.x,0.36,p.dest.z);player.onboard.push(p);updateSeats();SFX.click();
   floatText('乗車！',player.x,4,player.z,'small');renderPax();if(!S.intro){showHint('⏱ 制限時間内に光の柱まで運ぼう！');}}
+let REJW=null;
+function declineRide(){const w=REJW;if(!w||!waiting.includes(w))return;SFX.click();
+  if(w.app||w.special){applyRating(w.special?2:3);S.streak=0;floatText('🙅 お断りしました（評価ダウン）',w.m.position.x,5,w.m.position.z,'small bad');toast(w.special?'📸 インフルエンサーを断った… 評判ダウン':'📱 アプリの迎車をキャンセル… 評価ダウン');removeWaiting(w);}
+  else{w.declined=true;floatText('🙅 乗車お断り',w.m.position.x,5,w.m.position.z,'small');w.el.textContent='🙅 お断り';w.el.style.background='#777';w.mk.visible=false;setTimeout(()=>{if(waiting.includes(w))removeWaiting(w);},1500);}
+  REJW=null;}
 function refuseChance(w){if(S.wanted>0)return 1;if(w.special)return S.cond<0.5?1:0;let c=Math.max(0,(3.6-S.rep)*0.35);if(S.cond<0.3)c+=0.3;else if(S.cond<0.55)c+=0.1;if(w.type==='vip'&&(S.rep<4||S.cond<0.6))c+=0.45;return Math.min(0.9,c);}
 function refuse(w){w.refused=true;w.refT=1.6;SFX.angry();const why=S.wanted>0?'ひっ！指名手配犯だ！':S.cond<0.3?'こんなボロ車イヤ！':S.rep<3?'評判悪いからパス！':w.type==='vip'?'VIPには相応しくない':'やっぱやめとく…';
   floatText('😠 '+why,w.m.position.x,5,w.m.position.z,'small bad');w.el.textContent='😠 乗車拒否';w.el.style.background='#c1121f';w.mk.visible=false;}
@@ -1302,8 +1309,8 @@ function getGoal(){const u=S.upg;
 const floatsEl=$('#floats');let dispMoney=10;let lastGoal='';
 function updateHUD(force){const g=getGoal();const gs=g.t+'|'+Math.round(g.p*20);if(force||gs!==lastGoal){lastGoal=gs;$('#goal').innerHTML=`<div class="gt">🎯 次の目標</div>${g.t}<div class="gp"><i style="width:${g.p*100}%"></i></div>`;}
   $('#lvlNum').textContent='Lv'+S.level;$('#lvlName').textContent=LEVELS[S.level].name;
-  let sum=0;while(rateWin.length&&rateWin[0][0]<gameTime-60)rateWin.shift();rateWin.forEach(r=>sum+=r[1]);$('#rate').textContent='+'+fmt(sum)+' /分';
-  $('#dayTxt').textContent=S.day+'日目';const hm=hourNow();$('#clock').textContent=phaseOf(hm)[0]+' '+String(Math.floor(hm)).padStart(2,'0')+':'+String(Math.floor((hm%1)*60/10)*10).padStart(2,'0');$('#dayBar i').style.width=(S.dayT/DAY*100)+'%';
+  let sum=0;while(rateWin.length&&rateWin[0][0]<gameTime-60)rateWin.shift();rateWin.forEach(r=>sum+=r[1]);{const ti=Object.values(S.today.inc).reduce((a,b)=>a+b,0),te=Object.values(S.today.exp).reduce((a,b)=>a+b,0),el=$('#rate');el.textContent='📈 +'+fmt(sum)+'/分 ・ 今日 '+(ti-te>=0?'+':'')+fmt(ti-te);el.classList.toggle('neg',ti-te<0);}
+  $('#dayTxt').textContent=S.day+'日目';const hm=hourNow();$('#clock').textContent=phaseOf(hm)[0]+String(Math.floor(hm)).padStart(2,'0')+':'+String(Math.floor((hm%1)*60/10)*10).padStart(2,'0');$('#dayBar i').style.width=(S.dayT/DAY*100)+'%';
   $('#fuelFill').style.width=(S.fuel*100)+'%';$('#condFill').style.width=(S.cond*100)+'%';$('#condPct').textContent=Math.round(S.cond*100)+'%';
   const re=$('#rep');re.textContent='★'+S.rep.toFixed(1);re.classList.toggle('bad',S.rep<3);
   const rb=$('#repairBtn');rb.classList.toggle('hidden',S.cond>=0.9);$('#repairPct').textContent=Math.round(S.cond*100)+'%';$('#fuel').classList.toggle('low',S.fuel<0.2||S.cond<0.25);
@@ -1379,7 +1386,7 @@ function renderPanel(){if(!sheetOpen)return;const b=$('#sheetBody');const st=b.s
     h+=`<tr class="tot"><td>本日の収支</td><td class="${ti-te>=0?'plus':'minus'}">${ti-te>=0?'+':''}${fmtD(ti-te)}</td></tr></table>`;
     h+=`<div class="sec">📈 過去の収支（緑=収入 赤=支出）</div><canvas class="chart" id="chart" width="600" height="240"></canvas>`;
     if(isVN())h+=vnBizHtml();
-    else h+=`<div class="sec">🇻🇳 次の章：ホーチミン編</div><div class="card" style="background:linear-gradient(135deg,#fff,#ffe9e9)"><div class="ic">🇻🇳</div><div class="mid"><div class="nm">ホーチミンへ${S.meta.vnOpen?'渡る':'進出'}</div><div class="ds">プノンペンの会社は残したまま、いつでも行き来できます。お金は持ち込めるが関税（最大70%）・ライバル強化・外資監視イベントあり。<br>強力なライバル3社・信号と罰金/財産没収・累進課税…超高難度！${S.level<6&&!S.meta.vnOpen?'<br>🔒 Lv6 到達で解放':''}</div></div>${S.level>=6||S.meta.vnOpen?`<button class="btn r" data-act="govn">${S.meta.vnOpen?'渡る':'挑戦'}</button>`:'<span class="btn dis">🔒</span>'}</div>`;
+    else h+=`<div class="sec">🇻🇳 次の章：ホーチミン編</div><div class="card" style="background:linear-gradient(135deg,#fff,#ffe9e9)"><div class="ic">🇻🇳</div><div class="mid"><div class="nm">ホーチミンへ${S.meta.vnOpen?'渡る':'進出'}</div><div class="ds">プノンペンの会社は残したまま、いつでも行き来できます。お金は持ち込めるが関税（最大85%）・ライバル強化・外資監視イベントあり。<br>強力なライバル3社・信号と罰金/財産没収・累進課税…超高難度！${S.level<6&&!S.meta.vnOpen?'<br>🔒 Lv6 到達で解放':''}</div></div>${S.level>=6||S.meta.vnOpen?`<button class="btn r" data-act="govn">${S.meta.vnOpen?'渡る':'挑戦'}</button>`:'<span class="btn dis">🔒</span>'}</div>`;
     if(isVN()){const gn=prestigeGain(),nc=cityDef(curIdx()+1),ok=S.level>=5&&gn>=1;h+=`<div class="sec">🔁 会社を売却して再起業（転生）</div><div class="card" style="background:linear-gradient(135deg,#fff,#f3e8ff)"><div class="ic">🏯</div><div class="mid"><div class="nm">📍 ${CITY.name}（${S.meta.runs+1}都市目）</div><div class="ds">威光 <b>${S.meta.pts}pt</b>（全運賃 +${S.meta.pts*5}%）<br>次: ${nc.name}（物価×${nc.m.toFixed(1)}）・売却で <b>+${gn}pt</b>${S.level<5?'<br>🔒 Lv5「大企業」で解放':gn<1?'<br>もっと稼ぐと威光が手に入る':''}</div></div>${ok?'<button class="btn p" data-act="prestige">進出</button>':'<span class="btn dis">🔒</span>'}</div>`;}
     if(S.money<0)h+=`<div class="card" style="background:#ffe3e3"><div class="ic">⚖️</div><div class="mid"><div class="nm">借金 ${fmt(-S.money)}</div><div class="ds">決算（残り${Math.ceil(DAY-S.dayT)}秒）までに返済しないと、待機車両→設備→ドライバーの順に差し押さえ。足りなければ自己破産（残り${BANKRUPT_MAX-S.bankrupt}回・超えると倒産）</div></div></div>`;
     h+=`<div class="sec">🛡️ 自動車保険（本日の事故 ${S.today.acc||0}件 ・ 累計 ${S.accidents}件）</div>`;
@@ -1420,7 +1427,7 @@ function renderPhone(){const apps=APPS.filter(a=>S.apps[a.id]);$('#pTitle').text
 
 /* ================= input ================= */
 const keys={};let joy={x:0,y:0,active:false,id:null,ox:0,oy:0};let brake=false;
-addEventListener('keydown',e=>{if(e.target&&e.target.tagName==='INPUT'){if(e.key==='Enter')setCompanyName();return;}keys[e.code]=true;if(e.code==='KeyH')horn();{const m_=e.code.match(/^Digit([1-6])$/);if(m_)setGear(+m_[1]-1);}if(e.code==='KeyT')setAT(!player.at);if(e.code==='KeyG')punch();if(e.code==='KeyN'){mapOpen?closeMap():openMap();}if(e.code==='Escape'&&mapOpen)closeMap();if(e.code==='KeyC'&&nearCasino())openCasino();if(e.code==='KeyF')toggleFoot();if(e.code==='KeyQ')setGear(player.gear-1);if(e.code==='KeyE')setGear(player.gear+1);if(e.code==='KeyM')toggleBGM();if(['ArrowUp','ArrowDown','ArrowLeft','ArrowRight','Space'].includes(e.code))e.preventDefault();});
+addEventListener('keydown',e=>{if(e.target&&e.target.tagName==='INPUT'){if(e.key==='Enter')setCompanyName();return;}keys[e.code]=true;if(e.code==='KeyH')horn();if(e.code==='KeyR')declineRide();{const m_=e.code.match(/^Digit([1-6])$/);if(m_)setGear(+m_[1]-1);}if(e.code==='KeyT')setAT(!player.at);if(e.code==='KeyG')punch();if(e.code==='KeyN'){mapOpen?closeMap():openMap();}if(e.code==='Escape'&&mapOpen)closeMap();if(e.code==='KeyC'&&nearCasino())openCasino();if(e.code==='KeyF')toggleFoot();if(e.code==='KeyQ')setGear(player.gear-1);if(e.code==='KeyE')setGear(player.gear+1);if(e.code==='KeyM')toggleBGM();if(['ArrowUp','ArrowDown','ArrowLeft','ArrowRight','Space'].includes(e.code))e.preventDefault();});
 addEventListener('keyup',e=>{keys[e.code]=false;});
 const jz=$('#joyZone'),jb=$('#joyBase'),jk=$('#joyKnob');
 jz.addEventListener('pointerdown',e=>{initAudio();joy.active=true;joy.id=e.pointerId;jz.setPointerCapture(e.pointerId);const r=jz.getBoundingClientRect();joy.ox=e.clientX;joy.oy=e.clientY;
@@ -1438,6 +1445,7 @@ document.querySelectorAll('.ctabs button').forEach(b=>b.addEventListener('click'
 $('#cChips').addEventListener('click',e=>{const b=e.target.closest('[data-chip]');if(!b||cBusy)return;cBet=isNaN(+b.dataset.chip)?b.dataset.chip:+b.dataset.chip;SFX.click();updCasino();});
 $('#cGame').addEventListener('click',e=>{const b=e.target.closest('[data-rb]');if(!b||cBusy)return;rBet=b.dataset.rb;document.querySelectorAll('[data-rb]').forEach(x=>x.classList.toggle('on',x===b));SFX.click();});
 $('#footBtn').addEventListener('pointerdown',e=>{e.stopPropagation();toggleFoot();});
+$('#rejBtn').addEventListener('click',e=>{e.stopPropagation();initAudio();declineRide();});
 $('#repairBtn').addEventListener('click',()=>{initAudio();doRepair();});$('#bgmBtn').addEventListener('click',toggleBGM);
 let lastATToast=-99;function setGear(g){if(player.at){if(gameTime-lastATToast>3){lastATToast=gameTime;toast('AT中です。ギアを選ぶときは「AT」を押してマニュアルに');}return;}g=clamp(g,0,5);if(g===player.gear)return;player.gear=g;tone(360+g*45,0.06,'square',0.04);}
 function setAT(on){player.at=on;S.at=on;if(!on)player.gear=clamp(player.gear,0,5);$('#gears [data-gc=at]').classList.toggle('on',on);tone(on?700:400,0.06,'square',0.04);}
@@ -1525,15 +1533,18 @@ function update(dt){gameTime+=dt;
   player.hornT=Math.max(0,player.hornT-dt);
   // --- passengers
   spawnT-=dt;const nWaitNormal=waiting.filter(w=>!w.app&&!w.refused).length;if(spawnT<=0&&nWaitNormal<Math.min(11,Math.round((S.rep<2.5?4:7)*EV('spawn')*rampK(hourNow(),PASK)))){spawnT=1.1/EV('spawn')/rampK(hourNow(),PASK);newPassenger();}
-  const pr=player.hornT>0?13:7.5;
+  const pr=player.hornT>0?13:7.5;let nearW=null,nearD=1e9;
   for(let i=waiting.length-1;i>=0;i--){const w=waiting[i];w.t+=dt;w.mk.rotation.y+=dt*2;w.mk.position.y=3.3+Math.sin(w.t*3)*0.25;
     if(w.jump>0){w.jump-=dt;w.m.position.y=0.36+Math.abs(Math.sin(w.jump*10))*0.8;}else w.m.position.y=0.36;
     if(w.refused){w.refT-=dt;w.m.rotation.y+=dt*2;w.m.position.y=0.36+Math.abs(Math.sin(w.refT*12))*0.4;if(w.refT<=0)removeWaiting(w);continue;}
     if((w.app||w.special)&&gameTime>w.pickDL){toast(w.special?'📸 インフルエンサーが帰ってしまった… 評判ダウン':'📱 迎車が遅すぎてキャンセルされた… 評判ダウン ⭐');SFX.angry();applyRating(1);S.streak=0;removeWaiting(w);continue;}
-    const d=dist2(w.m.position.x,w.m.position.z,player.x,player.z);
+    const d=dist2(w.m.position.x,w.m.position.z,player.x,player.z);if(!w.declined&&d<pr+22&&d<nearD){nearD=d;nearW=w;}
+    if(w.declined)continue;
     if(d<pr&&!player.onFoot&&player.onboard.length<seatsCap()){if((!w.app||S.wanted>0)&&!w.checked){w.checked=true;if(rnd()<refuseChance(w)){refuse(w);continue;}}if(S.wanted>0)continue;board(w);continue;}
     if(d>pr+6)w.checked=false;
+    if(d>pr+30)w.declined=false;
     if(!w.app&&!w.special&&d>240)removeWaiting(w);}
+  REJW=(!player.onFoot&&player.onboard.length<seatsCap())?nearW:null;{const rb=$('#rejBtn');const k=REJW?(REJW.special?'⭐':REJW.app?'📱':'')+fmt(REJW.fare):'';if(rb.dataset.k!==k){rb.dataset.k=k;rb.classList.toggle('hidden',!REJW);if(REJW)rb.textContent='🙅 乗車拒否（'+k+'）';}}
   if(waiting.length&&player.onboard.length>=seatsCap()&&!S.intro){}
   for(let i=player.onboard.length-1;i>=0;i--){const o=player.onboard[i];o.beamD.userData.ring.scale.setScalar(i===0?1+Math.sin(gameTime*4)*0.12:0.8);o.beamD.children[0].material.opacity=i===0?0.32:0.1;if(!player.onFoot&&dist2(o.dest.x,o.dest.z,player.x,player.z)<7.5){dropOff(o);if(!S.intro&&S.trips>=1){S.intro=true;}}}
   // arrow
