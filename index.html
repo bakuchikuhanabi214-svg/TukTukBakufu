@@ -189,8 +189,11 @@ canvas.chart{width:100%;height:120px;background:#fff;border-radius:14px;display:
 @media (min-width:900px){#sheet{border-radius:22px;bottom:calc(var(--navh) + 10px)}}
 #sigHud{position:fixed;left:50%;top:150px;transform:translateX(-50%);z-index:40;align-items:center;gap:8px;background:rgba(20,20,20,.82);color:#fff;padding:6px 14px 6px 8px;border-radius:20px;font-size:14px;pointer-events:none}#sigHud i{width:20px;height:20px;border-radius:50%;display:block}.sh_g i{background:#22e06a;box-shadow:0 0 10px #22e06a}.sh_y i{background:#ffc400;box-shadow:0 0 10px #ffc400}.sh_r i{background:#ff2a2a;box-shadow:0 0 12px #ff2a2a}.sh_r{animation:shp .5s infinite alternate}@keyframes shp{to{background:rgba(160,0,0,.9)}}
 #flash{position:fixed;inset:0;background:#fff;opacity:0;pointer-events:none;z-index:999}#flash.on{animation:fl .5s ease-out}@keyframes fl{0%{opacity:.9}100%{opacity:0}}
-@media (max-width:420px){#money{font-size:26px;padding:2px 12px 2px 38px}#money:before{font-size:20px;left:8px}#lvl b{font-size:16px}}
-#rejBtn{width:auto;height:44px;border-radius:22px;padding:0 12px;background:linear-gradient(#ff8a8a,#e63946);color:#fff;font-size:13px;font-weight:800;box-shadow:0 3px 0 #9b1c25,0 4px 8px rgba(0,0,0,.25);white-space:nowrap}
+@media (max-width:420px){#money{font-size:24px;padding:2px 10px 2px 34px;max-width:100%;box-sizing:border-box}#money:before{font-size:20px;left:8px}#lvl b{font-size:16px}}
+#rejBtn{background:linear-gradient(#ff8a8a,#e63946);font-size:22px;box-shadow:0 3px 0 #9b1c25,0 4px 8px rgba(0,0,0,.25)}#rejBtn small{position:absolute;bottom:-6px;left:50%;transform:translateX(-50%);background:#9b1c25;color:#fff;font-size:9px;border-radius:6px;padding:0 4px;font-weight:800;white-space:nowrap}
+#bgmBtn,#homeBtn{display:none!important}
+#top{gap:6px}#moneyBox{min-width:0}#lvl,#dayBox{flex-shrink:0}
+@media (max-width:420px){#dayBox{min-width:0;padding:4px 8px 5px}#dayBox b{font-size:13px}#dayBox small{font-size:12px}#lvl small{max-width:58px}}
 </style>
 </head>
 <body>
@@ -208,7 +211,7 @@ canvas.chart{width:100%;height:120px;background:#fff;border-radius:14px;display:
 <canvas id="mini" width="224" height="224"></canvas>
 <div id="side">
   <button class="rb hidden" id="phoneBtn" title="配車アプリ">📱<span class="badge hidden" id="phoneBadge">0</span></button>
-  <button class="rb hidden" id="repairBtn" title="修理">🔧<small id="repairPct"></small></button><button class="rb hidden" id="casinoBtn" title="カジノに入る">🎰</button><button class="rb hidden" id="rejBtn" title="乗車拒否">🙅 乗車拒否</button><button class="rb" id="bgmBtn" title="BGM">🎵</button><button class="rb" id="zoomBtn" title="ズーム">🔍</button>
+  <button class="rb hidden" id="repairBtn" title="修理">🔧<small id="repairPct"></small></button><button class="rb hidden" id="casinoBtn" title="カジノに入る">🎰</button><button class="rb hidden" id="rejBtn" title="乗車拒否">🙅<small></small></button><button class="rb" id="bgmBtn" title="BGM">🎵</button><button class="rb" id="zoomBtn" title="ズーム">🔍</button>
   <button class="rb" id="homeBtn" title="本拠地へカメラ">🏠</button>
 </div>
 <div id="joyZone"><div id="joyBase"><div id="joyKnob"></div></div></div>
@@ -1544,7 +1547,7 @@ function update(dt){gameTime+=dt;
     if(d>pr+6)w.checked=false;
     if(d>pr+30)w.declined=false;
     if(!w.app&&!w.special&&d>240)removeWaiting(w);}
-  REJW=(!player.onFoot&&player.onboard.length<seatsCap())?nearW:null;{const rb=$('#rejBtn');const k=REJW?(REJW.special?'⭐':REJW.app?'📱':'')+fmt(REJW.fare):'';if(rb.dataset.k!==k){rb.dataset.k=k;rb.classList.toggle('hidden',!REJW);if(REJW)rb.textContent='🙅 乗車拒否（'+k+'）';}}
+  REJW=(!player.onFoot&&player.onboard.length<seatsCap())?nearW:null;{const rb=$('#rejBtn');const k=REJW?(REJW.special?'⭐':REJW.app?'📱':'')+fmt(REJW.fare):'';if(rb.dataset.k!==k){rb.dataset.k=k;rb.classList.toggle('hidden',!REJW);if(REJW)rb.innerHTML='🙅<small>'+k+'</small>';}}
   if(waiting.length&&player.onboard.length>=seatsCap()&&!S.intro){}
   for(let i=player.onboard.length-1;i>=0;i--){const o=player.onboard[i];o.beamD.userData.ring.scale.setScalar(i===0?1+Math.sin(gameTime*4)*0.12:0.8);o.beamD.children[0].material.opacity=i===0?0.32:0.1;if(!player.onFoot&&dist2(o.dest.x,o.dest.z,player.x,player.z)<7.5){dropOff(o);if(!S.intro&&S.trips>=1){S.intro=true;}}}
   // arrow
