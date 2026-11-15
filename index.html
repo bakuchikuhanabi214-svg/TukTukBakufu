@@ -358,7 +358,7 @@ const DIVS=[
  {id:'airport',name:'空港送迎事業部',icon:'✈️',lv:5,cost:20000,desc:'空港送迎（運賃×4）。空港行きの客が出現'},
  {id:'logi',name:'物流事業部',icon:'📦',lv:6,cost:80000,desc:'荷物配送（運賃×3）で社用車の稼ぎが増加'}];
 const INC_L={casino:'カジノの勝ち',fare:'乗客の運賃（自分）',app:'アプリ経由の配車',vip:'VIP送迎',tour:'観光ツアー',airport:'空港送迎',logi:'物流',fleet:'スタッフによる自動収益',offline:'留守中の収益'};
-const EXP_L={fx_audit:'外資の税務調査',fx_bribe:'役人への手続き費',fx_infl:'物価高騰',buyout:'ライバル買収',tax_corp:'法人税（累進）',tax_wealth:'資産税（累進）',signal:'信号無視の罰金',sabotage:'妨害被害の修理',ad:'広告キャンペーン',fuel:'ガソリン代',salary:'スタッフの給料',repair:'車両修理費',maint:'設備維持費',appfee:'アプリ手数料',fine:'罰金・違反金',casino:'カジノの負け',accident:'事故の賠償金',insurance:'自動車保険料',vehicle:'車両購入費',invest:'設備・強化投資',hire:'採用費・登録費'};
+const EXP_L={tax_fx:'外資特別税（持ち込み資金）',gov_fine:'政府の制裁金',fx_audit:'外資の税務調査',fx_bribe:'役人への手続き費',fx_infl:'物価高騰',buyout:'ライバル買収',tax_corp:'法人税（累進）',tax_wealth:'資産税（累進）',signal:'信号無視の罰金',sabotage:'妨害被害の修理',ad:'広告キャンペーン',fuel:'ガソリン代',salary:'スタッフの給料',repair:'車両修理費',maint:'設備維持費',appfee:'アプリ手数料',fine:'罰金・違反金',casino:'カジノの負け',accident:'事故の賠償金',insurance:'自動車保険料',vehicle:'車両購入費',invest:'設備・強化投資',hire:'採用費・登録費'};
 const EVENTS=[
  {id:'rain',w:3,cond:()=>true,icon:'🌧️',title:'雨季のスコール！',desc:'突然の大雨で道路が冠水！走りにくく、ぶつかると壊れやすい。でも雨の日はトゥクトゥクの需要が増える！',dur:100,base:{pSpeed:0.75,dmg:1.6,fleetDur:1.35,fare:1.3,spawn:1.4,rain:1},
   ch:[{t:'そのまま営業',d:'社用車の稼働が35%遅くなる'},{t:'全車に防水カバーを配る',cost:()=>8*LM()*Math.max(1,D.drivers.length),d:'社用車の遅れなし',fx:{fleetDur:1}}]},
@@ -399,7 +399,7 @@ const aCost=a=>Math.round(a.cost*CM());
 /* ================= state ================= */
 function DEF(){return {v:1,money:10,earned:0,level:1,upg:{engine:0,tank:0,seats:0,exterior:0,tires:0,cargo:0,ac:0},fuel:1,vehicles:1,grade:0,
  staff:[],nid:1,fac:{},apps:{},divs:{},day:1,dayT:0,today:{inc:{},exp:{}},hist:[],cand:[],candR:{},trips:0,fleetTrips:0,appTrips:0,
- lastSave:Date.now(),sound:true,bgm:true,meta:{pts:0,city:0,vcity:0,runs:0,total:0,ppDone:false},ev:null,evT:150,gasLock:0,justMoved:false,gasP:1,gasPrev:1,ins:0,hiredToday:0,bankrupt:0,company:'',dayv2:false,wanted:0,crimes:0,arrests:0,casinoNet:0,accidents:0,insSaved:0,accLoss:0,cond:1,rep:4,ratings:[],streak:0,bestStreak:0,hq:1,px:0,pz:-25,ph:0,intro:false,chapter:'pp',rivals:[],sigV:0,sigTot:0,taxY:{corp:0,wealth:0},taxTot:0,adT:0,pw:0,lobby:0,justVN:false,rivLog:[],fxHeat:0,inflT:0,arrive:null};}
+ lastSave:Date.now(),sound:true,bgm:true,meta:{pts:0,city:0,vcity:0,runs:0,total:0,ppDone:false},ev:null,evT:150,gasLock:0,justMoved:false,gasP:1,gasPrev:1,ins:0,hiredToday:0,bankrupt:0,company:'',dayv2:false,wanted:0,crimes:0,arrests:0,casinoNet:0,accidents:0,insSaved:0,accLoss:0,cond:1,rep:4,ratings:[],streak:0,bestStreak:0,hq:1,px:0,pz:-25,ph:0,intro:false,chapter:'pp',rivals:[],sigV:0,sigTot:0,taxY:{corp:0,wealth:0},taxTot:0,adT:0,pw:0,lobby:0,justVN:false,rivLog:[],fxHeat:0,inflT:0,arrive:null,fxCap:0,taxY2:0,govFine:0};}
 let S=DEF();
 function mergeDef(o){const d=DEF();for(const k in d){if(o[k]!==undefined){if(d[k]&&typeof d[k]==='object'&&!Array.isArray(d[k]))d[k]=Object.assign(d[k],o[k]);else d[k]=o[k];}}return d;}
 function load(){try{const raw=localStorage.getItem(KEY);if(!raw)return false;S=mergeDef(JSON.parse(raw));return true;}catch(e){return false;}}
@@ -416,8 +416,9 @@ function myPower(){const f=S.fac;return Math.round(10+(D.drivers?D.drivers.lengt
 function vnShare(){if(!isHard())return 1;const mp=myPower();const tot=mp+S.rivals.filter(r=>!r.own).reduce((a,r)=>a+r.p,0);return mp/tot;}
 function buyCost(i){const r=S.rivals[i];const owned=S.rivals.filter(x=>x.own).length;return Math.round(r.p*6000*CM()*(1+owned*0.7)*(1+(S.fxHeat||0)*0.05));}
 function taxBr(v,br){let t=0,lo=0;for(const [hi,r] of br){if(v>lo)t+=(Math.min(v,hi)-lo)*r;lo=hi;}return t;}
-function corpTax(p){const k=CM(),l=S.lobby>0?0.05:0;return p<=0?0:taxBr(p,[[3000*k,0.1+l],[30000*k,0.2+l],[300000*k,0.3+l],[3e6*k,0.4+l],[Infinity,0.5+l]]);}
-function wealthTax(c){const k=CM()/3;return c<=0?0:taxBr(c,[[60000*k,0],[600000*k,0.01],[6e6*k,0.025],[Infinity,0.04]]);}
+function corpTax(p){const k=CM(),l=(S.lobby>0?0.05:0)+(isIN()?0.05:0);return p<=0?0:taxBr(p,[[3000*k,0.15+l],[30000*k,0.25+l],[300000*k,0.38+l],[3e6*k,0.5+l],[Infinity,0.6+l]]);}
+function wealthTax(c){const k=CM()/3,x=isIN()?0.01:0;return c<=0?0:taxBr(c,[[20000*k,0],[200000*k,0.02+x],[2e6*k,0.04+x],[2e7*k,0.06+x],[Infinity,0.08+x]]);}
+function fxTax(c){return Math.max(0,Math.min(c,S.fxCap||0))*(isIN()?0.05:0.04);}
 const SIGC=20;function sigState(ax){const c=gameTime%SIGC;const ph=ax==='ns'?c:(c+10)%SIGC;return ph<8?'g':ph<10?'y':'r';}
 let SIG=null;
 function buildSignals(){if(!isHard()||!SIGN)return;const nodes=[];SIGN.forEach(k=>{const [i,j]=k.split(',').map(Number);nodes.push([nX(i),nX(j)]);});
@@ -455,9 +456,15 @@ function rivalsDay(){if(!isHard())return;const live=S.rivals.filter(r=>!r.own);
   else rivalLog(`📈 ${r.n}が新車を大量導入！勢力が急拡大`),r.p=Math.round(r.p*1.25);
   recalc();}
 function vnTaxes(){if(!isHard())return;const ti=Object.values(S.today.inc).reduce((a,b)=>a+b,0),te=Object.values(S.today.exp).reduce((a,b)=>a+b,0);
-  const c=Math.round(corpTax(ti-te)),w=Math.round(wealthTax(S.money));if(c>0)addExp('tax_corp',c);if(w>0)addExp('tax_wealth',w);S.taxY={corp:c,wealth:w};S.taxTot+=c+w;
-  if(c+w>0)setTimeout(()=>toast(`🧾 税務署: 法人税 ${fmt(c)} ＋ 資産税 ${fmt(w)} を徴収`),2000);}
-function buyRival(i){const r=S.rivals[i];if(!r||r.own)return;const c=buyCost(i);if(!spend('buyout',c))return;r.own=true;SFX.lvl();
+  const c=Math.round(corpTax(ti-te)),w=Math.round(wealthTax(S.money)),f=Math.round(fxTax(S.money));if(c>0)addExp('tax_corp',c);if(w>0)addExp('tax_wealth',w);if(f>0)addExp('tax_fx',f);S.taxY={corp:c,wealth:w+f};S.taxTot+=c+w+f;
+  S.fxCap=Math.max(0,Math.round((S.fxCap||0)*0.97));
+  if(c+w+f>0)setTimeout(()=>toast(`🧾 税務署: 法人税 ${fmt(c)} ＋ 資産税 ${fmt(w)}${f?` ＋ 外資特別税 ${fmt(f)}`:''} を徴収`),2000);}
+function govBlocked(){return isHard()&&(S.day<10||S.level<4||(S.fxHeat||0)>0);}
+function govCrackdown(r){const reasons=['独占禁止法違反の疑い','外資規制法の重大な違反','提出書類の不備（247項目）','脱税の疑いによる税務調査','環境基準違反（排ガス）','無許可営業の疑い','労働法違反（社員からの匿名通報）'];
+  const why=pick(reasons),fine=Math.round(Math.max(0,S.money)*0.45+8000*LM());addExp('gov_fine',fine);S.govFine=(S.govFine||0)+fine;S.fxHeat=(S.fxHeat||0)+4;r.p=Math.round(r.p*1.2);S.rep=Math.max(1,S.rep-0.3);SFX.err();camFlash();
+  modal(`<div class="big">🏛️</div><h2>政府に目をつけられた！</h2><p>来たばかりの外資が金の力で地元企業「${r.n}」を買収しようとしたため、当局が介入した。</p><table class="tb" style="font-size:12px"><tr><td>名目</td><td><b>${why}</b></td></tr><tr><td>制裁金</td><td class="minus">-${fmt(fine)}</td></tr><tr><td>買収</td><td class="minus">却下</td></tr><tr><td>外資監視</td><td class="minus">+4日</td></tr><tr><td>${r.n}の勢力</td><td class="minus">+20%（同情が集まった）</td></tr></table><p style="font-size:11px">地元で実績を積むまで（進出10日目以降・Lv4以上・外資監視なし）、買収は認められないようだ…</p><div class="btns"><button class="btn r" data-act="closemodal">理不尽だ…</button></div>`);
+  rivalLog(`🏛️ 政府が${CN()}の買収を却下し、制裁金 ${fmt(fine)}`);recalc();renderPanel();save();}
+function buyRival(i){const r=S.rivals[i];if(!r||r.own)return;const c=buyCost(i);if(S.money<c)return;if(govBlocked()){govCrackdown(r);return;}if(!spend('buyout',c))return;r.own=true;SFX.lvl();
   traffic.forEach(a=>{if(a.rival===i){a.rival=undefined;}});
   if(S.rivals.every(x=>x.own)){S.meta.vnWin=(S.meta.vnWin||0)+1;modal(`<div class="burst"><span>👑</span></div><h2>${CHN[S.chapter]}完全制覇！</h2><p>ライバル3社をすべて買収し、${CHN[S.chapter]}の交通を手中に収めた！<br>${escH(CN())}は東南アジア最強の交通グループだ。</p><div class="btns"><button class="btn p" data-act="closemodal">天下統一！</button></div>`);}
   else toast(`🤝 ${r.n} を買収！勢力が吸収された`);recalc();renderPanel();save();}
@@ -478,7 +485,7 @@ function switchChapter(target,carry){carry=Math.max(0,Math.min(Math.floor(S.mone
   const meta=Object.assign({},S.meta);if(from==='pp')meta.ppDone=true;if(target==='vn'||from==='vn')meta.vnOpen=true;if(target==='in'||from==='in')meta.inOpen=true;cur.meta=meta;T.meta=meta;
   Object.assign(T,{company:S.company||'',sound:S.sound,bgm:S.bgm,hq:S.hq,at:S.at,lastSave:Date.now()});
   const c=carryPreview(target,carry);T.money+=c.net;
-  if(target!=='pp'&&c.net>0){T.rivals.forEach(r=>{if(!r.own)r.p=Math.round(r.p*(1+c.boost/100));});T.fxHeat=(T.fxHeat||0)+c.heat;}
+  if(target!=='pp'&&c.net>0){T.fxCap=(T.fxCap||0)+c.net;T.rivals.forEach(r=>{if(!r.own)r.p=Math.round(r.p*(1+c.boost/100));});T.fxHeat=(T.fxHeat||0)+c.heat;}
   T.arrive={from,carry,duty:c.duty,net:c.net,boost:c.boost,heat:c.heat,first};
   resetting=true;try{localStorage.setItem(KEYC(from),JSON.stringify(cur));localStorage.setItem(KEY,JSON.stringify(T));}catch(e){}location.reload();}
 function startVN(){switchChapter('vn',Math.floor(Math.max(0,S.money)*0.5));}
@@ -501,12 +508,12 @@ function vnBizHtml(){let h='';const sh=vnShare(),mp=myPower();
   h+=`<div class="sec">${FLAG[S.chapter]} ${CHN[S.chapter]}市場シェア</div><div class="card" style="display:block"><div style="display:flex;justify-content:space-between;font-size:13px"><b>${escH(CN())}</b><b>${(sh*100).toFixed(1)}%（勢力 ${mp}）</b></div>
    <div style="height:14px;background:#eee;border-radius:7px;overflow:hidden;display:flex;margin:6px 0"><div style="width:${sh*100}%;background:#ff9f1c"></div>${S.rivals.filter(r=>!r.own).map(r=>`<div style="flex:${r.p};background:${r.c}"></div>`).join('')}</div>
    <div class="ds" style="font-size:12px">社用車への依頼数 ×${(sh*3).toFixed(2)}（シェアに比例）。ライバルのトゥクトゥクは待ち客を横取りする。ドライバー・評判・支店・本社・広告・買収で勢力UP。${S.pw>0?'<br><b style="color:#c1121f">値下げ攻勢中：運賃 -20%</b>':''}${S.lobby>0?'<br><b style="color:#c1121f">ロビー活動中：法人税 +5%</b>':''}</div></div>`;
-  S.rivals.forEach((r,i)=>{const c=buyCost(i);h+=`<div class="card"><div class="ic" style="background:${r.c};color:#fff;border-radius:10px">${r.own?'🤝':'🛺'}</div><div class="mid"><div class="nm" style="color:${r.c}">${r.n}</div><div class="ds">${r.own?'買収済み（勢力の70%を吸収）':`勢力 ${r.p}（毎日成長中）・買収額 ${fmt(c)}`}</div></div>${r.own?'<span class="btn dis">傘下</span>':`<button class="btn ${S.money>=c?'p':'dis'}" data-act="buyriv" data-arg="${i}" data-cost="${c}">買収</button>`}</div>`;});
+  S.rivals.forEach((r,i)=>{const c=buyCost(i);h+=`<div class="card"><div class="ic" style="background:${r.c};color:#fff;border-radius:10px">${r.own?'🤝':'🛺'}</div><div class="mid"><div class="nm" style="color:${r.c}">${r.n}</div><div class="ds">${r.own?'買収済み（勢力の70%を吸収）':`勢力 ${r.p}（毎日成長中）・買収額 ${fmt(c)}${govBlocked()?'<br><span style="color:#c1121f">🏛️ 政府の目が光っている…</span>':''}`}</div></div>${r.own?'<span class="btn dis">傘下</span>':`<button class="btn ${S.money>=c?'p':'dis'}" data-act="buyriv" data-arg="${i}" data-cost="${c}">買収</button>`}</div>`;});
   {const c=Math.round(1500*LM());h+=`<div class="card"><div class="ic">📣</div><div class="mid"><div class="nm">広告キャンペーン</div><div class="ds">${S.adT>0?`実施中（残り${S.adT}日）`:'2日間 勢力 +50'}</div></div>${S.adT>0?'<span class="btn dis">実施中</span>':`<button class="btn g" data-act="vnad" data-cost="${c}">${fmt(c)}</button>`}</div>`;}
   if(S.rivLog.length)h+=`<div class="card" style="display:block;font-size:12px;background:#fff4f4"><b>⚔️ ライバルの動き</b><br>${S.rivLog.map(escH).join('<br>')}</div>`;
   const ti=Object.values(S.today.inc).reduce((a,b)=>a+b,0),te=Object.values(S.today.exp).reduce((a,b)=>a+b,0);
-  h+=`<div class="sec">🧾 税金（累進課税・決算時に徴収）</div><table class="tb"><tr><td>法人税（予定・今日の利益に課税）</td><td class="minus">-${fmtD(Math.round(corpTax(ti-te)))}</td></tr><tr><td>資産税（予定・手元資金に課税）</td><td class="minus">-${fmtD(Math.round(wealthTax(S.money)))}</td></tr><tr><td>昨日の納税額</td><td>${fmtD(S.taxY.corp+S.taxY.wealth)}</td></tr><tr><td>累計納税額</td><td>${fmtD(S.taxTot)}</td></tr></table>
-   <div class="ds" style="font-size:11px;padding:2px 6px">法人税: 利益 ${fmt(3000*CM())}まで10%→20%→30%→40%→最高50%／資産税: 手元資金 ${fmt(60000*CM()/3)}超 1%→2.5%→4%（毎日）。お金は貯めるより使え！</div>
+  h+=`<div class="sec">🧾 税金（累進課税・決算時に徴収）</div><table class="tb"><tr><td>法人税（予定・今日の利益に課税）</td><td class="minus">-${fmtD(Math.round(corpTax(ti-te)))}</td></tr><tr><td>資産税（予定・手元資金に課税）</td><td class="minus">-${fmtD(Math.round(wealthTax(S.money)))}</td></tr>${S.fxCap>0?`<tr><td>外資特別税（持ち込み資金 ${fmt(S.fxCap)} 分）</td><td class="minus">-${fmtD(Math.round(fxTax(S.money)))}</td></tr>`:''}<tr><td>昨日の納税額</td><td>${fmtD(S.taxY.corp+S.taxY.wealth)}</td></tr><tr><td>累計納税額</td><td>${fmtD(S.taxTot)}</td></tr></table>
+   <div class="ds" style="font-size:11px;padding:2px 6px">法人税: 利益 ${fmt(3000*CM())}まで${isIN()?20:15}%→…→最高${isIN()?65:60}%／資産税: 手元資金 ${fmt(20000*CM()/3)}超 ${isIN()?3:2}%→…→最高${isIN()?9:8}%（毎日）／外資特別税: 持ち込んだ資金が残っている分に毎日${isIN()?5:4}%。お金は貯めるより使え！</div>
    <div class="sec">🚦 交通違反</div><div class="card"><div class="ic">📸</div><div class="mid"><div class="nm">本日の信号無視 ${S.sigV}回（累計 ${S.sigTot}回）</div><div class="ds">赤信号で交差点に進入すると罰金（回数ごとに増額）。3回ごとに財産没収（設備・車両・現金15%）</div></div></div>`;
   return h;}
 function recalc(){
