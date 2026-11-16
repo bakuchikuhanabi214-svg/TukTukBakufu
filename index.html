@@ -416,9 +416,14 @@ function myPower(){const f=S.fac;return Math.round(10+(D.drivers?D.drivers.lengt
 function vnShare(){if(!isHard())return 1;const mp=myPower();const tot=mp+S.rivals.filter(r=>!r.own).reduce((a,r)=>a+r.p,0);return mp/tot;}
 function buyCost(i){const r=S.rivals[i];const owned=S.rivals.filter(x=>x.own).length;return Math.round(r.p*6000*CM()*(1+owned*0.7)*(1+(S.fxHeat||0)*0.05));}
 function taxBr(v,br){let t=0,lo=0;for(const [hi,r] of br){if(v>lo)t+=(Math.min(v,hi)-lo)*r;lo=hi;}return t;}
-function corpTax(p){const k=CM(),l=(S.lobby>0?0.05:0)+(isIN()?0.05:0);return p<=0?0:taxBr(p,[[3000*k,0.15+l],[30000*k,0.25+l],[300000*k,0.38+l],[3e6*k,0.5+l],[Infinity,0.6+l]]);}
-function wealthTax(c){const k=CM()/3,x=isIN()?0.01:0;return c<=0?0:taxBr(c,[[20000*k,0],[200000*k,0.02+x],[2e6*k,0.04+x],[2e7*k,0.06+x],[Infinity,0.08+x]]);}
-function fxTax(c){return Math.max(0,Math.min(c,S.fxCap||0))*(isIN()?0.05:0.04);}
+function corpTax(p){const k=CM(),l=(S.lobby>0?0.05:0)+(isIN()?0.03:0);return p<=0?0:taxBr(p,[[3000*k,0.1+l],[30000*k,0.2+l],[300000*k,0.28+l],[3e6*k,0.36+l],[Infinity,0.42+l]]);}
+function wealthTax(c){const k=CM()/3,x=isIN()?0.002:0;return c<=0?0:taxBr(c,[[50000*k,0],[500000*k,0.004+x],[5e6*k,0.008+x],[5e7*k,0.012+x],[Infinity,0.016+x]]);}
+function fxTax(c){return Math.max(0,Math.min(c,S.fxCap||0))*(isIN()?0.015:0.012);}
+// taxes never wipe out a profitable day: total tax <= 50% of that day's pre-tax profit; on loss days only a light asset levy
+function taxPlan(ti,te,cash){const pre=ti-te;let c=corpTax(pre),w=wealthTax(cash),f=fxTax(cash);
+  if(pre>0){const cap=pre*0.5;if(c+w+f>cap){const k=Math.max(0,cap-c)/Math.max(1,w+f);if(c>cap){c=cap;w=0;f=0;}else{w*=k;f*=k;}}}
+  else{const cap=Math.max(0,cash)*0.002;if(w+f>cap){const k=cap/Math.max(1,w+f);w*=k;f*=k;}}
+  return {c:Math.round(c),w:Math.round(w),f:Math.round(f)};}
 const SIGC=20;function sigState(ax){const c=gameTime%SIGC;const ph=ax==='ns'?c:(c+10)%SIGC;return ph<8?'g':ph<10?'y':'r';}
 let SIG=null;
 function buildSignals(){if(!isHard()||!SIGN)return;const nodes=[];SIGN.forEach(k=>{const [i,j]=k.split(',').map(Number);nodes.push([nX(i),nX(j)]);});
@@ -456,7 +461,7 @@ function rivalsDay(){if(!isHard())return;const live=S.rivals.filter(r=>!r.own);
   else rivalLog(`📈 ${r.n}が新車を大量導入！勢力が急拡大`),r.p=Math.round(r.p*1.25);
   recalc();}
 function vnTaxes(){if(!isHard())return;const ti=Object.values(S.today.inc).reduce((a,b)=>a+b,0),te=Object.values(S.today.exp).reduce((a,b)=>a+b,0);
-  const c=Math.round(corpTax(ti-te)),w=Math.round(wealthTax(S.money)),f=Math.round(fxTax(S.money));if(c>0)addExp('tax_corp',c);if(w>0)addExp('tax_wealth',w);if(f>0)addExp('tax_fx',f);S.taxY={corp:c,wealth:w+f};S.taxTot+=c+w+f;
+  const tp=taxPlan(ti,te,S.money),c=tp.c,w=tp.w,f=tp.f;if(c>0)addExp('tax_corp',c);if(w>0)addExp('tax_wealth',w);if(f>0)addExp('tax_fx',f);S.taxY={corp:c,wealth:w+f};S.taxTot+=c+w+f;
   S.fxCap=Math.max(0,Math.round((S.fxCap||0)*0.97));
   if(c+w+f>0)setTimeout(()=>toast(`🧾 税務署: 法人税 ${fmt(c)} ＋ 資産税 ${fmt(w)}${f?` ＋ 外資特別税 ${fmt(f)}`:''} を徴収`),2000);}
 function govBlocked(){return isHard()&&(S.day<16||S.level<4||(S.fxHeat||0)>0);}
@@ -513,8 +518,8 @@ function vnBizHtml(){let h='';const sh=vnShare(),mp=myPower();
   {const c=Math.round(1500*LM());h+=`<div class="card"><div class="ic">📣</div><div class="mid"><div class="nm">広告キャンペーン</div><div class="ds">${S.adT>0?`実施中（残り${S.adT}日）`:'2日間 勢力 +50'}</div></div>${S.adT>0?'<span class="btn dis">実施中</span>':`<button class="btn g" data-act="vnad" data-cost="${c}">${fmt(c)}</button>`}</div>`;}
   if(S.rivLog.length)h+=`<div class="card" style="display:block;font-size:12px;background:#fff4f4"><b>⚔️ ライバルの動き</b><br>${S.rivLog.map(escH).join('<br>')}</div>`;
   const ti=Object.values(S.today.inc).reduce((a,b)=>a+b,0),te=Object.values(S.today.exp).reduce((a,b)=>a+b,0);
-  h+=`<div class="sec">🧾 税金（累進課税・決算時に徴収）</div><table class="tb"><tr><td>法人税（予定・今日の利益に課税）</td><td class="minus">-${fmtD(Math.round(corpTax(ti-te)))}</td></tr><tr><td>資産税（予定・手元資金に課税）</td><td class="minus">-${fmtD(Math.round(wealthTax(S.money)))}</td></tr>${S.fxCap>0?`<tr><td>外資特別税（持ち込み資金 ${fmt(S.fxCap)} 分）</td><td class="minus">-${fmtD(Math.round(fxTax(S.money)))}</td></tr>`:''}<tr><td>昨日の納税額</td><td>${fmtD(S.taxY.corp+S.taxY.wealth)}</td></tr><tr><td>累計納税額</td><td>${fmtD(S.taxTot)}</td></tr></table>
-   <div class="ds" style="font-size:11px;padding:2px 6px">法人税: 利益 ${fmt(3000*CM())}まで${isIN()?20:15}%→…→最高${isIN()?65:60}%／資産税: 手元資金 ${fmt(20000*CM()/3)}超 ${isIN()?3:2}%→…→最高${isIN()?9:8}%（毎日）／外資特別税: 持ち込んだ資金が残っている分に毎日${isIN()?5:4}%。お金は貯めるより使え！</div>
+  h+=`<div class="sec">🧾 税金（累進課税・決算時に徴収）</div><table class="tb">${(()=>{const tp=taxPlan(ti,te,S.money);return `<tr><td>法人税（予定・今日の利益に課税）</td><td class="minus">-${fmtD(tp.c)}</td></tr><tr><td>資産税（予定・手元資金に課税）</td><td class="minus">-${fmtD(tp.w)}</td></tr>${S.fxCap>0?`<tr><td>外資特別税（持ち込み資金 ${fmt(S.fxCap)} 分）</td><td class="minus">-${fmtD(tp.f)}</td></tr>`:''}`;})()}<tr><td>昨日の納税額</td><td>${fmtD(S.taxY.corp+S.taxY.wealth)}</td></tr><tr><td>累計納税額</td><td>${fmtD(S.taxTot)}</td></tr></table>
+   <div class="ds" style="font-size:11px;padding:2px 6px">法人税: 利益に${isIN()?13:10}%→…→最高${isIN()?45:42}%／資産税: 手元資金 ${fmt(50000*CM()/3)}超 ${isIN()?'0.6':'0.4'}%→…→最高${isIN()?'1.8':'1.6'}%（毎日）／外資特別税: 持ち込み資金の残りに毎日${isIN()?'1.5':'1.2'}%。※黒字の日は税金の合計が利益の50%まで（赤字の日は手元資金の0.2%まで）</div>
    <div class="sec">🚦 交通違反</div><div class="card"><div class="ic">📸</div><div class="mid"><div class="nm">本日の信号無視 ${S.sigV}回（累計 ${S.sigTot}回）</div><div class="ds">赤信号で交差点に進入すると罰金（回数ごとに増額）。3回ごとに財産没収（設備・車両・現金15%）</div></div></div>`;
   return h;}
 function recalc(){
