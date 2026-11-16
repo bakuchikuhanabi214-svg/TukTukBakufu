@@ -1161,7 +1161,7 @@ function stealVehicle(a){SFX.punch();traffic.splice(traffic.indexOf(a),1);const 
 function crime(type,victim){S.crimes++;const pos=ctrlPos();let w=0;const R=34;
   peds.forEach(p=>{if(!p.off&&p!==victim&&p.down<=0&&p.x!==undefined&&dist2(p.x,p.z,pos.x,pos.z)<R)w++;});traffic.forEach(a=>{if(!a.off&&a.x!==undefined&&dist2(a.x,a.z,pos.x,pos.z)<R)w++;});
   waiting.forEach(q=>{if(dist2(q.m.position.x,q.m.position.z,pos.x,pos.z)<R)w++;});walkers.forEach(q=>{if(dist2(q.m.position.x,q.m.position.z,pos.x,pos.z)<R)w++;});
-  const pRep=1-Math.pow(0.68,w)*(type==='theft'?0.45:0.8);if(isHard())pRep=Math.min(0.97,pRep*1.4+0.2);
+  let pRep=1-Math.pow(0.68,w)*(type==='theft'?0.45:0.8);if(isHard())pRep=Math.min(0.97,pRep*1.4+0.2);
   floatText(w?`👀 目撃者 ${w}人…`:'👀 誰も見ていない…？',pos.x,7,pos.z,'small');
   setTimeout(()=>{if(rnd()<pRep){const add=(type==='theft'?2:1)+(isHard()?1:0);S.wanted=Math.min(3,S.wanted+add);evadeT=0;SFX.siren(true);toast(`📞 通報された！指名手配 ${'★'.repeat(S.wanted)}  警察が来るぞ！`);spawnPolice();}else{toast('😎 誰にも通報されなかった…');}},1400);}
 function buildPolice(){const g=new THREE.Group();blob(g,3.4,6);bx(g,'#f4f4f4',2.4,1,4.6,0,0.95,0);bx(g,'#111',2.42,0.45,2.6,0,0.75,0);bx(g,'#2b3a4a',2.15,0.85,2.4,0,1.85,-0.2);bx(g,'#f4f4f4',2.2,0.12,2.4,0,2.32,-0.2);bx(g,'#151515',2.5,0.7,3.4,0,0.4,0);
