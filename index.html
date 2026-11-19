@@ -358,7 +358,7 @@ const DIVS=[
  {id:'airport',name:'空港送迎事業部',icon:'✈️',lv:5,cost:20000,desc:'空港送迎（運賃×4）。空港行きの客が出現'},
  {id:'logi',name:'物流事業部',icon:'📦',lv:6,cost:80000,desc:'荷物配送（運賃×3）で社用車の稼ぎが増加'}];
 const INC_L={casino:'カジノの勝ち',fare:'乗客の運賃（自分）',app:'アプリ経由の配車',vip:'VIP送迎',tour:'観光ツアー',airport:'空港送迎',logi:'物流',fleet:'スタッフによる自動収益',offline:'留守中の収益'};
-const EXP_L={tax_fx:'外資特別税（持ち込み資金）',gov_fine:'政府の制裁金',fx_audit:'外資の税務調査',fx_bribe:'役人への手続き費',fx_infl:'物価高騰',buyout:'ライバル買収',tax_corp:'法人税（累進）',tax_wealth:'資産税（累進）',signal:'信号無視の罰金',sabotage:'妨害被害の修理',ad:'広告キャンペーン',fuel:'ガソリン代',salary:'スタッフの給料',repair:'車両修理費',maint:'設備維持費',appfee:'アプリ手数料',fine:'罰金・違反金',casino:'カジノの負け',accident:'事故の賠償金',insurance:'自動車保険料',vehicle:'車両購入費',invest:'設備・強化投資',hire:'採用費・登録費'};
+const EXP_L={tax_fx:'外資特別税（持ち込み資金）',gov_fine:'政府の制裁金',fx_audit:'外資の税務調査',fx_bribe:'役人への手続き費',fx_infl:'物価高騰',loan_int:'緊急融資の利息',buyout:'ライバル買収',tax_corp:'法人税（累進）',tax_wealth:'資産税（累進）',signal:'信号無視の罰金',sabotage:'妨害被害の修理',ad:'広告キャンペーン',fuel:'ガソリン代',salary:'スタッフの給料',repair:'車両修理費',maint:'設備維持費',appfee:'アプリ手数料',fine:'罰金・違反金',casino:'カジノの負け',accident:'事故の賠償金',insurance:'自動車保険料',vehicle:'車両購入費',invest:'設備・強化投資',hire:'採用費・登録費'};
 const EVENTS=[
  {id:'rain',w:3,cond:()=>true,icon:'🌧️',title:'雨季のスコール！',desc:'突然の大雨で道路が冠水！走りにくく、ぶつかると壊れやすい。でも雨の日はトゥクトゥクの需要が増える！',dur:100,base:{pSpeed:0.75,dmg:1.6,fleetDur:1.35,fare:1.3,spawn:1.4,rain:1},
   ch:[{t:'そのまま営業',d:'社用車の稼働が35%遅くなる'},{t:'全車に防水カバーを配る',cost:()=>8*LM()*Math.max(1,D.drivers.length),d:'社用車の遅れなし',fx:{fleetDur:1}}]},
@@ -399,7 +399,7 @@ const aCost=a=>Math.round(a.cost*CM());
 /* ================= state ================= */
 function DEF(){return {v:1,money:10,earned:0,level:1,upg:{engine:0,tank:0,seats:0,exterior:0,tires:0,cargo:0,ac:0},fuel:1,vehicles:1,grade:0,
  staff:[],nid:1,fac:{},apps:{},divs:{},day:1,dayT:0,today:{inc:{},exp:{}},hist:[],cand:[],candR:{},trips:0,fleetTrips:0,appTrips:0,
- lastSave:Date.now(),sound:true,bgm:true,meta:{pts:0,city:0,vcity:0,runs:0,total:0,ppDone:false},ev:null,evT:150,gasLock:0,justMoved:false,gasP:1,gasPrev:1,ins:0,hiredToday:0,bankrupt:0,company:'',dayv2:false,wanted:0,crimes:0,arrests:0,casinoNet:0,accidents:0,insSaved:0,accLoss:0,cond:1,rep:4,ratings:[],streak:0,bestStreak:0,hq:1,px:0,pz:-25,ph:0,intro:false,chapter:'pp',rivals:[],sigV:0,sigTot:0,taxY:{corp:0,wealth:0},taxTot:0,adT:0,pw:0,lobby:0,justVN:false,rivLog:[],fxHeat:0,inflT:0,arrive:null,fxCap:0,taxY2:0,govFine:0,bgRate:0,bgEarned:0};}
+ lastSave:Date.now(),sound:true,bgm:true,meta:{pts:0,city:0,vcity:0,runs:0,total:0,ppDone:false},ev:null,evT:150,gasLock:0,justMoved:false,gasP:1,gasPrev:1,ins:0,hiredToday:0,bankrupt:0,company:'',dayv2:false,wanted:0,crimes:0,arrests:0,casinoNet:0,accidents:0,insSaved:0,accLoss:0,cond:1,rep:4,ratings:[],streak:0,bestStreak:0,hq:1,px:0,pz:-25,ph:0,intro:false,chapter:'pp',rivals:[],sigV:0,sigTot:0,taxY:{corp:0,wealth:0},taxTot:0,adT:0,pw:0,lobby:0,justVN:false,rivLog:[],fxHeat:0,inflT:0,arrive:null,fxCap:0,taxY2:0,govFine:0,bgRate:0,bgEarned:0,debt:0};}
 let S=DEF();
 function mergeDef(o){const d=DEF();for(const k in d){if(o[k]!==undefined){if(d[k]&&typeof d[k]==='object'&&!Array.isArray(d[k]))d[k]=Object.assign(d[k],o[k]);else d[k]=o[k];}}return d;}
 function load(){try{const raw=localStorage.getItem(KEY);if(!raw)return false;S=mergeDef(JSON.parse(raw));return true;}catch(e){return false;}}
@@ -478,12 +478,14 @@ function vnAd(){const c=Math.round(1500*LM());if(S.adT>0)return;if(!spend('ad',c
 function importDuty(v){return Math.round(taxBr(v,[[100000,0.6],[1e6,0.65],[Infinity,0.7]]));}
 function carryPreview(target,amt){if(target!=='pp'){const duty=importDuty(amt),net=amt-duty,lg=Math.log10(1+net/10000);return {duty,net,boost:Math.round(lg*25),heat:Math.round(lg*3)};}
   const fee=Math.round(amt*0.3);return {duty:fee,net:amt-fee,boost:0,heat:0};}
-function travelModal(target){const hard=target!=='pp',cash=Math.max(0,Math.floor(S.money));const pcts=[0,10,25,50,100];
+function cityReserve(){const m=D.mods;return D.drivers.length||S.staff.length?Math.round(((m.salary||0)+(m.maint||0)+(m.ins||0))*2+(S.debt||0)):0;}
+function carryable(){return Math.max(0,Math.floor(S.money-cityReserve()));}
+function travelModal(target){const hard=target!=='pp',cash=carryable(),rsv=cityReserve();const pcts=[0,10,25,50,100];
   const rows=pcts.map(pc=>{const a=Math.floor(cash*pc/100),c=carryPreview(target,a);return `<button class="btn ${pc?'g':'p'}" style="display:block;width:100%;margin:5px 0;text-align:left;font-size:12px" data-act="travel" data-arg="${target}:${pc}"><b>${pc?pc+'%（'+fmt(a)+'）持っていく':'お金は持っていかない'}</b>${pc?`<br>${hard?'関税':'送金手数料・税'} -${fmt(c.duty)} → 到着 <b>${fmt(c.net)}</b>${hard?`<br>⚠️ ライバル勢力 +${c.boost}%・外資監視 ${c.heat}日`:''}`:''}</button>`;}).join('');
-  modal(`<div class="big">${FLAG[target]}</div><h2>${CHN[target]}へ${target==='pp'?'戻る':'渡る'}</h2><p style="font-size:12px">${CHN[S.chapter||'pp']}の会社はそのまま残ります（いつでも戻れます）。<br>持っていくお金を選んでください（手持ち ${fmt(cash)}）。</p>
+  modal(`<div class="big">${FLAG[target]}</div><h2>${CHN[target]}へ${target==='pp'?'戻る':'渡る'}</h2><p style="font-size:12px">${CHN[S.chapter||'pp']}の会社はそのまま残ります（いつでも戻れます）。<br>持っていくお金を選んでください（持ち出せる額 ${fmt(cash)}）。${rsv>0?`<br><span style="font-size:11px;color:#8a5a00">🏦 留守中の給料・維持費として ${fmt(Math.min(rsv,Math.max(0,Math.floor(S.money))))} は会社に残します</span>`:''}</p>
    ${hard?'<p style="font-size:11px;text-align:left;background:#fff4f4;padding:6px;border-radius:8px">🧾 関税で約3分の2を取られる（60%→65%→最大70%）<br>📈 大金を持ち込むほどライバルが警戒して勢力アップ<br>🕵️ 外資監視期間中は税務調査・賄賂要求・物価高騰などのイベントが起きる</p>':'<p style="font-size:11px">プノンペンへの送金は一律30%の手数料・税がかかります。</p>'}
    ${rows}<div class="btns"><button class="btn" data-act="closemodal">やめる</button></div>`);}
-function switchChapter(target,carry){carry=Math.max(0,Math.min(Math.floor(S.money),Math.floor(carry||0)));save();const from=S.chapter||'pp';
+function switchChapter(target,carry){carry=Math.max(0,Math.min(carryable(),Math.floor(carry||0)));save();const from=S.chapter||'pp';
   const cur=JSON.parse(JSON.stringify(S));cur.money-=carry;cur.lastSave=Date.now();try{cur.bgRate=fleetNetPerSec();}catch(e){cur.bgRate=0;}
   let T=null;try{const raw=localStorage.getItem(KEYC(target));if(raw)T=mergeDef(JSON.parse(raw));}catch(e){}
   const first=!T;if(first){T=DEF();T.chapter=target;T.intro=true;if(target!=='pp'){T.rivals=defRivals(target);T.justVN=true;}}
@@ -1248,8 +1250,12 @@ const BANKRUPT_MAX=2;
 function gameOver(debt){SFX.err();modal(`<div class="big">💀</div><h2>倒産…</h2><p>借金 ${fmt(debt)} を返せず、自己破産の上限（${BANKRUPT_MAX}回）を超えてしまった。<br><b>${escH(CN())}は解散です。</b></p><p style="font-size:12px">ボロボロのトゥクトゥク1台と$10からやり直し。<br>威光ボーナスだけは引き継がれます。</p><div class="btns"><button class="btn r" data-act="gameover">一からやり直す</button></div>`);}
 function doGameOver(){const meta=Object.assign({},S.meta);const keep={sound:S.sound,bgm:S.bgm,hq:S.hq};const N_=DEF();Object.assign(N_,keep);N_.company=S.company||'';N_.meta=meta;N_.chapter=S.chapter||'pp';if(N_.chapter!=='pp')N_.rivals=defRivals(N_.chapter);N_.meta=N_.meta||meta;N_.money=Math.round(10*cityDef(chIdx({chapter:N_.chapter,meta}),N_.chapter).m);N_.intro=true;
   resetting=true;try{localStorage.setItem(KEY,JSON.stringify(N_));}catch(e){}location.reload();}
+function loanLimit(){let v=0;FAC.forEach(f=>{for(let l=0;l<(S.fac[f.id]||0);l++)v+=facCost(f,l);});v+=S.vehicles*vehPrice(0);return Math.round(v*0.6);}
 function foreclose(){if(S.money>=0)return;const seized=[];const debt0=-S.money;const sellVeh=()=>{const p=Math.round(vehPrice(Math.max(0,S.vehicles-2))*0.4);S.vehicles--;S.money+=p;return p;};
   let nv=0,sv=0;while(S.money<0&&freeVeh()>0){sv+=sellVeh();nv++;}if(nv)seized.push(`🛺 待機中のトゥクトゥク ${nv}台（+${fmt(sv)}）`);
+  if(S.money<0){const room=Math.max(0,loanLimit()-(S.debt||0)),take=Math.min(room,Math.ceil(-S.money));if(take>0){S.debt=(S.debt||0)+take;S.money+=take;
+    if(S.money>=0){recalc();syncFleetVis();syncParked();SFX.err();setTimeout(()=>modal(`<div class="big">🏦</div><h2>緊急融資を受けた</h2><p>資金が ${fmt(debt0)} 足りなくなったため、銀行から自動で借り入れました。<b>スタッフ・設備は無事です。</b></p>${nv?`<p style="font-size:12px">${seized[0]}は売却済み</p>`:''}<table class="tb"><tr><td>借入残高</td><td class="minus">${fmt(S.debt)}</td></tr><tr><td>利息</td><td>1日1%</td></tr><tr><td>返済</td><td>毎日の決算で手元資金の半分まで自動返済</td></tr></table><p style="font-size:11px">融資枠（会社の資産の約6割）を超えると差し押さえになります。</p><div class="btns"><button class="btn p" data-act="closemodal">立て直す！</button></div>`),600);return;}
+    seized.push(`🏦 緊急融資 ${fmt(take)}（融資枠いっぱい）`);}}
   while(S.money<0){const c=FAC.filter(f=>(S.fac[f.id]||0)>0).map(f=>({f,v:Math.round(facCost(f,S.fac[f.id]-1)*0.4)})).sort((a,b)=>b.v-a.v)[0];if(!c)break;S.fac[c.f.id]--;S.money+=c.v;seized.push(`${c.f.icon} ${c.f.name} Lv${S.fac[c.f.id]+1}（+${fmt(c.v)}）`);refreshFacVisual(c.f.id);}
   let nd=0,sd=0;while(S.money<0){const ds=S.staff.filter(x=>x.role==='driver');if(!ds.length)break;const d=ds[ds.length-1];S.staff.splice(S.staff.indexOf(d),1);sd+=sellVeh();nd++;}if(nd){seized.push(`🧑‍✈️ ドライバー${nd}人を解雇＋車両売却（+${fmt(sd)}）`);}
   if(S.money<0){const o=S.staff.filter(x=>x.role!=='driver');if(o.length){S.staff=S.staff.filter(x=>x.role==='driver');seized.push(`👥 事務スタッフ${o.length}人が給料未払いで退職`);}}
@@ -1526,7 +1532,7 @@ function renderPanel(){if(!sheetOpen)return;const b=$('#sheetBody');const st=b.s
     h+=`<div class="sec" id="plSec">📅 ${S.day}日目の収支（決算まで ${Math.ceil(DAY-S.dayT)}秒）</div><table class="tb">`;
     Object.keys(INC_L).forEach(k=>{if(inc[k])h+=`<tr><td>💰 ${INC_L[k]}</td><td class="plus">+${fmtD(inc[k])}</td></tr>`;});
     Object.keys(EXP_L).forEach(k=>{if(exp[k])h+=`<tr><td>💸 ${EXP_L[k]}</td><td class="minus">-${fmtD(exp[k])}</td></tr>`;});
-    h+=`<tr><td>⏰ 決算時の給料（予定）</td><td class="minus">-${fmtD(m.salary)}</td></tr><tr><td>⏰ 決算時の設備維持費（予定）</td><td class="minus">-${fmtD(m.maint)}</td></tr>${m.ins>0?`<tr><td>⏰ 決算時の保険料（予定）</td><td class="minus">-${fmtD(m.ins)}</td></tr>`:''}`;
+    h+=`<tr><td>⏰ 決算時の給料（予定）</td><td class="minus">-${fmtD(m.salary)}</td></tr><tr><td>⏰ 決算時の設備維持費（予定）</td><td class="minus">-${fmtD(m.maint)}</td></tr>${m.ins>0?`<tr><td>⏰ 決算時の保険料（予定）</td><td class="minus">-${fmtD(m.ins)}</td></tr>`:''}${S.debt>0?`<tr><td>🏦 緊急融資の残高（毎日1%の利息・手元資金の半分まで自動返済）</td><td class="minus">${fmtD(S.debt)}</td></tr>`:''}`;
     h+=`<tr class="tot"><td>本日の収支</td><td class="${ti-te>=0?'plus':'minus'}">${ti-te>=0?'+':''}${fmtD(ti-te)}</td></tr></table>`;}
     h+=`<div class="sec">📈 過去の収支（緑=収入 赤=支出・日をタップで上に内訳）</div><canvas class="chart" id="chart" width="600" height="240"></canvas>`;
     if(isHard())h+=vnBizHtml();
@@ -1632,7 +1638,7 @@ document.addEventListener('click',e=>{const t=e.target.closest('[data-act]');if(
       case'firebot':{const ds=D.drivers.slice();const sc=d=>(d.te||0)/Math.max(1,S.day-(d.hd===undefined?S.day:d.hd)+1);const k=Math.max(1,Math.round(ds.length*0.3));const bot=ds.sort((a,b)=>sc(a)-sc(b)).slice(0,k);
         confirmBox(`働きぶり下位 ${k}人（${bot.slice(0,4).map(x=>x.name).join('、')}${k>4?' ほか':''}）をまとめて解雇しますか？`,()=>{bot.forEach(b=>{const ix=S.staff.indexOf(b);if(ix>=0)S.staff.splice(ix,1);});recalc();syncFleetVis();syncParked();syncWalkers();toast(`🗑️ ${k}人を解雇しました`);renderPanel();save();});}break;
    case'app':regApp(g);break;case'div':buyDiv(g);break;case'openphone':openPhone();break;case'accept':acceptReq(+g);break;case'tab':openSheet(g);break;
-   case'closemodal':closeModal();break;case'buyriv':buyRival(+g);break;case'vnad':vnAd();break;case'govn':travelModal('vn');break;case'gopp':travelModal('pp');break;case'travelm':travelModal(g);break;case'travel':{const [tg,pc]=g.split(':');closeModal();switchChapter(tg,Math.floor(Math.max(0,S.money)*(+pc)/100));}break;case'confirmyes':closeModal();if(confirmCb){const c=confirmCb;confirmCb=null;c();}break;
+   case'closemodal':closeModal();break;case'buyriv':buyRival(+g);break;case'vnad':vnAd();break;case'govn':travelModal('vn');break;case'gopp':travelModal('pp');break;case'travelm':travelModal(g);break;case'travel':{const [tg,pc]=g.split(':');closeModal();switchChapter(tg,Math.floor(carryable()*(+pc)/100));}break;case'confirmyes':closeModal();if(confirmCb){const c=confirmCb;confirmCb=null;c();}break;
    case'sound':S.sound=!S.sound;if(!S.sound&&engGain)engGain.gain.value=0;renderPanel();break;case'quality':S.hq=S.hq?0:1;resize();renderPanel();break;
    case'savenow':save();toast('💾 保存しました');break;
    case'reset':confirmBox('すべての進行状況を消去して最初から始めますか？',()=>{try{localStorage.removeItem(KEY);}catch(e){}resetting=true;location.reload();});break;
@@ -1836,7 +1842,7 @@ function endDay(){const m=D.mods;S.dayT-=DAY;
   S.gasPrev=S.gasP;S.gasP=clamp(S.gasP*(0.9+rnd()*0.22)+(1-S.gasP)*0.15+(rnd()<0.06?0.35:0),0.6,1.9);if(S.gasLock>0){S.gasLock--;S.gasP=0.8;}const gd=(S.gasP/S.gasPrev-1)*100;
   if(Math.abs(gd)>=8)setTimeout(()=>toast(`⛽ ガソリン価格が${gd>0?'高騰':'値下がり'}！ ${gasPriceTxt()}`),3200);if(m.ins>0)addExp('insurance',m.ins);if(m.salary>0)addExp('salary',m.salary);if(m.maint>0)addExp('maint',m.maint);
   if(isHard()&&S.inflT>0){const te0=Object.values(S.today.exp).reduce((a,b)=>a+b,0);addExp('fx_infl',Math.round(te0*0.25));}
-  vnTaxes();const ti=Object.values(S.today.inc).reduce((a,b)=>a+b,0),te=Object.values(S.today.exp).reduce((a,b)=>a+b,0);S.casinoNet=0;
+  vnTaxes();if(S.debt>0){const it=Math.round(S.debt*0.01);addExp('loan_int',it);if(S.money>0){const pay=Math.min(S.debt,Math.floor(S.money*0.5));S.money-=pay;S.debt-=pay;if(S.debt<=0){S.debt=0;setTimeout(()=>toast('🏦 緊急融資を完済した！'),3800);}}}const ti=Object.values(S.today.inc).reduce((a,b)=>a+b,0),te=Object.values(S.today.exp).reduce((a,b)=>a+b,0);S.casinoNet=0;
   if(S.money<0)foreclose();rivalsDay();fxHeatDay();S.sigV=0;
   S.hist.push({day:S.day,inc:ti,exp:te,i:Object.assign({},S.today.inc),e:Object.assign({},S.today.exp)});if(S.hist.length>60)S.hist.shift();toast(`📅 ${S.day}日目の決算: 収入 ${fmt(ti)} ／ 支出 ${fmt(te)} → ${ti-te>=0?'黒字':'赤字'} ${fmt(ti-te)}`);
   S.day++;S.hiredToday=0;S.today={inc:{},exp:{}};RT.forEach(r=>r.trips=0);S.cand=[genDriver(),genDriver(),genDriver()];for(const r in ROLES)if(r!=='driver')S.candR[r]=genRole(r);
