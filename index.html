@@ -204,7 +204,7 @@
         // タイトル画面が表示されている間だけボタンを出す
         setInterval(function () {
           var el = document.querySelector(CFG.onlyWhile), on = false;
-          if (el) { var cs = getComputedStyle(el); on = cs.display !== 'none' && cs.visibility !== 'hidden' && !el.classList.contains('hidden') && el.offsetParent !== null; }
+          if (el) { var cs = getComputedStyle(el); on = cs.display !== 'none' && cs.visibility !== 'hidden' && cs.opacity !== '0' && !el.classList.contains('hidden') && el.getClientRects().length > 0; }
           box.style.display = on ? 'flex' : 'none';
         }, 400);
       }
